@@ -150,7 +150,7 @@ export function StoryPlayer({
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, onNext, onPrevious, currentScreenIndex, currentStoryIndex, currentStory?.screens.length, stories.length]);
+  }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, currentStory?.screens.length, stories.length]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -424,13 +424,7 @@ export function Stories() {
             image: string | null;
             excerpt?: string | null;
             category: { name: string; slug: string } | null;
-            acfScreens?: Array<{
-              type?: "text" | "quote";
-              content?: string;
-              imageUrl?: string;
-              quote?: string;
-              author?: string;
-            }> | null;
+            acfScreens?: StoryScreen[] | null;
           }>;
         };
         if (cancelled) return;
@@ -443,7 +437,7 @@ export function Stories() {
           link: `https://portal.commarilia.com${p.uri}`,
           screens:
             p.acfScreens && p.acfScreens.length
-              ? (p.acfScreens as any)
+              ? p.acfScreens
               : [
                   {
                     type: "text",
