@@ -1,102 +1,161 @@
 [
-{
-"key": "group_stories_simples",
-"title": "Stories Simples",
-"show_in_graphql": 1,
-"graphql_field_name": "storiesSimples",
-"fields": [
-{
-"key": "field_stories_repeater",
-"label": "Stories",
-"name": "stories",
-"type": "repeater",
-"instructions": "Adicione cada storie como um slide.",
-"collapsed": "field_story_title",
-"min": 0,
-"max": 0,
-"layout": "row",
-"button_label": "Adicionar storie",
-"show_in_graphql": 1,
-"graphql_field_name": "stories",
-"sub_fields": [
-{
-"key": "field_story_type",
-"label": "Tipo do slide",
-"name": "tipo",
-"type": "select",
-"choices": {
-"image": "Imagem",
-"video": "Vídeo",
-"text": "Texto"
-},
-"default_value": "text",
-"allow_null": 0,
-"multiple": 0,
-"ui": 1,
-"return_format": "value",
-"wrapper": { "width": "25", "class": "", "id": "" },
-"show_in_graphql": 1,
-"graphql_field_name": "type"
-},
-{
-"key": "field_story_title",
-"label": "Título (opcional)",
-"name": "titulo",
-"type": "text",
-"wrapper": { "width": "35", "class": "", "id": "" },
-"show_in_graphql": 1,
-"graphql_field_name": "title"
-},
-{
-"key": "field_story_text",
-"label": "Texto (opcional)",
-"name": "texto",
-"type": "textarea",
-"rows": 4,
-"new_lines": "br",
-"wrapper": { "width": "40", "class": "", "id": "" },
-"show_in_graphql": 1,
-"graphql_field_name": "text"
-},
-{
-"key": "field_story_media",
-"label": "Mídia (imagem ou vídeo)",
-"name": "midia",
-"type": "file",
-"instructions": "Envie uma imagem (jpg, png, webp, gif) ou vídeo (mp4, mov, webm).",
-"return_format": "id",
-"library": "all",
-"mime_types": "jpg,jpeg,png,webp,gif,mp4,mov,webm,m4v,ogg",
-"wrapper": { "width": "50", "class": "", "id": "" },
-"show_in_graphql": 1,
-"graphql_field_name": "media"
-},
-{
-"key": "field_story_show_button",
-"label": "Mostrar botão “Leia Mais”",
-"name": "mostrar_botao",
-"type": "true_false",
-"ui": 1,
-"default_value": 1,
-"wrapper": { "width": "20", "class": "", "id": "" },
-"show_in_graphql": 1,
-"graphql_field_name": "showButton"
-}
-]
-}
-],
-"location": [
-[
-{ "param": "post_type", "operator": "==", "value": "post" }
-]
-],
-"menu_order": 0,
-"position": "normal",
-"style": "default",
-"label_placement": "top",
-"instruction_placement": "label",
-"hide_on_screen": [],
-"active": true,
-"description": "Grupo simples para montar Stories por post."
-}
+    {
+        "key": "group_66dcb9e2a8c3c",
+        "title": "Stories Simples",
+        "fields": [
+            {
+                "key": "field_66dcb9e2ab178",
+                "label": "Slides da Story",
+                "name": "stories",
+                "type": "repeater",
+                "instructions": "Adicione os slides que comporão a story. O primeiro slide é sempre a capa do post (título e imagem destacada).",
+                "required": 0,
+                "conditional_logic": 0,
+                "wrapper": {
+                    "width": "",
+                    "class": "",
+                    "id": ""
+                },
+                "show_in_graphql": 1,
+                "collapsed": "",
+                "min": 0,
+                "max": 0,
+                "layout": "block",
+                "button_label": "Adicionar Slide",
+                "sub_fields": [
+                    {
+                        "key": "field_66dcb9e2b2a66",
+                        "label": "Tipo de Slide",
+                        "name": "type",
+                        "type": "select",
+                        "instructions": "Selecione o layout do slide.",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "30",
+                            "class": "",
+                            "id": ""
+                        },
+                        "show_in_graphql": 1,
+                        "choices": {
+                            "text": "Texto",
+                            "image": "Imagem",
+                            "video": "Vídeo",
+                            "quote": "Citação"
+                        },
+                        "default_value": "text",
+                        "allow_null": 0,
+                        "multiple": 0,
+                        "ui": 1,
+                        "ajax": 0,
+                        "return_format": "value",
+                        "placeholder": ""
+                    },
+                    {
+                        "key": "field_66dcb9e2b6513",
+                        "label": "Título",
+                        "name": "title",
+                        "type": "text",
+                        "instructions": "Título que aparece no slide (opcional).",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "70",
+                            "class": "",
+                            "id": ""
+                        },
+                        "show_in_graphql": 1,
+                        "default_value": "",
+                        "placeholder": "",
+                        "prepend": "",
+                        "append": "",
+                        "maxlength": ""
+                    },
+                    {
+                        "key": "field_66dcb9e2ba017",
+                        "label": "Texto / Citação",
+                        "name": "text",
+                        "type": "textarea",
+                        "instructions": "O conteúdo principal do slide.",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "",
+                            "class": "",
+                            "id": ""
+                        },
+                        "show_in_graphql": 1,
+                        "default_value": "",
+                        "placeholder": "",
+                        "maxlength": "",
+                        "rows": 4,
+                        "new_lines": ""
+                    },
+                    {
+                        "key": "field_66dcb9e2bdb32",
+                        "label": "Mídia (Imagem ou Vídeo)",
+                        "name": "media",
+                        "type": "gallery",
+                        "instructions": "Envie uma imagem ou vídeo para este slide.",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "70",
+                            "class": "",
+                            "id": ""
+                        },
+                        "show_in_graphql": 1,
+                        "return_format": "array",
+                        "preview_size": "medium",
+                        "insert": "append",
+                        "library": "all",
+                        "min": 0,
+                        "max": 1
+                    },
+                    {
+                        "key": "field_66dcb9e2c14f6",
+                        "label": "Mostrar Botão 'Leia Mais'?",
+                        "name": "show_button",
+                        "type": "true_false",
+                        "instructions": "Exibe um botão que leva para a notícia completa.",
+                        "required": 0,
+                        "conditional_logic": 0,
+                        "wrapper": {
+                            "width": "30",
+                            "class": "",
+                            "id": ""
+                        },
+                        "show_in_graphql": 1,
+                        "message": "",
+                        "default_value": 0,
+                        "ui": 1,
+                        "ui_on_text": "Sim",
+                        "ui_off_text": "Não"
+                    }
+                ]
+            }
+        ],
+        "location": [
+            [
+                {
+                    "param": "post_type",
+                    "operator": "==",
+                    "value": "post"
+                }
+            ]
+        ],
+        "menu_order": 0,
+        "position": "normal",
+        "style": "default",
+        "label_placement": "top",
+        "instruction_placement": "label",
+        "hide_on_screen": "",
+        "active": true,
+        "description": "",
+        "show_in_graphql": 1,
+        "graphql_field_name": "storiesSimples",
+        "graphql_types": [
+            "Post"
+        ]
+    }
 ]

@@ -59,8 +59,7 @@ async function getInitial(): Promise<{ items: PostCardData[]; pageInfo: { endCur
               text
               showButton
               media {
-                nodes { sourceUrl mimeType mediaItemUrl }
-                edges { node { sourceUrl mimeType mediaItemUrl } }
+                node { sourceUrl mimeType mediaItemUrl }
               }
             }
           }
@@ -106,10 +105,13 @@ async function getInitial(): Promise<{ items: PostCardData[]; pageInfo: { endCur
       const m = media as {
         sourceUrl?: string | null;
         mediaItemUrl?: string | null;
+        node?: { sourceUrl?: string | null; mediaItemUrl?: string | null };
         nodes?: Array<{ sourceUrl?: string | null; mediaItemUrl?: string | null }>;
         edges?: Array<{ node?: { sourceUrl?: string | null; mediaItemUrl?: string | null } }>;
       } | null | undefined;
       if (!m) return undefined;
+      if (m.node?.sourceUrl) return m.node.sourceUrl;
+      if (m.node?.mediaItemUrl) return m.node.mediaItemUrl as string;
       if (typeof m.sourceUrl === "string" && m.sourceUrl) return m.sourceUrl;
       if (typeof m.mediaItemUrl === "string" && m.mediaItemUrl) return m.mediaItemUrl;
       if (Array.isArray(m.nodes) && m.nodes.length) {

@@ -443,7 +443,7 @@ export function Stories() {
           link: `https://portal.commarilia.com${p.uri}`,
           screens:
             p.acfScreens && p.acfScreens.length
-              ? p.acfScreens
+              ? (p.acfScreens as any)
               : [
                   {
                     type: "text",

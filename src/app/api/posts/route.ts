@@ -3,6 +3,7 @@ import { gqlFetch } from "@/lib/graphql";
 
 type WPMediaLike =
   | { sourceUrl?: string | null; mediaItemUrl?: string | null }
+  | { node?: { sourceUrl?: string | null; mediaItemUrl?: string | null } }
   | { nodes?: Array<{ sourceUrl?: string | null; mediaItemUrl?: string | null }> }
   | { edges?: Array<{ node?: { sourceUrl?: string | null; mediaItemUrl?: string | null } }> }
   | Array<{ sourceUrl?: string | null; mediaItemUrl?: string | null }>
@@ -76,6 +77,11 @@ function pickMediaUrl(media: WPMediaLike): string | undefined {
   // objeto simples
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const obj = media as any;
+  // wrapper { node: { ... } }
+  if (obj?.node) {
+    if (typeof obj.node.sourceUrl === "string" && obj.node.sourceUrl) return obj.node.sourceUrl;
+    if (typeof obj.node.mediaItemUrl === "string" && obj.node.mediaItemUrl) return obj.node.mediaItemUrl;
+  }
   if (typeof obj.sourceUrl === "string" && obj.sourceUrl) return obj.sourceUrl;
   if (typeof obj.mediaItemUrl === "string" && obj.mediaItemUrl) return obj.mediaItemUrl;
 
@@ -126,15 +132,17 @@ const queryWithAcf = /* GraphQL */ `
             text
             showButton
             media {
-              sourceUrl
-              mediaItemUrl
-              altText
-              mediaDetails {
-                sizes {
-                  sourceUrl
-                  width
-                  height
-                  name
+              node {
+                sourceUrl
+                mediaItemUrl
+                altText
+                mediaDetails {
+                  sizes {
+                    sourceUrl
+                    width
+                    height
+                    name
+                  }
                 }
               }
             }

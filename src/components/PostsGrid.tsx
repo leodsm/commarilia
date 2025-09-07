@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PostCard, type PostCardData } from "./PostCard";
+import { PostCardCompact } from "./PostCardCompact";
 import { StoryPlayer, type NewsStory } from "./StoryPlayer";
 import { NewsModal } from "./NewsModal";
 
@@ -16,6 +17,7 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
   const [index, setIndex] = useState(0);
   const [newsOpen, setNewsOpen] = useState(false);
   const [newsStory, setNewsStory] = useState<NewsStory | null>(null);
+  
 
   // const canLoadMore = pageInfo.hasNextPage && !loading;
 
@@ -69,7 +71,7 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
       contentHtml: p.contentHtml || null,
       screens:
         p.acfScreens && p.acfScreens.length
-          ? p.acfScreens
+          ? (p.acfScreens as any)
           : [
               {
                 type: "text",
@@ -91,9 +93,17 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
     [items]
   );
 
+
   return (
     <div className="max-w-[990px] mx-auto px-4 py-8">
       {grid}
+      <div className="mt-10">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {items.map((p) => (
+            <PostCardCompact key={`compact-${p.id}`} post={p} />
+          ))}
+        </div>
+      </div>
       <div ref={sentinelRef} className="h-10" />
       {loading ? (
         <div className="mt-6 text-center text-sm text-neutral-500">Carregando mais…</div>
@@ -113,6 +123,7 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
           onPrevious={() => setIndex((p) => Math.max(p - 1, 0))}
         />
       )}
+
       <NewsModal story={newsStory} isOpen={newsOpen} onClose={() => setNewsOpen(false)} />
     </div>
   );
