@@ -71,7 +71,7 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
       contentHtml: p.contentHtml || null,
       screens:
         p.acfScreens && p.acfScreens.length
-          ? (p.acfScreens as any)
+          ? p.acfScreens
           : [
               {
                 type: "text",
