@@ -3,6 +3,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
+import type { SwipeableHandlers } from "react-swipeable";
 import { categoryColorHex } from "@/lib/categoryColors";
 
 export type StoryScreen = {
@@ -278,6 +279,7 @@ export function StoryPlayer({
     trackMouse: false,
     preventScrollOnSwipe: true,
   });
+  const { ref: swipeableRef, ...swipeableHandlers } = swipeHandlers as SwipeableHandlers & Record<string, unknown>;
 
   if (!currentStory) return null;
 
@@ -285,12 +287,17 @@ export function StoryPlayer({
     <div className="fixed inset-0 bg-gray-900 z-50">
       <div className="flex items-center justify-center w-full h-full">
         <div
-          ref={containerRef}
+          ref={(el) => {
+            containerRef.current = el;
+            if (typeof swipeableRef === "function") {
+              swipeableRef(el);
+            }
+          }}
           className="swiper-main-wrapper w-full h-full max-w-[450px] relative overflow-hidden rounded-none md:rounded-[2rem] md:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] md:aspect-[9/16] md:h-auto"
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onClick={handleTap}
-          {...swipeHandlers}
+          {...swipeableHandlers}
           onPointerDown={() => setIsPaused(true)}
           onPointerUp={() => setIsPaused(false)}
           onPointerCancel={() => setIsPaused(false)}
@@ -483,6 +490,10 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
+
+
+
+
 
 
 

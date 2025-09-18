@@ -1,3 +1,4 @@
+﻿/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect } from "react";
@@ -131,3 +132,4 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
 }
 
 export default NewsModal;
+
