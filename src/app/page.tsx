@@ -1,4 +1,4 @@
-import { gqlFetch } from "@/lib/graphql";
+﻿import { gqlFetch } from "@/lib/graphql";
 import { PostsGrid } from "@/components/PostsGrid";
 import type { PostCardData } from "@/components/PostCard";
 
@@ -189,7 +189,7 @@ async function getInitial(): Promise<{ items: PostCardData[]; pageInfo: { endCur
                   slideTitle,
                   content,
                   quote: rawText || slideTitle || "",
-                  author: null,
+                  author: undefined,
                   imageUrl: mediaUrl || null,
                   showButton,
                 };
@@ -262,3 +262,4 @@ export default async function Home() {
 
   return <PostsGrid initialItems={initial.items} initialPageInfo={initial.pageInfo} />;
 }
+

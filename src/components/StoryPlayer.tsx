@@ -1,4 +1,5 @@
-﻿"use client";
+﻿/* eslint-disable @next/next/no-img-element */
+"use client";
 
 import React, { useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
@@ -482,6 +483,7 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
+
 
 
 

@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+﻿import { NextRequest } from "next/server";
 import { gqlFetch } from "@/lib/graphql";
 
 // Force this route to be dynamic and never cached
@@ -268,7 +268,7 @@ export async function GET(req: NextRequest) {
                 return {
                   type: "quote" as const,
                   quote: rawText || slideTitle || "",
-                  author: null,
+                  author: undefined,
                   imageUrl: mediaUrl || null,
                   slideTitle,
                   content,
@@ -367,3 +367,4 @@ export async function GET(req: NextRequest) {
     });
   }
 }
+
