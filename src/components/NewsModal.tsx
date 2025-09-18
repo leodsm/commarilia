@@ -34,16 +34,16 @@ function formatDate(dateString?: string) {
   if (diffDays <= 7) {
     if (diffDays === 0) {
       if (diffHours === 0) {
-        return "postado há poucos minutos";
+        return "postado ha poucos minutos";
       } else if (diffHours === 1) {
-        return "postado há 1 hora";
+        return "postado ha 1 hora";
       } else {
-        return `postado há ${diffHours} horas`;
+        return `postado ha ${diffHours} horas`;
       }
     } else if (diffDays === 1) {
-      return "postado há 1 dia";
+      return "postado ha 1 dia";
     } else {
-      return `postado há ${diffDays} dias`;
+      return `postado ha ${diffDays} dias`;
     }
   } else {
     return publishDate.toLocaleDateString("pt-BR", {
@@ -120,7 +120,7 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
                   <path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6m0 0v6m0-6L10 14" />
                 </svg>
-                <span>Ler matéria completa</span>
+                <span>Ler materia completa</span>
               </button>
             </div>
           ) : null}

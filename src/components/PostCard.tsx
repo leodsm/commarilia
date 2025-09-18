@@ -1,5 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
+import { categoryColorHex } from "@/lib/categoryColors";
+import type { StoryScreen } from "./StoryPlayer";
 
 export type PostCardData = {
   id: string;
@@ -13,53 +15,12 @@ export type PostCardData = {
   // Optional: full content (HTML) if available
   contentHtml?: string | null;
   // Optional: stories from ACF (already mapped to player shape)
-  acfScreens?: Array<{
-    type?: "text" | "quote";
-    content?: string;
-    imageUrl?: string | null;
-    videoUrl?: string | null;
-    quote?: string;
-    author?: string;
-    slideTitle?: string | null;
-    showButton?: boolean | null;
-  }> | null;
+  acfScreens?: StoryScreen[] | null;
 };
 
-export function PostCard({ post, onOpenStory }: { post: PostCardData; onOpenStory?: () => void }) {
+export function PostCard({ post, onOpenStory, priority = false }: { post: PostCardData; onOpenStory?: () => void; priority?: boolean }) {
   const href = `https://portal.commarilia.com${post.uri}`;
   const ariaLabel = `Leia: ${post.title}`;
-
-  function normalizeKey(value?: string): string {
-    if (!value) return "";
-    return value
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .toLowerCase()
-      .trim();
-  }
-
-  // (cores por categoria aplicadas via hex + alpha na função abaixo)
-
-  // Hex map (mesmas cores) para compor vidro translúcido
-  function categoryColorHex(name?: string, slug?: string): string {
-    const key = normalizeKey(slug || name);
-    switch (key) {
-      case "brasil":
-        return "#2563eb";
-      case "marilia":
-        return "#dc2626";
-      case "mundo":
-        return "#0ea5e9";
-      case "regiao":
-        return "#ea580c";
-      case "saude":
-        return "#16a34a";
-      default:
-        return "#9ca3af"; // slate-400
-    }
-  }
-
-  // (unused) hexToRgba removed
 
   function handleClick(e: React.MouseEvent) {
     if (onOpenStory) {
@@ -85,7 +46,7 @@ export function PostCard({ post, onOpenStory }: { post: PostCardData; onOpenStor
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
             className="object-cover transition-transform duration-500 ease-out motion-safe:group-hover:scale-105"
-            priority={false}
+            priority={priority}
           />
         ) : (
           <div className="absolute inset-0 bg-gradient-to-b from-slate-700 to-slate-900 skeleton" />
@@ -93,8 +54,6 @@ export function PostCard({ post, onOpenStory }: { post: PostCardData; onOpenStor
 
         {/* Overlay gradient */}
         <div className="absolute inset-0 bg-gradient-to-b from-transparent via-black/50 to-black/80" />
-
-        {/* Removed top-left category badge as requested */}
 
         {/* Text block */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
@@ -121,3 +80,6 @@ export function PostCard({ post, onOpenStory }: { post: PostCardData; onOpenStor
     </Link>
   );
 }
+
+export default PostCard;
+

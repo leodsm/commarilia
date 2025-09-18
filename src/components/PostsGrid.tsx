@@ -2,7 +2,6 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PostCard, type PostCardData } from "./PostCard";
-import { PostCardCompact } from "./PostCardCompact";
 import { StoryPlayer, type NewsStory } from "./StoryPlayer";
 import { NewsModal } from "./NewsModal";
 
@@ -17,7 +16,6 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
   const [index, setIndex] = useState(0);
   const [newsOpen, setNewsOpen] = useState(false);
   const [newsStory, setNewsStory] = useState<NewsStory | null>(null);
-  
 
   // const canLoadMore = pageInfo.hasNextPage && !loading;
 
@@ -59,56 +57,55 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
   }
 
   const stories: NewsStory[] = useMemo(() => {
-    return items.map((p) => ({
-      id: p.id,
-      title: p.title,
-      subtitle: (p.excerpt || "").trim(),
-      imageUrl: p.image || "",
-      category: p.category?.name || "Geral",
-      link: `https://portal.commarilia.com${p.uri}`,
-      publishDate: p.date,
-      excerpt: p.excerpt || null,
-      contentHtml: p.contentHtml || null,
-      screens:
-        p.acfScreens && p.acfScreens.length
-          ? p.acfScreens
-          : [
-              {
-                type: "text",
-                content: p.title,
-                imageUrl: p.image || undefined,
-              },
-            ],
-    }));
+    return items.map((p) => {
+      const fallbackScreen = {
+        type: "text" as const,
+        content: p.title,
+        imageUrl: p.image || null,
+      };
+      const screens = p.acfScreens && p.acfScreens.length ? p.acfScreens : [fallbackScreen];
+      return {
+        id: p.id,
+        title: p.title,
+        subtitle: (p.excerpt || "").trim(),
+        imageUrl: p.image || "",
+        category: p.category?.name || "Geral",
+        link: `https://portal.commarilia.com${p.uri}`,
+        publishDate: p.date,
+        excerpt: p.excerpt || null,
+        contentHtml: p.contentHtml || null,
+        screens,
+      };
+    });
   }, [items]);
 
   const grid = useMemo(
     () => (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {items.map((p, i) => (
-          <PostCard key={p.id} post={p} onOpenStory={() => { setIndex(i); setOpen(true); }} />
+          <PostCard
+            key={p.id}
+            post={p}
+            priority={i < 3}
+            onOpenStory={() => {
+              setIndex(i);
+              setOpen(true);
+            }}
+          />
         ))}
       </div>
     ),
     [items]
   );
 
-
   return (
     <div className="max-w-[990px] mx-auto px-4 py-8">
       {grid}
-      <div className="mt-10">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          {items.map((p) => (
-            <PostCardCompact key={`compact-${p.id}`} post={p} />
-          ))}
-        </div>
-      </div>
       <div ref={sentinelRef} className="h-10" />
       {loading ? (
-        <div className="mt-6 text-center text-sm text-neutral-500">Carregando mais…</div>
+        <div className="mt-6 text-center text-sm text-neutral-500">Carregando mais...</div>
       ) : !pageInfo.hasNextPage ? (
-        <div className="mt-6 text-center text-sm text-neutral-400">Você chegou ao fim.</div>
+        <div className="mt-6 text-center text-sm text-neutral-400">Voce chegou ao fim.</div>
       ) : null}
       {open && stories.length > 0 && (
         <StoryPlayer

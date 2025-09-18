@@ -1,9 +1,11 @@
-"use client";
+﻿"use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { useSwipeable } from "react-swipeable";
+import { categoryColorHex } from "@/lib/categoryColors";
 
 export type StoryScreen = {
-  type?: "text" | "quote";
+  type?: "text" | "quote" | "image" | "video";
   content?: string;
   imageUrl?: string | null;
   videoUrl?: string | null;
@@ -20,37 +22,11 @@ export type NewsStory = {
   imageUrl: string;
   category: string;
   screens: StoryScreen[];
-  // Optional: link to full post
   link?: string;
-  // Optional: full content (HTML) for modal
   contentHtml?: string | null;
-  // Optional: publish date (ISO)
   publishDate?: string;
-  // Optional: excerpt text (plain)
   excerpt?: string | null;
 };
-
-// Simple category color util
-export function categoryHex(category: string): string {
-  const map: Record<string, string> = {
-    Saúde: "#10b981",
-    Cidade: "#2563eb",
-    Cultura: "#8b5cf6",
-    Esportes: "#f59e0b",
-    Educação: "#e11d48",
-    Brasil: "#2563eb",
-    Marília: "#dc2626",
-    Mundo: "#0ea5e9",
-    Região: "#ea580c",
-  };
-  if (map[category]) return map[category];
-  let hash = 0;
-  for (let i = 0; i < category.length; i++) hash = (hash * 31 + category.charCodeAt(i)) | 0;
-  const r = (hash & 0xff).toString(16).padStart(2, "0");
-  const g = ((hash >> 8) & 0xff).toString(16).padStart(2, "0");
-  const b = ((hash >> 16) & 0xff).toString(16).padStart(2, "0");
-  return `#${r}${g}${b}`;
-}
 
 function Button({
   children,
@@ -61,10 +37,7 @@ function Button({
 }: React.PropsWithChildren<{ className?: string; onClick?: React.MouseEventHandler; variant?: "ghost" | "solid"; size?: "md" | "icon" }>) {
   const base = "inline-flex items-center justify-center rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2";
   const sizes = size === "icon" ? "h-10 w-10" : "h-10 px-4";
-  const styles =
-    variant === "solid"
-      ? "bg-white text-black hover:opacity-90"
-      : "text-white border border-white/30 hover:bg-white hover:text-black";
+  const styles = variant === "solid" ? "bg-white text-black hover:opacity-90" : "text-white border border-white/30 hover:bg-white hover:text-black";
   return (
     <button className={`${base} ${sizes} ${styles} ${className}`} onClick={onClick}>
       {children}
@@ -96,12 +69,30 @@ export function StoryPlayer({
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const [slideProgress, setSlideProgress] = useState(0); // 0..1 progresso do slide atual
   const containerRef = useRef<HTMLDivElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   const currentStory = stories[currentStoryIndex];
-  const currentScreen = currentStory?.screens?.[currentScreenIndex];
+  const totalScreens = currentStory?.screens?.length || 0;
+  const currentScreen = totalScreens > 0 ? currentStory?.screens?.[Math.min(currentScreenIndex, totalScreens - 1)] : undefined;
+  const isVideo = !!currentScreen?.videoUrl;
+  const isFirstScreen = currentScreenIndex === 0;
+  const slideTitleText = currentScreen?.slideTitle?.trim() ?? "";
+  const rawSlideBodyText = currentScreen?.content?.trim() ?? "";
+  const slideTextsEqual =
+    slideTitleText.length > 0 && rawSlideBodyText.length > 0 && slideTitleText.toLowerCase() === rawSlideBodyText.toLowerCase();
+  const slideBodyText = slideTextsEqual ? "" : rawSlideBodyText;
+  const hasSlideTitle = slideTitleText.length > 0;
+  const hasSlideBody = slideBodyText.length > 0;
 
   useEffect(() => setCurrentScreenIndex(0), [currentStoryIndex]);
+
+  // Reset progress when trocar de story ou slide
+  useEffect(() => {
+    setSlideProgress(0);
+  }, [currentStoryIndex, currentScreenIndex]);
 
   // Lock background scroll while StoryPlayer is open
   useEffect(() => {
@@ -144,13 +135,59 @@ export function StoryPlayer({
           break;
         case "ArrowRight":
           e.preventDefault();
-          if (currentStory && currentScreenIndex < (currentStory.screens.length - 1)) setCurrentScreenIndex((p) => p + 1);
+          if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
           break;
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, currentStory?.screens.length, stories.length]);
+  }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, stories, totalScreens]);
+
+  // Auto-avance para slides nao-video
+  useEffect(() => {
+    const DURATION = 6000; // ms por slide
+    if (!currentStory || totalScreens <= 0) return;
+    if (isVideo) return; // video controlado abaixo
+    if (isPaused) return;
+
+    let raf: number;
+    const start = performance.now();
+    const tick = (ts: number) => {
+      const ratio = Math.min(1, (ts - start) / DURATION);
+      setSlideProgress(ratio);
+      if (ratio >= 1) {
+        if (currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+        else onNext();
+        return;
+      }
+      raf = requestAnimationFrame(tick);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [currentStoryIndex, currentScreenIndex, totalScreens, isPaused, isVideo, currentStory, onNext]);
+
+  // Progresso de video + auto-avance ao terminar
+  useEffect(() => {
+    if (!isVideo) return;
+    const v = videoRef.current;
+    if (!v) return;
+    const onTime = () => {
+      if (v.duration && isFinite(v.duration)) {
+        const ratio = Math.min(1, Math.max(0, v.currentTime / v.duration));
+        setSlideProgress(ratio);
+      }
+    };
+    const onEnded = () => {
+      if (currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+      else onNext();
+    };
+    v.addEventListener('timeupdate', onTime);
+    v.addEventListener('ended', onEnded);
+    return () => {
+      v.removeEventListener('timeupdate', onTime);
+      v.removeEventListener('ended', onEnded);
+    };
+  }, [isVideo, currentScreenIndex, totalScreens, onNext]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -166,7 +203,7 @@ export function StoryPlayer({
     if (!el) return;
     el.addEventListener("wheel", handleWheel, { passive: false });
     return () => el.removeEventListener("wheel", handleWheel as EventListener);
-  }, [currentStoryIndex, stories.length, onNext, onPrevious, onClose]);
+  }, [currentStoryIndex, stories, onNext, onPrevious, onClose]);
 
   useEffect(() => {
     const next = stories[currentStoryIndex + 1];
@@ -202,7 +239,7 @@ export function StoryPlayer({
       if (deltaX > 0) {
         if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
       } else {
-        if (currentStory && currentScreenIndex < (currentStory.screens.length - 1)) setCurrentScreenIndex((p) => p + 1);
+        if (currentStory && currentScreenIndex < currentStory.screens.length - 1) setCurrentScreenIndex((p) => p + 1);
       }
     }
     setStartX(0);
@@ -217,9 +254,29 @@ export function StoryPlayer({
     if (x < w / 3) {
       if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
     } else if (x > (2 * w) / 3) {
-      if (currentStory && currentScreenIndex < (currentStory.screens.length - 1)) setCurrentScreenIndex((p) => p + 1);
+      if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
     }
   };
+
+  // Swipe handlers (robust cross-browser)
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => {
+      if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+    },
+    onSwipedRight: () => {
+      if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+    },
+    onSwipedUp: () => {
+      if (currentStoryIndex < stories.length - 1) onNext(); else onClose();
+    },
+    onSwipedDown: () => {
+      onClose();
+    },
+    delta: 50,
+    trackTouch: true,
+    trackMouse: false,
+    preventScrollOnSwipe: true,
+  });
 
   if (!currentStory) return null;
 
@@ -232,16 +289,42 @@ export function StoryPlayer({
           onTouchStart={handleTouchStart}
           onTouchEnd={handleTouchEnd}
           onClick={handleTap}
+          {...swipeHandlers}
+          onPointerDown={() => setIsPaused(true)}
+          onPointerUp={() => setIsPaused(false)}
+          onPointerCancel={() => setIsPaused(false)}
+          onMouseLeave={() => setIsPaused(false)}
         >
+          {/* Invisible tap hotspots to guarantee lateral navigation even over content */}
+          {totalScreens > 1 && (
+            <>
+              <div
+                className="absolute inset-y-0 left-0 w-1/3 z-40 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+                }}
+              />
+              <div
+                className="absolute inset-y-0 right-0 w-1/3 z-40 cursor-pointer"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+                }}
+              />
+            </>
+          )}
+
           <div className="news-card h-full w-full">
             {currentScreen?.videoUrl ? (
               <video
+                ref={videoRef}
                 className="absolute inset-0 w-full h-full object-cover z-0"
                 src={currentScreen.videoUrl}
                 playsInline
                 muted
                 autoPlay
-                loop
+                preload="metadata"
               />
             ) : (
               <ImageWithFallback
@@ -252,84 +335,68 @@ export function StoryPlayer({
             )}
 
             <div className="news-content">
-              <div className="w-full max-w-3xl">
-                {currentScreenIndex === 0 && (
-                  <>
-                    <span
-                      className={`text-white text-xs font-bold px-3 py-1 rounded-full mb-3 inline-block uppercase tracking-widest`}
-                      style={{ backgroundColor: categoryHex(currentStory.category) }}
-                    >
-                      {currentStory.category}
-                    </span>
-                    <h1 className="text-2xl md:text-2xl lg:text-3xl font-black mb-2 text-left">
-                      {currentStory.title}
-                    </h1>
-                    {currentStory.subtitle ? (
-                      <p className="text-base opacity-90 mb-6 text-left">{currentStory.subtitle}</p>
-                    ) : null}
-                    <Button
-                      variant="ghost"
-                      className="text-white"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        onOpenNewsModal(currentStory);
-                      }}
-                    >
-                      Leia Mais
-                    </Button>
-                    {currentScreen?.slideTitle || currentScreen?.content ? (
-                      <div className="mt-4">
-                        {currentScreen.slideTitle ? (
-                          <h2 className="text-2xl md:text-3xl font-bold mb-2 text-left">{currentScreen.slideTitle}</h2>
-                        ) : null}
-                        
-                        {currentScreen.showButton ? (
-                          <Button
-                            variant="ghost"
-                            className="text-white mt-3"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenNewsModal(currentStory);
-                            }}
-                          >
-                            Leia Mais
-                          </Button>
-                        ) : null}
-                      </div>
-                    ) : null}
-                  </>
-                )}
+              <div className="w-full max-w-3xl h-full flex flex-col">
+                {isFirstScreen ? (
+                  <div className="mt-auto space-y-4 text-left">
+                    <div className="space-y-2">
+                      <span
+                        className={`text-white text-xs font-bold px-3 py-1 rounded-full inline-block uppercase tracking-widest`}
+                        style={{ backgroundColor: categoryColorHex(currentStory.category) }}
+                      >
+                        {currentStory.category}
+                      </span>
+                      <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug">
+                        {currentStory.title}
+                      </h1>
+                      {currentStory.subtitle ? (
+                        <p className="text-base opacity-90">{currentStory.subtitle}</p>
+                      ) : null}
+                    </div>
+                    <div className="pt-2">
+                      <Button
+                        variant="ghost"
+                        className="text-white"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onOpenNewsModal(currentStory);
+                        }}
+                      >
+                        Leia Mais
+                      </Button>
+                    </div>
+                  </div>
+                ) : null}
 
-                {currentScreenIndex > 0 && currentScreen && (
-                  <>
-                    <h2 className="text-2xl md:text-3xl font-bold mb-4 text-left">
-                      {currentScreen.type === "quote" ? "Citação" : currentScreen.content}
-                    </h2>
-                    {currentScreen.type === "quote" && currentScreen.quote && (
+                {!isFirstScreen && currentScreen && (
+                  <div className="mt-auto space-y-3 text-left">
+                    {hasSlideTitle ? (
+                      <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow">{slideTitleText}</h2>
+                    ) : null}
+                    {currentScreen.type !== "quote" && hasSlideBody ? (
+                      <p className="text-base text-white/80 leading-relaxed">{slideBodyText}</p>
+                    ) : null}
+                    {currentScreen.type === "quote" && currentScreen.quote ? (
                       <>
                         <div className="text-4xl mb-4">&quot;</div>
-                        <p className="text-xl mb-4 italic text-left">{currentScreen.quote}</p>
-                        <p className="text-sm opacity-75 text-left">— {currentScreen.author}</p>
+                        <p className="text-xl mb-4 italic">{currentScreen.quote}</p>
+                        <p className="text-sm opacity-75"> {currentScreen.author}</p>
                       </>
-                    )}
-                    {currentScreen.type !== "quote" && (
-                      <>
-                        
-                        {currentScreen.showButton ? (
-                          <Button
-                            variant="ghost"
-                            className="text-white mt-4"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onOpenNewsModal(currentStory);
-                            }}
-                          >
-                            Leia Mais
-                          </Button>
-                        ) : null}
-                      </>
-                    )}
-                  </>
+                    ) : null}
+                    {currentScreen.showButton ? (
+                      <div className="pt-2">
+                        <Button
+                          variant="ghost"
+                          className="text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenNewsModal(currentStory);
+                          }}
+                        >
+                          Leia Mais
+                        </Button>
+                      </div>
+                    ) : null}
+                  </div>
                 )}
               </div>
             </div>
@@ -341,7 +408,7 @@ export function StoryPlayer({
               const maxBullets = 5;
               const total = stories.length;
               if (total <= maxBullets) {
-                return stories.map((story, index) => (
+                return stories.map((_, index) => (
                   <div
                     key={index}
                     className={`w-2 rounded-full transition-all duration-300 ${index === currentStoryIndex ? "h-6" : "h-2"}`}
@@ -372,15 +439,26 @@ export function StoryPlayer({
             })()}
           </div>
 
-          {/* Horizontal bars */}
+          {/* Horizontal progress */}
           <div className="absolute top-4 left-0 right-0 px-4 flex space-x-1 z-40">
-            {currentStory.screens.map((_, index) => (
-              <div
-                key={index}
-                className={`h-1 rounded-full transition-all duration-300 flex-1 ${index === currentScreenIndex ? "bg-white" : index < currentScreenIndex ? "bg-white/80" : "bg-white/30"}`}
-                style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }}
-              />
-            ))}
+            {(currentStory.screens || []).map((_, index) => {
+              const widthPct = index < currentScreenIndex ? 100 : index === currentScreenIndex ? Math.round(slideProgress * 100) : 0;
+              return (
+                <div
+                  key={index}
+                  role="button"
+                  aria-label={`Ir para o slide ${index + 1}`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setCurrentScreenIndex(index);
+                  }}
+                  className="h-1 rounded-full flex-1 bg-white/30 overflow-hidden cursor-pointer"
+                  style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }}
+                >
+                  <div className="h-full bg-white" style={{ width: `${widthPct}%`, transition: isVideo ? undefined : "width 80ms linear" }} />
+                </div>
+              );
+            })}
           </div>
 
           {/* Close */}
@@ -404,137 +482,6 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
-export function Stories() {
-  const [open, setOpen] = useState(false);
-  const [index, setIndex] = useState(0);
-  const [stories, setStories] = useState<NewsStory[]>([]);
-  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const res = await fetch("/api/posts?first=9", { cache: "no-store" });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        const json = (await res.json()) as {
-          items: Array<{
-            id: string;
-            title: string;
-            uri: string;
-            image: string | null;
-            excerpt?: string | null;
-            category: { name: string; slug: string } | null;
-            acfScreens?: StoryScreen[] | null;
-          }>;
-        };
-        if (cancelled) return;
-        const mapped: NewsStory[] = json.items.map((p) => ({
-          id: p.id,
-          title: p.title,
-          subtitle: (p.excerpt || "").replace(/<[^>]*>/g, " ").trim(),
-          imageUrl: p.image || "",
-          category: p.category?.name || "Geral",
-          link: `https://portal.commarilia.com${p.uri}`,
-          screens:
-            p.acfScreens && p.acfScreens.length
-              ? p.acfScreens
-              : [
-                  {
-                    type: "text",
-                    content: p.title,
-                    imageUrl: p.image || undefined,
-                  },
-                ],
-        }));
-        setStories(mapped);
-      } catch {
-        setStories([]);
-      } finally {
-        setLoading(false);
-      }
-    })();
-    return () => {
-      cancelled = true;
-    };
-  }, []);
 
-  const grid = useMemo(() => (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-      {stories.map((s, i) => (
-        <button
-          key={s.id}
-          onClick={() => {
-            setIndex(i);
-            setOpen(true);
-          }}
-          className="group relative overflow-hidden rounded-2xl bg-white border hover:shadow-xl transition-all text-left"
-        >
-          {s.imageUrl ? (
-            <img src={s.imageUrl} alt={s.title} className="h-56 w-full object-cover" />
-          ) : (
-            <div className="h-56 w-full bg-neutral-200" />
-          )}
-          <div className="p-4">
-            <span
-              className="text-[10px] font-bold px-2 py-1 rounded-full inline-block mb-2 text-white"
-              style={{ backgroundColor: categoryHex(s.category) }}
-            >
-              {s.category}
-            </span>
-            <h3 className="font-bold leading-snug line-clamp-2">{s.title}</h3>
-            {s.subtitle ? (
-              <p className="text-sm opacity-70 line-clamp-2 mt-1">{s.subtitle}</p>
-            ) : null}
-          </div>
-        </button>
-      ))}
-    </div>
-  ), [stories]);
 
-  if (loading) {
-    return (
-      <div className="max-w-[990px] mx-auto px-4 py-6">
-        <div className="h-8 w-40 bg-neutral-200 rounded mb-4" />
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="h-72 bg-neutral-100 rounded-2xl border skeleton" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
-  if (!stories.length) return null;
-
-  return (
-    <div className="max-w-[990px] mx-auto px-4 py-6">
-      <div className="flex items-center justify-between mb-3">
-        <h2 className="text-lg font-bold">Stories</h2>
-        <a
-          href="https://portal.commarilia.com/"
-          target="_blank"
-          rel="noreferrer"
-          className="text-sm text-blue-600 hover:underline"
-        >
-          Ver mais
-        </a>
-      </div>
-      {grid}
-      {open && (
-        <StoryPlayer
-          stories={stories}
-          currentStoryIndex={index}
-          onClose={() => setOpen(false)}
-          onOpenNewsModal={(story) => {
-            const href = story.link || "";
-            if (href) window.open(href, "_blank", "noopener,noreferrer");
-          }}
-          onNext={() => setIndex((p) => Math.min(p + 1, stories.length - 1))}
-          onPrevious={() => setIndex((p) => Math.max(p - 1, 0))}
-        />
-      )}
-    </div>
-  );
-}
-
-export default StoryPlayer;
