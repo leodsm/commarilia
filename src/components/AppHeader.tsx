@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
+import type { ReactNode } from "react";
 
 type Option = {
   label: string;
@@ -16,7 +17,7 @@ type AppHeaderProps = {
 
 type MenuItem = {
   label: string;
-  icon: JSX.Element;
+  icon: ReactNode;
 };
 
 const menuItems: MenuItem[] = [

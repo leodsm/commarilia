@@ -71,7 +71,6 @@ export function StoryPlayer({
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
   const [slideProgress, setSlideProgress] = useState(0); // 0..1 progresso do slide atual
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -278,10 +277,6 @@ export function StoryPlayer({
           onTouchEnd={handleTouchEnd}
           onClick={handleTap}
           {...swipeableHandlers}
-          onPointerDown={() => setIsPaused(true)}
-          onPointerUp={() => setIsPaused(false)}
-          onPointerCancel={() => setIsPaused(false)}
-          onMouseLeave={() => setIsPaused(false)}
         >
           {/* Invisible tap hotspots to guarantee lateral navigation even over content */}
           {totalScreens > 1 && (
