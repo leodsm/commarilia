@@ -301,94 +301,98 @@ export function StoryPlayer({
           )}
 
           <div className="news-card h-full w-full">
-            {currentScreen?.videoUrl ? (
-              <video
-                ref={videoRef}
-                className="absolute inset-0 w-full h-full object-cover z-0"
-                src={currentScreen.videoUrl}
-                playsInline
-                muted
-                autoPlay
-                preload="metadata"
-              />
-            ) : (
-              <ImageWithFallback
-                src={currentScreen?.imageUrl || currentStory.imageUrl}
-                alt={currentScreen?.content}
-                className="absolute inset-0 w-full h-full object-cover z-0"
-              />
-            )}
+            <div
+              key={`${currentStory.id}-${currentScreenIndex}`}
+              className="slide-transition relative flex flex-1 h-full w-full flex-col"
+            >
+              {currentScreen?.videoUrl ? (
+                <video
+                  ref={videoRef}
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                  src={currentScreen.videoUrl}
+                  playsInline
+                  muted
+                  autoPlay
+                  preload="metadata"
+                />
+              ) : (
+                <ImageWithFallback
+                  src={currentScreen?.imageUrl || currentStory.imageUrl}
+                  alt={currentScreen?.content}
+                  className="absolute inset-0 w-full h-full object-cover z-0"
+                />
+              )}
 
-            <div className="news-content">
-              <div className="w-full max-w-3xl h-full flex flex-col">
-                {isFirstScreen ? (
-                  <div className="mt-auto space-y-4 text-left">
-                    <div className="space-y-2">
-                      <span
-                        className={`text-white text-xs font-bold px-3 py-1 rounded-full inline-block uppercase tracking-widest`}
-                        style={{ backgroundColor: categoryColorHex(currentStory.category) }}
-                      >
-                        {currentStory.category}
-                      </span>
-                      <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">
-                        {currentStory.title}
-                      </h1>
-                      {currentStory.subtitle ? (
-                        <p className="text-base opacity-90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentStory.subtitle}</p>
+              <div className="news-content">
+                <div className="w-full max-w-3xl h-full flex flex-col">
+                  {isFirstScreen ? (
+                    <div className="mt-auto space-y-4 text-left">
+                      <div className="space-y-2">
+                        <span
+                          className={`text-white text-xs font-bold px-3 py-1 rounded-full inline-block uppercase tracking-widest`}
+                          style={{ backgroundColor: categoryColorHex(currentStory.category) }}
+                        >
+                          {currentStory.category}
+                        </span>
+                        <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">
+                          {currentStory.title}
+                        </h1>
+                        {currentStory.subtitle ? (
+                          <p className="text-base opacity-90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentStory.subtitle}</p>
+                        ) : null}
+                      </div>
+                      {showSlideButton ? (
+                        <div className="pt-2">
+                          <Button
+                            variant="ghost"
+                            className="text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenNewsModal(currentStory);
+                            }}
+                          >
+                            Leia Mais
+                          </Button>
+                        </div>
                       ) : null}
                     </div>
-                    {showSlideButton ? (
-                      <div className="pt-2">
-                        <Button
-                          variant="ghost"
-                          className="text-white"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenNewsModal(currentStory);
-                          }}
-                        >
-                          Leia Mais
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
+                  ) : null}
 
-                {!isFirstScreen && currentScreen && (
-                  <div className="mt-auto space-y-3 text-left">
-                    {hasSlideTitle ? (
-                      <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">{slideTitleText}</h2>
-                    ) : null}
-                    {currentScreen.type !== "quote" && hasSlideBody ? (
-                      <p className="text-base text-white/80 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{slideBodyText}</p>
-                    ) : null}
-                    {currentScreen.type === "quote" && currentScreen.quote ? (
-                      <>
-                        <div className="text-4xl mb-4">&quot;</div>
-                        <p className="text-xl mb-4 italic drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentScreen.quote}</p>
-                        <p className="text-sm opacity-75 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"> {currentScreen.author}</p>
-                      </>
-                    ) : null}
-                    {showSlideButton ? (
-                      <div className="pt-2">
-                        <Button
-                          variant="ghost"
-                          className="text-white"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            onOpenNewsModal(currentStory);
-                          }}
-                        >
-                          Leia Mais
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
+                  {!isFirstScreen && currentScreen && (
+                    <div className="mt-auto space-y-3 text-left">
+                      {hasSlideTitle ? (
+                        <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">{slideTitleText}</h2>
+                      ) : null}
+                      {currentScreen.type !== "quote" && hasSlideBody ? (
+                        <p className="text-base text-white/80 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{slideBodyText}</p>
+                      ) : null}
+                      {currentScreen.type === "quote" && currentScreen.quote ? (
+                        <>
+                          <div className="text-4xl mb-4">&quot;</div>
+                          <p className="text-xl mb-4 italic drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentScreen.quote}</p>
+                          <p className="text-sm opacity-75 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"> {currentScreen.author}</p>
+                        </>
+                      ) : null}
+                      {showSlideButton ? (
+                        <div className="pt-2">
+                          <Button
+                            variant="ghost"
+                            className="text-white"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              onOpenNewsModal(currentStory);
+                            }}
+                          >
+                            Leia Mais
+                          </Button>
+                        </div>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-
           {/* Vertical bullets */}
           <div className="absolute right-4 top-1/2 -translate-y-1/2 flex flex-col space-y-2">
             {(() => {
@@ -469,6 +473,8 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
+
+
 
 
 
