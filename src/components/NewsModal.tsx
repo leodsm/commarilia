@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect } from "react";
@@ -58,6 +58,19 @@ function formatDate(dateString?: string) {
 export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null; isOpen: boolean; onClose: () => void }) {
   useEffect(() => {
     if (!isOpen) return;
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        event.stopPropagation();
+        onClose();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown, true);
+    return () => window.removeEventListener("keydown", handleKeyDown, true);
+  }, [isOpen, onClose]);
+
+  useEffect(() => {
+    if (!isOpen) return;
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
@@ -110,21 +123,16 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
             </div>
           ) : null}
 
-          {/* External Link */}
-          {story.link ? (
-            <div className="flex justify-center">
-              <button
-                className="inline-flex items-center gap-2 px-4 h-10 rounded-lg border border-neutral-300 text-neutral-800 hover:bg-neutral-50"
-                onClick={() => window.open(story.link!, "_blank", "noopener,noreferrer")}
-              >
-                <svg className="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M18 13v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M15 3h6m0 0v6m0-6L10 14" />
-                </svg>
-                <span>Ler materia completa</span>
-              </button>
-            </div>
-          ) : null}
+          <div className="mt-6 flex justify-center">
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Fechar"
+              className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
+            >
+              <span className="text-2xl leading-none">&times;</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
@@ -132,4 +140,9 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
 }
 
 export default NewsModal;
+
+
+
+
+
 

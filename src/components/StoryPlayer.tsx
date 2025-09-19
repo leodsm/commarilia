@@ -1,4 +1,4 @@
-﻿/* eslint-disable @next/next/no-img-element */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
@@ -88,6 +88,7 @@ export function StoryPlayer({
   const slideBodyText = slideTextsEqual ? "" : rawSlideBodyText;
   const hasSlideTitle = slideTitleText.length > 0;
   const hasSlideBody = slideBodyText.length > 0;
+  const showSlideButton = !!currentScreen?.showButton;
 
   useEffect(() => setCurrentScreenIndex(0), [currentStoryIndex]);
 
@@ -145,28 +146,21 @@ export function StoryPlayer({
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, stories, totalScreens]);
 
-  // Auto-avance para slides nao-video
   useEffect(() => {
-    const DURATION = 6000; // ms por slide
-    if (!currentStory || totalScreens <= 0) return;
-    if (isVideo) return; // video controlado abaixo
-    if (isPaused) return;
-
-    let raf: number;
-    const start = performance.now();
-    const tick = (ts: number) => {
-      const ratio = Math.min(1, (ts - start) / DURATION);
-      setSlideProgress(ratio);
-      if (ratio >= 1) {
-        if (currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
-        else onNext();
-        return;
+    const handleWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      if (e.deltaY > 0) {
+        if (currentStoryIndex < stories.length - 1) onNext();
+        else onClose();
+      } else {
+        if (currentStoryIndex > 0) onPrevious();
       }
-      raf = requestAnimationFrame(tick);
     };
-    raf = requestAnimationFrame(tick);
-    return () => cancelAnimationFrame(raf);
-  }, [currentStoryIndex, currentScreenIndex, totalScreens, isPaused, isVideo, currentStory, onNext]);
+    const el = containerRef.current;
+    if (!el) return;
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel as EventListener);
+  }, [currentStoryIndex, stories, onNext, onPrevious, onClose]);
 
   // Progresso de video + auto-avance ao terminar
   useEffect(() => {
@@ -191,21 +185,7 @@ export function StoryPlayer({
     };
   }, [isVideo, currentScreenIndex, totalScreens, onNext]);
 
-  useEffect(() => {
-    const handleWheel = (e: WheelEvent) => {
-      e.preventDefault();
-      if (e.deltaY > 0) {
-        if (currentStoryIndex < stories.length - 1) onNext();
-        else onClose();
-      } else {
-        if (currentStoryIndex > 0) onPrevious();
-      }
-    };
-    const el = containerRef.current;
-    if (!el) return;
-    el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel as EventListener);
-  }, [currentStoryIndex, stories, onNext, onPrevious, onClose]);
+
 
   useEffect(() => {
     const next = stories[currentStoryIndex + 1];
@@ -307,14 +287,14 @@ export function StoryPlayer({
           {totalScreens > 1 && (
             <>
               <div
-                className="absolute inset-y-0 left-0 w-1/3 z-40 cursor-pointer"
+                className="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
                 }}
               />
               <div
-                className="absolute inset-y-0 right-0 w-1/3 z-40 cursor-pointer"
+                className="absolute inset-y-0 right-0 w-1/3 z-10 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
                   if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
@@ -353,44 +333,46 @@ export function StoryPlayer({
                       >
                         {currentStory.category}
                       </span>
-                      <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug">
+                      <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">
                         {currentStory.title}
                       </h1>
                       {currentStory.subtitle ? (
-                        <p className="text-base opacity-90">{currentStory.subtitle}</p>
+                        <p className="text-base opacity-90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentStory.subtitle}</p>
                       ) : null}
                     </div>
-                    <div className="pt-2">
-                      <Button
-                        variant="ghost"
-                        className="text-white"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onOpenNewsModal(currentStory);
-                        }}
-                      >
-                        Leia Mais
-                      </Button>
-                    </div>
+                    {showSlideButton ? (
+                      <div className="pt-2">
+                        <Button
+                          variant="ghost"
+                          className="text-white"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onOpenNewsModal(currentStory);
+                          }}
+                        >
+                          Leia Mais
+                        </Button>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
 
                 {!isFirstScreen && currentScreen && (
                   <div className="mt-auto space-y-3 text-left">
                     {hasSlideTitle ? (
-                      <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow">{slideTitleText}</h2>
+                      <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">{slideTitleText}</h2>
                     ) : null}
                     {currentScreen.type !== "quote" && hasSlideBody ? (
-                      <p className="text-base text-white/80 leading-relaxed">{slideBodyText}</p>
+                      <p className="text-base text-white/80 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{slideBodyText}</p>
                     ) : null}
                     {currentScreen.type === "quote" && currentScreen.quote ? (
                       <>
                         <div className="text-4xl mb-4">&quot;</div>
-                        <p className="text-xl mb-4 italic">{currentScreen.quote}</p>
-                        <p className="text-sm opacity-75"> {currentScreen.author}</p>
+                        <p className="text-xl mb-4 italic drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentScreen.quote}</p>
+                        <p className="text-sm opacity-75 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"> {currentScreen.author}</p>
                       </>
                     ) : null}
-                    {currentScreen.showButton ? (
+                    {showSlideButton ? (
                       <div className="pt-2">
                         <Button
                           variant="ghost"
@@ -450,7 +432,7 @@ export function StoryPlayer({
           {/* Horizontal progress */}
           <div className="absolute top-4 left-0 right-0 px-4 flex space-x-1 z-40">
             {(currentStory.screens || []).map((_, index) => {
-              const widthPct = index < currentScreenIndex ? 100 : index === currentScreenIndex ? Math.round(slideProgress * 100) : 0;
+              const widthPct = index < currentScreenIndex ? 100 : index === currentScreenIndex ? (isVideo ? Math.round(slideProgress * 100) : 100) : 0;
               return (
                 <div
                   key={index}
@@ -490,6 +472,11 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
+
+
+
+
+
 
 
 

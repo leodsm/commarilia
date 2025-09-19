@@ -1,11 +1,14 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PostCard, type PostCardData } from "./PostCard";
 import { StoryPlayer, type NewsStory } from "./StoryPlayer";
+import { AppHeader } from "./AppHeader";
 import { NewsModal } from "./NewsModal";
 
 type PageInfo = { endCursor: string | null; hasNextPage: boolean };
+
+type CategoryOption = { value: string; label: string };
 
 export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: PostCardData[]; initialPageInfo: PageInfo }) {
   const [items, setItems] = useState<PostCardData[]>(initialItems);
@@ -16,8 +19,30 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
   const [index, setIndex] = useState(0);
   const [newsOpen, setNewsOpen] = useState(false);
   const [newsStory, setNewsStory] = useState<NewsStory | null>(null);
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
 
-  // const canLoadMore = pageInfo.hasNextPage && !loading;
+  const categoryOptions: CategoryOption[] = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const item of items) {
+      if (item.category?.slug && item.category?.name) {
+        seen.set(item.category.slug, item.category.name);
+      }
+    }
+    const sorted = Array.from(seen.entries())
+      .map(([slug, name]) => ({ value: slug, label: name }))
+      .sort((a, b) => a.label.localeCompare(b.label, "pt-BR"));
+    return [{ value: "all", label: "Todas" }, ...sorted];
+  }, [items]);
+
+  const filteredItems = useMemo(() => {
+    if (selectedCategory === "all") return items;
+    return items.filter((item) => item.category?.slug === selectedCategory);
+  }, [items, selectedCategory]);
+
+  useEffect(() => {
+    setOpen(false);
+    setIndex(0);
+  }, [selectedCategory]);
 
   useEffect(() => {
     if (!sentinelRef.current) return;
@@ -49,15 +74,14 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
       setItems((prev) => [...prev, ...json.items]);
       setPageInfo(json.pageInfo);
     } catch {
-      // fail silently for UX; could add toast here
-      // console.error(e);
+      // silencioso
     } finally {
       setLoading(false);
     }
   }
 
   const stories: NewsStory[] = useMemo(() => {
-    return items.map((p) => {
+    return filteredItems.map((p) => {
       const fallbackScreen = {
         type: "text" as const,
         content: p.title,
@@ -77,12 +101,12 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
         screens,
       };
     });
-  }, [items]);
+  }, [filteredItems]);
 
   const grid = useMemo(
     () => (
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {items.map((p, i) => (
+      <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {filteredItems.map((p, i) => (
           <PostCard
             key={p.id}
             post={p}
@@ -95,17 +119,18 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
         ))}
       </div>
     ),
-    [items]
+    [filteredItems]
   );
 
   return (
-    <div className="max-w-[990px] mx-auto px-4 py-8">
+    <div className="max-w-[990px] mx-auto px-4 lg:px-0 pt-4 pb-8 lg:pt-0">
+      <AppHeader options={categoryOptions} selected={selectedCategory} onSelect={setSelectedCategory} />
       {grid}
       <div ref={sentinelRef} className="h-10" />
       {loading ? (
         <div className="mt-6 text-center text-sm text-neutral-500">Carregando mais...</div>
       ) : !pageInfo.hasNextPage ? (
-        <div className="mt-6 text-center text-sm text-neutral-400">Voce chegou ao fim.</div>
+        <div className="mt-6 text-center text-sm text-neutral-400">VocÃª chegou ao fim.</div>
       ) : null}
       {open && stories.length > 0 && (
         <StoryPlayer
@@ -125,3 +150,9 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
     </div>
   );
 }
+
+
+
+
+
+

@@ -1,4 +1,4 @@
-import Image from "next/image";
+﻿import Image from "next/image";
 import Link from "next/link";
 import { categoryColorHex } from "@/lib/categoryColors";
 import type { StoryScreen } from "./StoryPlayer";
@@ -58,23 +58,14 @@ export function PostCard({ post, onOpenStory, priority = false }: { post: PostCa
         {/* Text block */}
         <div className="absolute bottom-0 left-0 right-0 p-6 text-white z-10">
           <span
-            className={`inline-block text-white text-[11px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full mb-2`}
+            className={`inline-block text-white text-[12px] uppercase tracking-widest font-semibold px-2.5 py-1 rounded-full mb-2`}
             style={{ backgroundColor: categoryColorHex(post.category?.name, post.category?.slug) }}
           >
             {post.category?.name ?? "Uncategorized"}
           </span>
-          <h3 className="font-poppins font-bold text-[16px] leading-[1.18] break-words">
+          <h3 className="font-poppins font-bold text-[18px] leading-[1.18] md:text-[16px] break-words pb-2 drop-shadow-[0_3px_6px_rgba(0,0,0,0.45)]">
             {post.title}
           </h3>
-          {(() => {
-            const t = (post.excerpt || "").trim();
-            if (!t) return null;
-            const idx = t.indexOf(".");
-            const shown = idx === -1 ? t : t.slice(0, idx + 1).trim();
-            return (
-              <p className="mt-2 text-white/90 text-[14px] leading-[1.35] break-words line-clamp-2">{shown}</p>
-            );
-          })()}
         </div>
       </div>
     </Link>
@@ -82,4 +73,8 @@ export function PostCard({ post, onOpenStory, priority = false }: { post: PostCa
 }
 
 export default PostCard;
+
+
+
+
 
