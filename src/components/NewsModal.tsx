@@ -10,19 +10,6 @@ function ImageWithFallback({ src, alt, className }: { src?: string | null; alt?:
   return <img src={url || undefined} alt={alt || ""} className={className} onError={() => setErr(true)} />;
 }
 
-function CloseButton({ onClick }: { onClick: () => void }) {
-  return (
-    <button
-      aria-label="Fechar"
-      onClick={onClick}
-      className="absolute top-3 right-3 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-black/40 text-white hover:bg-black/60 transition"
-    >
-      <svg className="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-      </svg>
-    </button>
-  );
-}
 
 function formatDate(dateString?: string) {
   if (!dateString) return "";
@@ -87,8 +74,6 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
 
       {/* Dialog */}
       <div className="relative max-w-3xl w-[92%] max-h-[90vh] overflow-y-auto rounded-2xl bg-white text-neutral-900 shadow-2xl">
-        <CloseButton onClick={onClose} />
-
         {/* Header image */}
         <div className="relative h-56 w-full">
           <ImageWithFallback src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
@@ -123,18 +108,16 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
             </div>
           ) : null}
 
-          <div className="mt-6 flex justify-center">
-            <button
-              type="button"
-              onClick={onClose}
-              aria-label="Fechar"
-              className="inline-flex h-12 w-12 items-center justify-center rounded-full border border-neutral-300 text-neutral-500 transition hover:bg-neutral-100 hover:text-neutral-800"
-            >
-              <span className="text-2xl leading-none">&times;</span>
-            </button>
-          </div>
         </div>
       </div>
+      <button
+        type="button"
+        onClick={onClose}
+        aria-label="Fechar"
+        className="fixed bottom-6 left-1/2 z-[70] flex h-12 w-12 -translate-x-1/2 items-center justify-center rounded-full border border-neutral-200 bg-white/80 text-neutral-600 shadow-lg transition hover:bg-white hover:text-neutral-900"
+      >
+        <span className="text-2xl leading-none">&times;</span>
+      </button>
     </div>
   );
 }

@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { PostCard, type PostCardData } from "./PostCard";
@@ -130,7 +130,7 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
       {loading ? (
         <div className="mt-6 text-center text-sm text-neutral-500">Carregando mais...</div>
       ) : !pageInfo.hasNextPage ? (
-        <div className="mt-6 text-center text-sm text-neutral-400">VocÃª chegou ao fim.</div>
+        <div className="mt-6 text-center text-sm text-neutral-400">Você chegou ao fim.</div>
       ) : null}
       {open && stories.length > 0 && (
         <StoryPlayer
@@ -150,9 +150,4 @@ export function PostsGrid({ initialItems, initialPageInfo }: { initialItems: Pos
     </div>
   );
 }
-
-
-
-
-
 

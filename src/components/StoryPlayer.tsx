@@ -1,7 +1,7 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useSwipeable } from "react-swipeable";
 import type { SwipeableHandlers } from "react-swipeable";
 import { categoryColorHex } from "@/lib/categoryColors";
@@ -29,6 +29,8 @@ export type NewsStory = {
   publishDate?: string;
   excerpt?: string | null;
 };
+
+type TransitionDirection = "forward" | "backward" | "idle";
 
 function Button({
   children,
@@ -72,6 +74,7 @@ export function StoryPlayer({
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
   const [slideProgress, setSlideProgress] = useState(0); // 0..1 progresso do slide atual
+  const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>("idle");
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
 
@@ -89,7 +92,26 @@ export function StoryPlayer({
   const hasSlideBody = slideBodyText.length > 0;
   const showSlideButton = !!currentScreen?.showButton;
 
-  useEffect(() => setCurrentScreenIndex(0), [currentStoryIndex]);
+  const goToScreen = useCallback(
+    (resolver: number | ((prev: number) => number), options?: { animate?: boolean }) => {
+      const shouldAnimate = options?.animate ?? true;
+      setCurrentScreenIndex((prev) => {
+        const rawNext = typeof resolver === "function" ? resolver(prev) : resolver;
+        const clamped =
+          totalScreens > 0 ? Math.max(0, Math.min(totalScreens - 1, rawNext)) : 0;
+        if (clamped !== prev) {
+          setTransitionDirection(shouldAnimate ? (clamped > prev ? "forward" : "backward") : "idle");
+        }
+        return clamped;
+      });
+    },
+    [totalScreens]
+  );
+
+  useEffect(() => {
+    setTransitionDirection("idle");
+    goToScreen(0, { animate: false });
+  }, [currentStoryIndex, goToScreen]);
 
   // Reset progress when trocar de story ou slide
   useEffect(() => {
@@ -133,17 +155,17 @@ export function StoryPlayer({
           break;
         case "ArrowLeft":
           e.preventDefault();
-          if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+          if (currentScreenIndex > 0) goToScreen((prev) => prev - 1);
           break;
         case "ArrowRight":
           e.preventDefault();
-          if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+          if (currentStory && currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
           break;
       }
     };
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, stories, totalScreens]);
+  }, [onClose, onNext, onPrevious, currentStory, currentScreenIndex, currentStoryIndex, stories, totalScreens, goToScreen]);
 
   useEffect(() => {
     const handleWheel = (e: WheelEvent) => {
@@ -173,7 +195,7 @@ export function StoryPlayer({
       }
     };
     const onEnded = () => {
-      if (currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+      if (currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
       else onNext();
     };
     v.addEventListener('timeupdate', onTime);
@@ -182,7 +204,7 @@ export function StoryPlayer({
       v.removeEventListener('timeupdate', onTime);
       v.removeEventListener('ended', onEnded);
     };
-  }, [isVideo, currentScreenIndex, totalScreens, onNext]);
+  }, [isVideo, currentScreenIndex, totalScreens, onNext, goToScreen]);
 
 
 
@@ -219,9 +241,9 @@ export function StoryPlayer({
     }
     if (Math.abs(deltaX) > min) {
       if (deltaX > 0) {
-        if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+        if (currentScreenIndex > 0) goToScreen((prev) => prev - 1);
       } else {
-        if (currentStory && currentScreenIndex < currentStory.screens.length - 1) setCurrentScreenIndex((p) => p + 1);
+        if (currentStory && currentScreenIndex < currentStory.screens.length - 1) goToScreen((prev) => prev + 1);
       }
     }
     setStartX(0);
@@ -234,19 +256,19 @@ export function StoryPlayer({
     const x = e.clientX - rect.left;
     const w = rect.width;
     if (x < w / 3) {
-      if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+      if (currentScreenIndex > 0) goToScreen((prev) => prev - 1);
     } else if (x > (2 * w) / 3) {
-      if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+      if (currentStory && currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
     }
   };
 
   // Swipe handlers (robust cross-browser)
   const swipeHandlers = useSwipeable({
     onSwipedLeft: () => {
-      if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+      if (currentStory && currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
     },
     onSwipedRight: () => {
-      if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+      if (currentScreenIndex > 0) goToScreen((prev) => prev - 1);
     },
     onSwipedUp: () => {
       if (currentStoryIndex < stories.length - 1) onNext(); else onClose();
@@ -287,14 +309,14 @@ export function StoryPlayer({
                 className="absolute inset-y-0 left-0 w-1/3 z-10 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (currentScreenIndex > 0) setCurrentScreenIndex((p) => p - 1);
+                  if (currentScreenIndex > 0) goToScreen((prev) => prev - 1);
                 }}
               />
               <div
                 className="absolute inset-y-0 right-0 w-1/3 z-10 cursor-pointer"
                 onClick={(e) => {
                   e.stopPropagation();
-                  if (currentStory && currentScreenIndex < totalScreens - 1) setCurrentScreenIndex((p) => p + 1);
+                  if (currentStory && currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
                 }}
               />
             </>
@@ -304,6 +326,7 @@ export function StoryPlayer({
             <div
               key={`${currentStory.id}-${currentScreenIndex}`}
               className="slide-transition relative flex flex-1 h-full w-full flex-col"
+              data-transition={transitionDirection}
             >
               {currentScreen?.videoUrl ? (
                 <video
@@ -441,7 +464,7 @@ export function StoryPlayer({
                   aria-label={`Ir para o slide ${index + 1}`}
                   onClick={(e) => {
                     e.stopPropagation();
-                    setCurrentScreenIndex(index);
+                    goToScreen(index);
                   }}
                   className="h-1 rounded-full flex-1 bg-white/30 overflow-hidden cursor-pointer"
                   style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }}
