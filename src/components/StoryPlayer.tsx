@@ -209,7 +209,8 @@ export function StoryPlayer({
     const min = 50;
     if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > min) {
       if (deltaY > 0) {
-        onClose();
+        if (currentStoryIndex > 0) onPrevious();
+        else onClose();
       } else {
         if (currentStoryIndex < stories.length - 1) onNext();
         else onClose();
@@ -251,7 +252,8 @@ export function StoryPlayer({
       if (currentStoryIndex < stories.length - 1) onNext(); else onClose();
     },
     onSwipedDown: () => {
-      onClose();
+      if (currentStoryIndex > 0) onPrevious();
+      else onClose();
     },
     delta: 50,
     trackTouch: true,
@@ -467,6 +469,8 @@ export function StoryPlayer({
 }
 
 // Lightweight Stories launcher that fetches WP posts and opens the player
+
+
 
 
 
