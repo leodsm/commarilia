@@ -5,19 +5,20 @@ const CMS_GRAPHQL_ENDPOINT =
 
 type GraphQLResponse<T> = {
   data?: T;
-  errors?: Array<{ message: string }>;
+  errors?: Array<{ message?: string }>;
 };
 
 export async function gqlFetch<T>(
   query: string,
   variables?: Record<string, unknown>,
   revalidate: number = 60
-) {
+): Promise<T> {
   const init: RequestInit & { next?: { revalidate?: number } } = {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),
   };
+
   if (revalidate <= 0) {
     (init as RequestInit).cache = "no-store";
   } else {
@@ -32,9 +33,14 @@ export async function gqlFetch<T>(
   }
 
   const json = (await res.json()) as GraphQLResponse<T>;
-  if (json.errors && json.errors.length) {
-    throw new Error(json.errors.map((e) => e.message).join("; "));
+  if (json.errors?.length) {
+    throw new Error(json.errors.map((err) => err.message ?? "Unknown GraphQL error").join("; "));
   }
 
-  return json.data as T;
+  if (!json.data) {
+    throw new Error("GraphQL response missing data");
+  }
+
+  return json.data;
 }
+

@@ -15,6 +15,8 @@ export type StoryScreen = {
   showButton?: boolean | null;
   quote?: string;
   author?: string;
+  textAlign?: "left" | "center" | "right";
+  contentVertical?: "top" | "center" | "bottom";
 };
 
 export type NewsStory = {
@@ -31,6 +33,16 @@ export type NewsStory = {
 };
 
 type TransitionDirection = "forward" | "backward" | "idle";
+
+function ShareIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 3v12" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M5 11v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+    </svg>
+  );
+}
 
 function Button({
   children,
@@ -90,6 +102,18 @@ export function StoryPlayer({
   const hasSlideTitle = slideTitleText.length > 0;
   const hasSlideBody = slideBodyText.length > 0;
   const showSlideButton = !!currentScreen?.showButton;
+  const textAlign = currentScreen?.textAlign ?? "left";
+  const textAlignClass =
+    textAlign === "center" ? "text-center" : textAlign === "right" ? "text-right" : "text-left";
+  const buttonJustifyClass =
+    textAlign === "center" ? "justify-center" : textAlign === "right" ? "justify-end" : "";
+  const verticalPosition = currentScreen?.contentVertical ?? "bottom";
+  const verticalClass =
+    verticalPosition === "top"
+      ? "mt-0 mb-auto pt-12"
+      : verticalPosition === "center"
+      ? "my-auto py-10"
+      : "mt-auto pb-10";
 
   const goToScreen = useCallback(
     (resolver: number | ((prev: number) => number), options?: { animate?: boolean }) => {
@@ -106,6 +130,22 @@ export function StoryPlayer({
     },
     [totalScreens]
   );
+
+  const shareStory = useCallback((storyToShare: NewsStory) => {
+    if (!storyToShare) return;
+    const shareUrl = storyToShare.link || (typeof window !== "undefined" ? window.location.href : "");
+    if (!shareUrl) return;
+    const shareData = {
+      title: storyToShare.title,
+      text: storyToShare.subtitle || storyToShare.excerpt || storyToShare.title,
+      url: shareUrl,
+    };
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      navigator.share(shareData).catch(() => {});
+    } else if (typeof window !== "undefined") {
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
+  }, []);
 
   useEffect(() => {
     setTransitionDirection("idle");
@@ -274,7 +314,7 @@ export function StoryPlayer({
 
   return (
     <div className="fixed inset-0 bg-gray-900 z-50">
-      <div className="flex items-center justify-center w-full h-full">
+      <div className="relative flex items-center justify-center w-full h-full">
         <div
           ref={(el) => {
             containerRef.current = el;
@@ -332,10 +372,12 @@ export function StoryPlayer({
                 />
               )}
 
-              <div className="news-content">
+              <div className="absolute inset-0 z-10 bg-gradient-to-b from-black/10 via-black/40 to-black/80" />
+
+              <div className="news-content relative z-20">
                 <div className="w-full max-w-3xl h-full flex flex-col">
                   {isFirstScreen ? (
-                    <div className="mt-auto space-y-4 text-left">
+                    <div className={`${verticalClass} space-y-4 ${textAlignClass}`}>
                       <div className="space-y-2">
                         <span
                           className={`text-white text-xs font-bold px-3 py-1 rounded-full inline-block uppercase tracking-widest`}
@@ -346,12 +388,16 @@ export function StoryPlayer({
                         <h1 className="text-2xl md:text-2xl lg:text-3xl font-black leading-snug drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">
                           {currentStory.title}
                         </h1>
-                        {currentStory.subtitle ? (
+                        {hasSlideBody ? (
+                          <p className="text-base text-white/80 leading-relaxed whitespace-pre-line drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">
+                            {slideBodyText}
+                          </p>
+                        ) : currentStory.subtitle ? (
                           <p className="text-base opacity-90 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentStory.subtitle}</p>
                         ) : null}
                       </div>
                       {showSlideButton ? (
-                        <div className="pt-2">
+                        <div className={`pt-2 flex items-center gap-2 ${buttonJustifyClass}`}>
                           <Button
                             variant="ghost"
                             className="text-white"
@@ -362,28 +408,39 @@ export function StoryPlayer({
                           >
                             Leia Mais
                           </Button>
+                          <button
+                            type="button"
+                            aria-label="Compartilhar story"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareStory(currentStory);
+                            }}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition hover:bg-white hover:text-slate-900"
+                          >
+                            <ShareIcon className="h-5 w-5" />
+                          </button>
                         </div>
                       ) : null}
                     </div>
                   ) : null}
 
                   {!isFirstScreen && currentScreen && (
-                    <div className="mt-auto space-y-3 text-left">
+                    <div className={`${verticalClass} space-y-3 ${textAlignClass}`}>
                       {hasSlideTitle ? (
                         <h2 className="text-2xl md:text-3xl font-black leading-tight drop-shadow-[0_3px_8px_rgba(0,0,0,0.45)]">{slideTitleText}</h2>
                       ) : null}
                       {currentScreen.type !== "quote" && hasSlideBody ? (
-                        <p className="text-base text-white/80 leading-relaxed drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{slideBodyText}</p>
+                        <p className="text-base text-white/80 leading-relaxed whitespace-pre-line drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{slideBodyText}</p>
                       ) : null}
                       {currentScreen.type === "quote" && currentScreen.quote ? (
                         <>
-                          <div className="text-4xl mb-4">&quot;</div>
-                          <p className="text-xl mb-4 italic drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentScreen.quote}</p>
+                          <div className="text-4xl mb-4 drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">&quot;</div>
+                          <p className="text-xl mb-4 italic whitespace-pre-line drop-shadow-[0_2px_6px_rgba(0,0,0,0.4)]">{currentScreen.quote}</p>
                           <p className="text-sm opacity-75 drop-shadow-[0_2px_6px_rgba(0,0,0,0.35)]"> {currentScreen.author}</p>
                         </>
                       ) : null}
                       {showSlideButton ? (
-                        <div className="pt-2">
+                        <div className={`pt-2 flex items-center gap-2 ${buttonJustifyClass}`}>
                           <Button
                             variant="ghost"
                             className="text-white"
@@ -394,6 +451,17 @@ export function StoryPlayer({
                           >
                             Leia Mais
                           </Button>
+                          <button
+                            type="button"
+                            aria-label="Compartilhar story"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              shareStory(currentStory);
+                            }}
+                            className="flex h-10 w-10 items-center justify-center rounded-full border border-white/30 text-white transition hover:bg-white hover:text-slate-900"
+                          >
+                            <ShareIcon className="h-5 w-5" />
+                          </button>
                         </div>
                       ) : null}
                     </div>
@@ -477,7 +545,7 @@ export function StoryPlayer({
   );
 }
 
-// Lightweight Stories launcher that fetches WP posts and opens the player
+// Lightweight Stories launcher that opens the player for fetched posts
 
 
 

@@ -184,7 +184,7 @@ export function AppHeader({ options, selected, onSelect }: AppHeaderProps) {
       {menuOpen ? (
         <>
           <div className="fixed inset-0 z-40 bg-slate-900/60" onClick={() => setMenuOpen(false)} />
-          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] flex-col gap-6 border-r border-slate-200 bg-white/98 p-6">
+          <aside className="fixed inset-y-0 left-0 z-50 flex w-72 max-w-[80vw] flex-col gap-6 border-r border-slate-200 bg-white p-6">
             <div className="flex items-start justify-between">
               <div>
                 <p className="text-sm font-semibold text-slate-900">Menu</p>

@@ -1,13 +1,23 @@
 /* eslint-disable @next/next/no-img-element */
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useCallback, useEffect } from "react";
 import type { NewsStory } from "./StoryPlayer";
 
 function ImageWithFallback({ src, alt, className }: { src?: string | null; alt?: string; className?: string }) {
   const [err, setErr] = React.useState(false);
   const url = err || !src ? "https://images.unsplash.com/photo-1545972152-7051c7c4e9f5?q=80&w=1200&auto=format&fit=crop" : src;
   return <img src={url || undefined} alt={alt || ""} className={className} onError={() => setErr(true)} />;
+}
+
+function ShareIcon(props: React.SVGProps<SVGSVGElement>) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} strokeLinecap="round" strokeLinejoin="round" {...props}>
+      <path d="M12 3v12" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M5 11v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7" />
+    </svg>
+  );
 }
 
 
@@ -65,6 +75,22 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
     };
   }, [isOpen]);
 
+  const handleShare = useCallback(() => {
+    if (!story) return;
+    const shareUrl = story.link || (typeof window !== "undefined" ? window.location.href : "");
+    if (!shareUrl) return;
+    const shareData = {
+      title: story.title,
+      text: story.subtitle || story.excerpt || story.title,
+      url: shareUrl,
+    };
+    if (typeof navigator !== "undefined" && typeof navigator.share === "function") {
+      navigator.share(shareData).catch(() => {});
+    } else if (typeof window !== "undefined") {
+      window.open(shareUrl, "_blank", "noopener,noreferrer");
+    }
+  }, [story]);
+
   if (!isOpen || !story) return null;
 
   return (
@@ -78,6 +104,14 @@ export function NewsModal({ story, isOpen, onClose }: { story: NewsStory | null;
         <div className="relative h-56 w-full">
           <ImageWithFallback src={story.imageUrl} alt={story.title} className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
+          <button
+            type="button"
+            aria-label="Compartilhar noticia"
+            onClick={handleShare}
+            className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-white/85 text-neutral-700 shadow-md transition hover:bg-white hover:text-neutral-900"
+          >
+            <ShareIcon className="h-5 w-5" />
+          </button>
         </div>
 
         {/* Content */}
