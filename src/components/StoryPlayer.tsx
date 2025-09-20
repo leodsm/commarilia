@@ -73,7 +73,6 @@ export function StoryPlayer({
   const [currentScreenIndex, setCurrentScreenIndex] = useState(0);
   const [startX, setStartX] = useState(0);
   const [startY, setStartY] = useState(0);
-  const [slideProgress, setSlideProgress] = useState(0); // 0..1 progresso do slide atual
   const [transitionDirection, setTransitionDirection] = useState<TransitionDirection>("idle");
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -112,11 +111,6 @@ export function StoryPlayer({
     setTransitionDirection("idle");
     goToScreen(0, { animate: false });
   }, [currentStoryIndex, goToScreen]);
-
-  // Reset progress when trocar de story ou slide
-  useEffect(() => {
-    setSlideProgress(0);
-  }, [currentStoryIndex, currentScreenIndex]);
 
   // Lock background scroll while StoryPlayer is open
   useEffect(() => {
@@ -183,26 +177,18 @@ export function StoryPlayer({
     return () => el.removeEventListener("wheel", handleWheel as EventListener);
   }, [currentStoryIndex, stories, onNext, onPrevious, onClose]);
 
-  // Progresso de video + auto-avance ao terminar
+  // Auto-avanca video ao terminar
   useEffect(() => {
     if (!isVideo) return;
     const v = videoRef.current;
     if (!v) return;
-    const onTime = () => {
-      if (v.duration && isFinite(v.duration)) {
-        const ratio = Math.min(1, Math.max(0, v.currentTime / v.duration));
-        setSlideProgress(ratio);
-      }
-    };
     const onEnded = () => {
       if (currentScreenIndex < totalScreens - 1) goToScreen((prev) => prev + 1);
       else onNext();
     };
-    v.addEventListener('timeupdate', onTime);
-    v.addEventListener('ended', onEnded);
+    v.addEventListener("ended", onEnded);
     return () => {
-      v.removeEventListener('timeupdate', onTime);
-      v.removeEventListener('ended', onEnded);
+      v.removeEventListener("ended", onEnded);
     };
   }, [isVideo, currentScreenIndex, totalScreens, onNext, goToScreen]);
 
@@ -452,25 +438,21 @@ export function StoryPlayer({
               }
             })()}
           </div>
-
-          {/* Horizontal progress */}
-          <div className="absolute top-4 left-0 right-0 px-4 flex space-x-1 z-40">
+          {/* Slide dots */}
+          <div className="absolute bottom-8 left-0 right-0 flex items-center justify-center space-x-2 z-40">
             {(currentStory.screens || []).map((_, index) => {
-              const widthPct = index < currentScreenIndex ? 100 : index === currentScreenIndex ? (isVideo ? Math.round(slideProgress * 100) : 100) : 0;
+              const isActive = index === currentScreenIndex;
               return (
-                <div
+                <button
                   key={index}
-                  role="button"
+                  type="button"
                   aria-label={`Ir para o slide ${index + 1}`}
                   onClick={(e) => {
                     e.stopPropagation();
                     goToScreen(index);
                   }}
-                  className="h-1 rounded-full flex-1 bg-white/30 overflow-hidden cursor-pointer"
-                  style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,0.3))" }}
-                >
-                  <div className="h-full bg-white" style={{ width: `${widthPct}%`, transition: isVideo ? undefined : "width 80ms linear" }} />
-                </div>
+                  className={`h-2.5 w-2.5 rounded-full transition-all duration-200 ${isActive ? "transform scale-110 bg-white shadow-[0_0_0_2px_rgba(15,23,42,0.45)]" : "bg-white/40 hover:bg-white/70"}`}
+                />
               );
             })}
           </div>
