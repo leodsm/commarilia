@@ -18,22 +18,21 @@
         /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
         body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
-        /* MODIFICATION: Removed fixed width/height and max-width/height. 
-           Dimensions are now controlled by JavaScript to enforce a 9:16 aspect ratio. */
+        /* MODIFICATION: Removed border to allow content to be flush with the edges. */
         .mobile-frame { 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
             border-radius: 2.5rem; 
             overflow: hidden; 
             position: relative; 
             background-color: #000; 
-            border: 12px solid #1f2937; 
             transition: width 0.2s ease, height 0.2s ease; /* Added a smooth transition for resizing */
         }
         .swiper-container-v, .swiper-container-h, .swiper { width: 100%; height: 100%; }
         .swiper-slide { display: flex; text-align: center; color: #fff; background-size: cover; background-position: center; position: relative; overflow: hidden; }
         .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 100%); }
         .slide-video-bg { position: absolute; top: 50%; left: 50%; width: auto; height: auto; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: -1; }
-        .swiper-pagination-horizontal { top: 60px; bottom: auto; }
+        /* MODIFICATION: Adjusted top position for the new layout where the header is not overlaying the content. */
+        .swiper-pagination-horizontal { top: 10px; bottom: auto; }
         .swiper-pagination-bullet { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.6); opacity: 1; }
         .swiper-pagination-bullet-active { background-color: #fd572b; }
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
@@ -46,23 +45,25 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<!-- MODIFICATION: Changed body background from gray to black to create a more seamless, full-screen illusion when the frame doesn't perfectly fit the viewport. -->
 <body class="flex items-center justify-center h-screen bg-black overflow-hidden">
 
     <div class="mobile-frame">
-        <div id="app" class="w-full h-full relative">
+        <!-- MODIFICATION: Changed to a flex column layout to position the header above the swiper container. -->
+        <div id="app" class="w-full h-full relative flex flex-col bg-black">
             <div id="loader-container" class="absolute inset-0 z-40 bg-black flex items-center justify-center">
                 <div id="loader"></div>
             </div>
 
-            <header class="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/50 backdrop-blur-sm">
+            <!-- MODIFICATION: Removed absolute positioning. The header now sits in the normal document flow. Changed background for better visibility. -->
+            <header class="z-20 p-4 flex items-center gap-4 bg-gray-800 flex-shrink-0">
                 <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
                 <div class="swiper-container-categories flex-grow min-w-0">
                     <div class="swiper-wrapper" id="categories-wrapper"></div>
                 </div>
             </header>
 
-            <div class="swiper swiper-container-v">
+            <!-- MODIFICATION: Added flex-grow to make the swiper container fill the remaining vertical space. -->
+            <div class="swiper swiper-container-v flex-grow">
                 <div class="swiper-wrapper" id="news-wrapper"></div>
             </div>
             
@@ -283,11 +284,12 @@
                             large: 'text-base lg:text-lg'
                         }[segment.textSize] || 'text-sm lg:text-base';
                         
+                        // MODIFICATION: Removed pt-20 as the header is no longer overlaying the content.
                         return `
                             <div class="swiper-slide" ${bgStyle}>
                                 ${mediaTag}
                                 ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
-                                <div class="z-10 p-6 pt-20 flex flex-col ${contentPositionClass} h-full w-full text-left">
+                                <div class="z-10 p-6 flex flex-col ${contentPositionClass} h-full w-full text-left">
                                     <div class="mb-10">
                                         <h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClasses}">${segment.title}</h2>
                                         <div class="text-shadow ${descriptionSizeClasses}">${segment.description}</div>
@@ -423,7 +425,4 @@
     </script>
 </body>
 </html>
-
-
-
 
