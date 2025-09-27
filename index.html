@@ -18,10 +18,10 @@
         /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
         body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
-        /* MODIFICATION: Removed border to allow content to be flush with the edges. */
+        /* MODIFICATION: Removed top rounded corners so the header is flush with the top. */
         .mobile-frame { 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
-            border-radius: 2.5rem; 
+            border-radius: 0 0 2.5rem 2.5rem; 
             overflow: hidden; 
             position: relative; 
             background-color: #000; 
