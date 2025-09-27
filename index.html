@@ -15,20 +15,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
+        /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
         body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
+        /* MODIFICATION: Removed top rounded corners so the header is flush with the top. */
         .mobile-frame { 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
-            border-radius: 2.5rem; 
+            border-radius: 0 0 2.5rem 2.5rem; 
             overflow: hidden; 
             position: relative; 
             background-color: #000; 
-            transition: width 0.2s ease, height 0.2s ease;
+            transition: width 0.2s ease, height 0.2s ease; /* Added a smooth transition for resizing */
         }
         .swiper-container-v, .swiper-container-h, .swiper { width: 100%; height: 100%; }
         .swiper-slide { display: flex; text-align: center; color: #fff; background-size: cover; background-position: center; position: relative; overflow: hidden; }
         .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 100%); }
         .slide-video-bg { position: absolute; top: 50%; left: 50%; width: auto; height: auto; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: -1; }
+        /* MODIFICATION: Adjusted top position for the new layout where the header is not overlaying the content. */
         .swiper-pagination-horizontal { top: 10px; bottom: auto; }
         .swiper-pagination-bullet { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.6); opacity: 1; }
         .swiper-pagination-bullet-active { background-color: #fd572b; }
@@ -42,94 +45,80 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<!-- MODIFICATION: Body now centers a single component container. -->
 <body class="flex items-center justify-center h-screen bg-black overflow-hidden">
 
-    <!-- MODIFICATION: A new wrapper to group header and frame, allowing them to be centered as a single block. -->
-    <div class="flex flex-col">
-        <header class="z-20 p-4 flex items-center gap-4 bg-gray-800 flex-shrink-0">
-            <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
-            <div class="swiper-container-categories flex-grow min-w-0">
-                <div class="swiper-wrapper" id="categories-wrapper"></div>
+    <div class="mobile-frame">
+        <!-- MODIFICATION: Changed to a flex column layout to position the header above the swiper container. -->
+        <div id="app" class="w-full h-full relative flex flex-col bg-black">
+            <div id="loader-container" class="absolute inset-0 z-40 bg-black flex items-center justify-center">
+                <div id="loader"></div>
             </div>
-        </header>
 
-        <div class="mobile-frame">
-            <div id="app" class="w-full h-full relative bg-black">
-                <div id="loader-container" class="absolute inset-0 z-40 bg-black flex items-center justify-center">
-                    <div id="loader"></div>
+            <!-- MODIFICATION: Removed absolute positioning. The header now sits in the normal document flow. Changed background for better visibility. -->
+            <header class="z-20 p-4 flex items-center gap-4 bg-gray-800 flex-shrink-0">
+                <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
+                <div class="swiper-container-categories flex-grow min-w-0">
+                    <div class="swiper-wrapper" id="categories-wrapper"></div>
                 </div>
+            </header>
 
-                <div class="swiper swiper-container-v h-full">
-                    <div class="swiper-wrapper" id="news-wrapper"></div>
+            <!-- MODIFICATION: Added flex-grow to make the swiper container fill the remaining vertical space. -->
+            <div class="swiper swiper-container-v flex-grow">
+                <div class="swiper-wrapper" id="news-wrapper"></div>
+            </div>
+            
+            <div id="onboarding-overlay" class="hidden absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center text-white text-center p-8 cursor-pointer transition-opacity duration-500">
+                <h2 class="text-3xl font-poppins font-bold mb-12">Como Navegar</h2>
+                <div class="flex flex-col gap-10">
+                    <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9650;</div><p class="font-bold tracking-wider">ARRASTE PARA CIMA</p><p class="text-sm text-white/70">Para ver a próxima notícia</p></div>
+                    <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9654;</div><p class="font-bold tracking-wider">ARRASTE PARA O LADO</p><p class="text-sm text-white/70">Para ver mais sobre este assunto</p></div>
                 </div>
-                
-                <div id="onboarding-overlay" class="hidden absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center text-white text-center p-8 cursor-pointer transition-opacity duration-500">
-                    <h2 class="text-3xl font-poppins font-bold mb-12">Como Navegar</h2>
-                    <div class="flex flex-col gap-10">
-                        <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9650;</div><p class="font-bold tracking-wider">ARRASTE PARA CIMA</p><p class="text-sm text-white/70">Para ver a próxima notícia</p></div>
-                        <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9654;</div><p class="font-bold tracking-wider">ARRASTE PARA O LADO</p><p class="text-sm text-white/70">Para ver mais sobre este assunto</p></div>
-                    </div>
-                    <p class="absolute bottom-10 text-sm text-white/50">Toque em qualquer lugar para começar</p>
-                </div>
+                <p class="absolute bottom-10 text-sm text-white/50">Toque em qualquer lugar para começar</p>
+            </div>
 
-                <div id="read-more-modal" class="modal invisible opacity-0 fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
-                    <div class="bg-white w-full h-full md:w-[450px] md:h-auto md:max-h-[90vh] md:rounded-2xl overflow-y-auto relative">
-                         <button id="close-modal-btn" class="sticky top-4 right-4 float-right text-gray-600 bg-white/70 rounded-full p-1 z-10 mr-4"><span class="text-2xl font-bold">&times;</span></button>
-                        <div id="modal-content">
-                            <img id="modal-img" src="" alt="Imagem da notícia" class="w-full h-64 object-cover">
-                            <div class="p-6">
-                                <h2 id="modal-title" class="text-2xl font-bold font-poppins text-gray-800 mb-4"></h2>
-                                <div id="modal-body" class="text-gray-700 leading-relaxed prose"></div>
-                            </div>
+            <div id="read-more-modal" class="modal invisible opacity-0 fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
+                <div class="bg-white w-full h-full md:w-[450px] md:h-auto md:max-h-[90vh] md:rounded-2xl overflow-y-auto relative">
+                     <button id="close-modal-btn" class="sticky top-4 right-4 float-right text-gray-600 bg-white/70 rounded-full p-1 z-10 mr-4"><span class="text-2xl font-bold">&times;</span></button>
+                    <div id="modal-content">
+                        <img id="modal-img" src="" alt="Imagem da notícia" class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h2 id="modal-title" class="text-2xl font-bold font-poppins text-gray-800 mb-4"></h2>
+                            <div id="modal-body" class="text-gray-700 leading-relaxed prose"></div>
                         </div>
                     </div>
                 </div>
-
             </div>
+
         </div>
     </div>
 
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // --- START: Aspect Ratio & Resize Logic ---
-            // MODIFICATION: Get header to sync its width with the frame.
-            const header = document.querySelector('header');
             const mobileFrame = document.querySelector('.mobile-frame');
 
             function resizeAndPositionFrame() {
                 const aspectRatio = 9 / 16;
-                const availableWidth = window.innerWidth;
-                const availableHeight = window.innerHeight;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
 
-                const headerHeight = header.offsetHeight;
-                if (!headerHeight) { // Retry if header hasn't rendered yet
-                    setTimeout(resizeAndPositionFrame, 50);
-                    return;
-                }
-                
-                let finalFrameWidth;
-                let finalFrameHeight;
+                let frameWidth;
+                let frameHeight;
 
-                // Calculate dimensions assuming width is the constraint first
-                let potentialFrameWidth = availableWidth;
-                let potentialFrameHeight = potentialFrameWidth / aspectRatio;
-                
-                // Check if the combined height of header and frame fits in the viewport
-                if (potentialFrameHeight + headerHeight <= availableHeight) {
-                    // It fits. Width is the limiting factor.
-                    finalFrameWidth = potentialFrameWidth;
-                    finalFrameHeight = potentialFrameHeight;
+                // Determine the limiting dimension to maintain the aspect ratio within the viewport
+                if ((viewportWidth / viewportHeight) > aspectRatio) {
+                    // Viewport is wider than 9:16, so height is the limiting factor
+                    frameHeight = viewportHeight;
+                    frameWidth = frameHeight * aspectRatio;
                 } else {
-                    // It doesn't fit. Height is the limiting factor.
-                    finalFrameHeight = availableHeight - headerHeight;
-                    finalFrameWidth = finalFrameHeight * aspectRatio;
+                    // Viewport is taller or equal to 9:16, so width is the limiting factor
+                    frameWidth = viewportWidth;
+                    frameHeight = frameWidth / aspectRatio;
                 }
 
-                // Apply the calculated width to both header and frame for visual consistency
-                header.style.width = `${finalFrameWidth}px`;
-                mobileFrame.style.width = `${finalFrameWidth}px`;
-                mobileFrame.style.height = `${finalFrameHeight}px`;
+                // Apply the new dimensions
+                mobileFrame.style.width = `${frameWidth}px`;
+                mobileFrame.style.height = `${frameHeight}px`;
             }
             // --- END: Aspect Ratio & Resize Logic ---
 
@@ -144,8 +133,10 @@
             let mainSwiper;
             let newsData = [];
 
+            // --- ADDITION: Add resize listener to update frame and swipers ---
             window.addEventListener('resize', () => {
                 resizeAndPositionFrame();
+                // Update swipers to recalculate their dimensions, crucial for responsiveness
                 if (mainSwiper && mainSwiper.slides.length > 0) {
                     mainSwiper.update();
                     mainSwiper.slides.forEach(slide => {
@@ -224,10 +215,13 @@
                 if (listItems.length > 0) {
                     let htmlContent = '';
                     listItems.forEach(li => {
+                        // Adiciona um bullet, o texto do item e uma quebra de linha HTML.
                         htmlContent += `• ${li.textContent.trim()}<br>`;
                     });
+                    // Retorna o conteúdo completo formatado como HTML, sem truncar.
                     return htmlContent;
                 } else {
+                    // Para textos sem lista, retorna o texto completo sem truncar.
                     const text = div.textContent || div.innerText || '';
                     return text;
                 }
@@ -290,6 +284,7 @@
                             large: 'text-base lg:text-lg'
                         }[segment.textSize] || 'text-sm lg:text-base';
                         
+                        // MODIFICATION: Removed pt-20 as the header is no longer overlaying the content.
                         return `
                             <div class="swiper-slide" ${bgStyle}>
                                 ${mediaTag}
@@ -404,6 +399,7 @@
             }
 
             async function main() {
+                // Call initially to set the size as soon as the DOM is ready
                 resizeAndPositionFrame();
                 
                 const fetchedData = await fetchNewsData();
@@ -417,7 +413,7 @@
                     const isFirstVisit = !localStorage.getItem('hasVisitedComMarilia');
                     if (isFirstVisit) {
                         onboardingOverlay.classList.remove('hidden');
-                        onboardingOverlay.classList.add('flex');
+                        onboardingOverlay.classList.add('flex'); // Make sure it's a flex container
                         setTimeout(() => onboardingOverlay.classList.add('opacity-100'), 50);
                         localStorage.setItem('hasVisitedComMarilia', 'true');
                     }
