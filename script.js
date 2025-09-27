@@ -36,6 +36,9 @@
     let newsData = [];
     let selectedCategory = 'Todas';
     let categoriesSwiperInitialized = false;
+    let initialStoryId = null;
+    let initialSegmentId = null;
+    let hasAppliedInitialNavigation = false;
 
     const CONTENT_POSITION_CLASSES = {
         top: 'justify-start',
@@ -73,6 +76,8 @@
         query GetStories {
             posts(first: 50) {
                 nodes {
+                    id
+                    slug
                     title
                     content
                     featuredImage {
@@ -148,27 +153,97 @@
         }
     }
     
+    function slugify(value) {
+        return (value || '')
+            .normalize('NFD')
+            .replace(/[^\w\s-]/g, '')
+            .trim()
+            .replace(/\s+/g, '-')
+            .toLowerCase();
+    }
+
     function transformData(nodes) {
-        return nodes.map(post => {
-                    const slides = post.conteudoDosStories?.conteudo?.slides || [];
-                    return {
-                        category: post.categories?.nodes[0]?.name || 'Geral',
-                        postTitle: post.title,
-                        postContent: post.content || '<p>Conteúdo principal não disponível.</p>',
-                        featuredImageUrl: post.featuredImage?.node?.sourceUrl,
-                        segments: slides.map(slide => ({
-                            mediaUrl: slide.media?.node?.mediaItemUrl,
-                            mediaType: slide.media?.node?.mimeType,
-                            title: (slide.title || '').trim(),
-                            description: generateDescription(slide.text),
-                            fullContent: slide.text || '',
-                            contentPosition: slide.contentPosition || 'bottom',
-                            textSize: slide.textSize || 'medium',
-                            showOverlay: slide.showOverlay !== false,
-                            showButton: slide.showButton !== false
-                        }))
+        return nodes.map((post, postIndex) => {
+            const slides = post.conteudoDosStories?.conteudo?.slides || [];
+            const storyId = post.slug || slugify(post.title) || `story-${postIndex}`;
+            return {
+                category: post.categories?.nodes[0]?.name || 'Geral',
+                postTitle: post.title,
+                postContent: post.content || '<p>Conteúdo principal não disponível.</p>',
+                featuredImageUrl: post.featuredImage?.node?.sourceUrl,
+                storyId,
+                segments: slides.map((slide, segmentIndex) => ({
+                    segmentId: slugify(slide?.title) || `segment-${segmentIndex}`,
+                    mediaUrl: slide.media?.node?.mediaItemUrl,
+                    mediaType: slide.media?.node?.mimeType,
+                    title: (slide.title || '').trim(),
+                    description: generateDescription(slide.text),
+                    fullContent: slide.text || '',
+                    contentPosition: slide.contentPosition || 'bottom',
+                    textSize: slide.textSize || 'medium',
+                    showOverlay: slide.showOverlay !== false,
+                    showButton: slide.showButton !== false
+                }))
             };
         }).filter(story => story.segments.length > 0);
+    }
+
+    function updateShareUrl(storyId, segmentId) {
+        const params = new URLSearchParams();
+        if (storyId) params.set('story', storyId);
+        if (storyId && segmentId) params.set('segment', segmentId);
+        const query = params.toString();
+        const newUrl = query ? `${window.location.pathname}?${query}` : window.location.pathname;
+        const currentUrl = `${window.location.pathname}${window.location.search}`;
+        if (newUrl !== currentUrl) {
+            history.replaceState(null, '', newUrl);
+        }
+    }
+
+    function getActiveSegmentId(swiperInstance) {
+        if (!swiperInstance) return null;
+        const activeSlide = swiperInstance.slides?.[swiperInstance.activeIndex];
+        return activeSlide?.dataset?.segmentId || null;
+    }
+
+    function ensureInitialNavigation(swiperInstance) {
+        if (hasAppliedInitialNavigation || !initialStoryId || !swiperInstance) return;
+        const targetStoryIndex = Array.from(swiperInstance.slides).findIndex(slide => slide.dataset.storyId === initialStoryId);
+        if (targetStoryIndex < 0) {
+            hasAppliedInitialNavigation = true;
+            return;
+        }
+
+        swiperInstance.slideTo(targetStoryIndex, 0);
+        const targetSlide = swiperInstance.slides[targetStoryIndex];
+        const horizontalSwiper = targetSlide.querySelector('.swiper-container-h')?.swiper;
+        if (horizontalSwiper && initialSegmentId) {
+            const targetSegmentIndex = Array.from(horizontalSwiper.slides || []).findIndex(slide => slide.dataset.segmentId === initialSegmentId);
+            if (targetSegmentIndex >= 0) {
+                horizontalSwiper.slideTo(targetSegmentIndex, 0);
+            }
+        }
+
+        const resolvedSegmentId = initialSegmentId || getActiveSegmentId(targetSlide.querySelector('.swiper-container-h')?.swiper);
+        updateShareUrl(initialStoryId, resolvedSegmentId);
+        initialStoryId = null;
+        initialSegmentId = null;
+        hasAppliedInitialNavigation = true;
+    }
+
+    function handleHorizontalChange(storyId, swiperInstance) {
+        if (!storyId) return;
+        const segmentId = getActiveSegmentId(swiperInstance);
+        updateShareUrl(storyId, segmentId);
+    }
+
+    function handleVerticalChange(swiperInstance) {
+        const activeSlide = swiperInstance?.slides?.[swiperInstance.activeIndex];
+        if (!activeSlide) return;
+        const storyId = activeSlide.dataset.storyId;
+        const horizontalSwiper = activeSlide.querySelector('.swiper-container-h')?.swiper;
+        const segmentId = getActiveSegmentId(horizontalSwiper);
+        updateShareUrl(storyId, segmentId);
     }
     
     function createSegmentHTML(segment, newsIndex, segmentIndex) {
@@ -176,34 +251,46 @@
         const mediaTag = isVideo
             ? `<video class="slide-video-bg" autoplay muted loop playsinline src="${segment.mediaUrl}"></video>`
             : '';
-                const backgroundStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
-                const contentPositionKey = segment.contentPosition || 'bottom';
-                const textSizeKey = segment.textSize || 'medium';
-                const contentPositionClass = CONTENT_POSITION_CLASSES[contentPositionKey] || CONTENT_POSITION_CLASSES.bottom;
-                const textSizeClass = TEXT_SIZE_CLASSES[textSizeKey] || TEXT_SIZE_CLASSES.medium;
-                const descriptionSizeClass = DESCRIPTION_SIZE_CLASSES[textSizeKey] || DESCRIPTION_SIZE_CLASSES.medium;
-                const hasTitle = Boolean(segment.title && segment.title.trim());
-                const hasDescription = Boolean(segment.description && segment.description.trim());
-                const titleMarkup = hasTitle ? `<h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClass}">${segment.title}</h2>` : '';
-                const descriptionMarkup = hasDescription ? `<div class="text-shadow ${descriptionSizeClass}">${segment.description}</div>` : '';
-                const infoMarkup = (hasTitle || hasDescription)
-                    ? `<div class="mb-10">${titleMarkup}${descriptionMarkup}</div>`
-                    : '';
+        const backgroundStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
+        const contentPositionKey = segment.contentPosition || 'bottom';
+        const textSizeKey = segment.textSize || 'medium';
+        const contentPositionClass = CONTENT_POSITION_CLASSES[contentPositionKey] || CONTENT_POSITION_CLASSES.bottom;
+        const bottomOffsetClass = contentPositionKey === 'bottom' ? 'pb-12' : '';
+        const textSizeClass = TEXT_SIZE_CLASSES[textSizeKey] || TEXT_SIZE_CLASSES.medium;
+        const descriptionSizeClass = DESCRIPTION_SIZE_CLASSES[textSizeKey] || DESCRIPTION_SIZE_CLASSES.medium;
+        const hasTitle = Boolean(segment.title && segment.title.trim());
+        const hasDescription = Boolean(segment.description && segment.description.trim());
+        const titleMarkup = hasTitle ? `<h2 class="font-poppins font-bold text-shadow ${textSizeClass}">${segment.title}</h2>` : '';
+        const descriptionMarkup = hasDescription ? `<div class="text-shadow ${descriptionSizeClass}">${segment.description}</div>` : '';
 
-                return `
-                    <div class="swiper-slide" ${backgroundStyle}>
-                        ${mediaTag}
-                        ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
-                        <div class="z-10 p-6 flex flex-col ${contentPositionClass} h-full w-full text-left">
-                            ${infoMarkup}
-                            ${segment.showButton ? `
-                            <button 
-                                class="read-more-btn btn-glass font-bold text-sm self-start transition-transform hover:scale-105 flex items-center gap-2 group"
-                                data-news-index="${newsIndex}"
-                                data-segment-index="${segmentIndex}">
-                                <span>Leia Mais</span>
-                        
-                    </button>` : ''}
+        const contentBlocks = [];
+        if (hasTitle || hasDescription) {
+            contentBlocks.push(`<div class="flex flex-col gap-2">${titleMarkup}${descriptionMarkup}</div>`);
+        }
+
+        if (segment.showButton) {
+            const buttonBottomSpacing = contentPositionKey === 'bottom' ? 'style="margin-bottom:50px;"' : '';
+            contentBlocks.push(`
+                <button 
+                    class="read-more-btn btn-glass font-bold text-sm self-start transition-transform hover:scale-105"
+                    ${buttonBottomSpacing}
+                    data-news-index="${newsIndex}"
+                    data-segment-index="${segmentIndex}"
+                    data-segment-id="${segment.segmentId}">
+                    <span>Leia Mais</span>
+                </button>`);
+        }
+
+        const infoMarkup = contentBlocks.length
+            ? `<div class="flex flex-col gap-3">${contentBlocks.join('')}</div>`
+            : '';
+
+        return `
+            <div class="swiper-slide" data-segment-id="${segment.segmentId}" ${backgroundStyle}>
+                ${mediaTag}
+                ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
+                <div class="z-10 p-6 flex flex-col ${contentPositionClass} ${bottomOffsetClass} h-full w-full text-left">
+                    ${infoMarkup}
                 </div>
             </div>
         `;
@@ -213,6 +300,7 @@
         const verticalSlide = document.createElement('div');
         verticalSlide.className = 'swiper-slide';
         verticalSlide.dataset.category = newsItem.category;
+        verticalSlide.dataset.storyId = newsItem.storyId;
         const segmentsHTML = newsItem.segments
             .map((segment, segmentIndex) => createSegmentHTML(segment, newsIndex, segmentIndex))
             .join('');
@@ -266,12 +354,33 @@
             speed: 500,
             on: {
                 init: function () {
-                   this.slides.forEach(slide => {
-                        new Swiper(slide.querySelector('.swiper-container-h'), { pagination: { el: '.swiper-pagination', clickable: true }, speed: 500 });
+                    this.slides.forEach(slide => {
+                        const storyId = slide.dataset.storyId;
+                        const horizontalContainer = slide.querySelector('.swiper-container-h');
+                        if (!horizontalContainer) return;
+
+                        new Swiper(horizontalContainer, {
+                            pagination: { el: horizontalContainer.querySelector('.swiper-pagination'), clickable: true },
+                            speed: 500,
+                            on: {
+                                slideChange() {
+                                    handleHorizontalChange(storyId, this);
+                                }
+                            }
+                        });
+
+                        if (slide.classList.contains('swiper-slide-active')) {
+                            handleHorizontalChange(storyId, horizontalContainer.swiper);
+                        }
                     });
                     updateActiveCategory();
+                    ensureInitialNavigation(this);
+                    handleVerticalChange(this);
                 },
-                slideChange: function() { updateActiveCategory(); }
+                slideChange: function() {
+                    updateActiveCategory();
+                    handleVerticalChange(this);
+                }
             },
         });
     }
@@ -350,6 +459,10 @@
         const fetchedData = await fetchNewsData();
         if (fetchedData) {
             newsData = fetchedData;
+            const params = new URLSearchParams(window.location.search);
+            initialStoryId = params.get('story');
+            initialSegmentId = params.get('segment');
+            hasAppliedInitialNavigation = false;
             renderCategories();
             // Force "Todas" active and show all on load
             applyCategoryFilter('Todas');
