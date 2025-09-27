@@ -15,13 +15,12 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
-        body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
+        /* Ensure no default page margin and smooth scrolling behavior */
+        body { margin: 0; font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
-        /* MODIFICATION: Removed top rounded corners so the header is flush with the top. */
         .mobile-frame { 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
-            border-radius: 0 0 2.5rem 2.5rem; 
+            border-radius: 0; 
             overflow: hidden; 
             position: relative; 
             background-color: #000; 
@@ -36,6 +35,9 @@
         .swiper-pagination-bullet { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.6); opacity: 1; }
         .swiper-pagination-bullet-active { background-color: #fd572b; }
         .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        /* Slide-up animation for modal panel */
+        .modal .modal-panel { transform: translateY(32px); opacity: 0; transition: transform 0.35s ease, opacity 0.35s ease; }
+        .modal.open .modal-panel { transform: translateY(0); opacity: 1; }
         .category-link.active { background-color: #fd572b; color: white; font-weight: 700; box-shadow: 0 0 15px rgba(253, 87, 43, 0.5); }
         .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
         .swiper-container-categories { -webkit-mask-image: linear-gradient(to right, transparent, black 1.5rem); mask-image: linear-gradient(to right, transparent, black 1.5rem); }
@@ -77,8 +79,8 @@
             </div>
 
             <div id="read-more-modal" class="modal invisible opacity-0 fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
-                <div class="bg-white w-full h-full md:w-[450px] md:h-auto md:max-h-[90vh] md:rounded-2xl overflow-y-auto relative">
-                     <button id="close-modal-btn" class="sticky top-4 right-4 float-right text-gray-600 bg-white/70 rounded-full p-1 z-10 mr-4"><span class="text-2xl font-bold">&times;</span></button>
+                <div class="modal-panel bg-white w-full h-full md:w-[450px] md:h-auto md:max-h-[90vh] md:rounded-2xl overflow-y-auto relative">
+                     <button id="close-modal-btn" class="absolute top-3 right-3 text-gray-600 bg-white/70 rounded-full p-1 z-10"><span class="text-2xl font-bold">&times;</span></button>
                     <div id="modal-content">
                         <img id="modal-img" src="" alt="Imagem da notícia" class="w-full h-64 object-cover">
                         <div class="p-6">
@@ -132,6 +134,8 @@
 
             let mainSwiper;
             let newsData = [];
+            let selectedCategory = 'Todas';
+            let categoriesSwiperInitialized = false;
 
             // --- ADDITION: Add resize listener to update frame and swipers ---
             window.addEventListener('resize', () => {
@@ -318,9 +322,74 @@
                     </div>`
                 ).join('');
             }
+
+            function renderNews(category = 'Todas') {
+                newsWrapper.innerHTML = '';
+                for (let originalIndex = 0; originalIndex < newsData.length; originalIndex++) {
+                    const newsItem = newsData[originalIndex];
+                    if (category !== 'Todas' && newsItem.category !== category) continue;
+
+                    const verticalSlide = document.createElement('div');
+                    verticalSlide.className = 'swiper-slide';
+                    verticalSlide.dataset.category = newsItem.category;
+
+                    const slidesHTML = newsItem.segments.map((segment, segmentIndex) => {
+                        const isVideo = segment.mediaType && segment.mediaType.startsWith('video/');
+                        const mediaTag = isVideo 
+                            ? `<video class="slide-video-bg" autoplay muted loop playsinline src="${segment.mediaUrl}"></video>`
+                            : '';
+                        const bgStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
+
+                        const contentPositionClass = {
+                            top: 'justify-start',
+                            center: 'justify-center',
+                            bottom: 'justify-end'
+                        }[segment.contentPosition] || 'justify-end';
+
+                        const textSizeClasses = {
+                            small: 'text-xl lg:text-2xl',
+                            medium: 'text-2xl lg:text-3xl',
+                            large: 'text-3xl lg:text-4xl'
+                        }[segment.textSize] || 'text-2xl lg:text-3xl';
+
+                        const descriptionSizeClasses = {
+                            small: 'text-xs lg:text-sm',
+                            medium: 'text-sm lg:text-base',
+                            large: 'text-base lg:text-lg'
+                        }[segment.textSize] || 'text-sm lg:text-base';
+
+                        return `
+                            <div class="swiper-slide" ${bgStyle}>
+                                ${mediaTag}
+                                ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
+                                <div class="z-10 p-6 flex flex-col ${contentPositionClass} h-full w-full text-left">
+                                    <div class="mb-10">
+                                        <h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClasses}">${segment.title}</h2>
+                                        <div class="text-shadow ${descriptionSizeClasses}">${segment.description}</div>
+                                    </div>
+                                    ${segment.showButton ? `
+                                    <button 
+                                        class="read-more-btn bg-[#fd572b] text-white font-bold py-2 px-4 text-sm rounded-full self-start transition-transform hover:scale-105 shadow-lg flex items-center gap-2 group"
+                                        data-news-index="${originalIndex}"
+                                        data-segment-index="${segmentIndex}">
+                                        <span>Leia Mais</span>
+                                        <span class="transition-transform group-hover:-translate-y-1 text-lg">&#9650;</span>
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    verticalSlide.innerHTML = `<div class="swiper swiper-container-h"><div class="swiper-wrapper">${slidesHTML}</div><div class="swiper-pagination"></div></div>`;
+                    newsWrapper.appendChild(verticalSlide);
+                }
+            }
             
             function initSwipers() {
-                new Swiper('.swiper-container-categories', { slidesPerView: 'auto', spaceBetween: 10, freeMode: true });
+                if (!categoriesSwiperInitialized) {
+                    new Swiper('.swiper-container-categories', { slidesPerView: 'auto', spaceBetween: 10, freeMode: true });
+                    categoriesSwiperInitialized = true;
+                }
 
                 mainSwiper = new Swiper('.swiper-container-v', {
                     direction: 'vertical',
@@ -338,16 +407,20 @@
             }
 
             function updateActiveCategory(swiper) {
-                if (!swiper || !swiper.slides || swiper.slides.length === 0) return;
-                const activeSlide = swiper.slides[swiper.activeIndex];
-                if (!activeSlide) return;
-                const activeCategory = activeSlide.dataset.category;
-
+                // Respect the explicitly selectedCategory instead of inferring from slide
                 document.querySelectorAll('.category-link').forEach(link => {
-                    link.classList.toggle('active', link.dataset.category === activeCategory);
+                    link.classList.toggle('active', link.dataset.category === selectedCategory);
                 });
-                const anyOtherCategoryIsActive = Array.from(document.querySelectorAll('.category-link.active')).some(link => link.dataset.category !== 'Todas');
-                document.querySelector('.category-link[data-category="Todas"]')?.classList.toggle('active', !anyOtherCategoryIsActive);
+            }
+
+            function applyCategoryFilter(category) {
+                selectedCategory = category || 'Todas';
+                if (mainSwiper) {
+                    try { mainSwiper.destroy(true, true); } catch (e) { /* ignore */ }
+                }
+                renderNews(selectedCategory);
+                initSwipers();
+                updateActiveCategory(mainSwiper);
             }
             
             function openModal(newsIndex, segmentIndex) {
@@ -362,20 +435,22 @@
                 document.getElementById('modal-title').innerText = story.postTitle;
                 document.getElementById('modal-body').innerHTML = story.postContent;
                 modal.classList.remove('invisible', 'opacity-0');
+                // Trigger slide-up animation on open
+                setTimeout(() => modal.classList.add('open'), 20);
             }
 
-            function closeModal() { modal.classList.add('invisible', 'opacity-0'); }
+            function closeModal() {
+                modal.classList.remove('open');
+                setTimeout(() => modal.classList.add('invisible', 'opacity-0'), 200);
+            }
 
             function setupEventListeners() {
                 categoriesWrapper.addEventListener('click', (e) => {
-                    if (e.target.classList.contains('category-link')) {
+                    const link = e.target.closest('.category-link');
+                    if (link) {
                         e.preventDefault();
-                        const category = e.target.dataset.category;
-                        let slideIndex = 0;
-                        if (category !== 'Todas') {
-                           slideIndex = newsData.findIndex(item => item.category === category);
-                        }
-                        if(mainSwiper && slideIndex !== -1) mainSwiper.slideTo(slideIndex);
+                        const category = link.dataset.category || 'Todas';
+                        applyCategoryFilter(category);
                     }
                 });
 
@@ -407,6 +482,8 @@
                     newsData = fetchedData;
                     populateNewsAndCategories();
                     initSwipers();
+                    // Force "Todas" active and show all on load
+                    applyCategoryFilter('Todas');
                     setupEventListeners();
                     loaderContainer.classList.add('hidden');
 
