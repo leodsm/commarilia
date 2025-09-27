@@ -150,23 +150,23 @@
     
     function transformData(nodes) {
         return nodes.map(post => {
-            const slides = post.conteudoDosStories?.conteudo?.slides || [];
-            return {
-                category: post.categories?.nodes[0]?.name || 'Geral',
-                postTitle: post.title,
-                postContent: post.content || '<p>Conteúdo principal não disponível.</p>',
-                featuredImageUrl: post.featuredImage?.node?.sourceUrl,
-                segments: slides.map(slide => ({
-                    mediaUrl: slide.media?.node?.mediaItemUrl,
-                    mediaType: slide.media?.node?.mimeType,
-                    title: slide.title || post.title,
-                    description: generateDescription(slide.text),
-                    fullContent: slide.text || '<p>Conteúdo do slide não disponível.</p>',
-                    contentPosition: slide.contentPosition || 'bottom',
-                    textSize: slide.textSize || 'medium',
-                    showOverlay: slide.showOverlay !== false,
-                    showButton: slide.showButton !== false
-                }))
+                    const slides = post.conteudoDosStories?.conteudo?.slides || [];
+                    return {
+                        category: post.categories?.nodes[0]?.name || 'Geral',
+                        postTitle: post.title,
+                        postContent: post.content || '<p>Conteúdo principal não disponível.</p>',
+                        featuredImageUrl: post.featuredImage?.node?.sourceUrl,
+                        segments: slides.map(slide => ({
+                            mediaUrl: slide.media?.node?.mediaItemUrl,
+                            mediaType: slide.media?.node?.mimeType,
+                            title: (slide.title || '').trim(),
+                            description: generateDescription(slide.text),
+                            fullContent: slide.text || '',
+                            contentPosition: slide.contentPosition || 'bottom',
+                            textSize: slide.textSize || 'medium',
+                            showOverlay: slide.showOverlay !== false,
+                            showButton: slide.showButton !== false
+                        }))
             };
         }).filter(story => story.segments.length > 0);
     }
@@ -176,23 +176,27 @@
         const mediaTag = isVideo
             ? `<video class="slide-video-bg" autoplay muted loop playsinline src="${segment.mediaUrl}"></video>`
             : '';
-        const backgroundStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
-        const contentPositionKey = segment.contentPosition || 'bottom';
-        const textSizeKey = segment.textSize || 'medium';
-        const contentPositionClass = CONTENT_POSITION_CLASSES[contentPositionKey] || CONTENT_POSITION_CLASSES.bottom;
-        const textSizeClass = TEXT_SIZE_CLASSES[textSizeKey] || TEXT_SIZE_CLASSES.medium;
-        const descriptionSizeClass = DESCRIPTION_SIZE_CLASSES[textSizeKey] || DESCRIPTION_SIZE_CLASSES.medium;
+                const backgroundStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
+                const contentPositionKey = segment.contentPosition || 'bottom';
+                const textSizeKey = segment.textSize || 'medium';
+                const contentPositionClass = CONTENT_POSITION_CLASSES[contentPositionKey] || CONTENT_POSITION_CLASSES.bottom;
+                const textSizeClass = TEXT_SIZE_CLASSES[textSizeKey] || TEXT_SIZE_CLASSES.medium;
+                const descriptionSizeClass = DESCRIPTION_SIZE_CLASSES[textSizeKey] || DESCRIPTION_SIZE_CLASSES.medium;
+                const hasTitle = Boolean(segment.title && segment.title.trim());
+                const hasDescription = Boolean(segment.description && segment.description.trim());
+                const titleMarkup = hasTitle ? `<h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClass}">${segment.title}</h2>` : '';
+                const descriptionMarkup = hasDescription ? `<div class="text-shadow ${descriptionSizeClass}">${segment.description}</div>` : '';
+                const infoMarkup = (hasTitle || hasDescription)
+                    ? `<div class="mb-10">${titleMarkup}${descriptionMarkup}</div>`
+                    : '';
 
-        return `
-            <div class="swiper-slide" ${backgroundStyle}>
-                ${mediaTag}
-                ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
-                <div class="z-10 p-6 flex flex-col ${contentPositionClass} h-full w-full text-left">
-                    <div class="mb-10">
-                        <h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClass}">${segment.title}</h2>
-                        <div class="text-shadow ${descriptionSizeClass}">${segment.description}</div>
-                    </div>
-                    ${segment.showButton ? `
+                return `
+                    <div class="swiper-slide" ${backgroundStyle}>
+                        ${mediaTag}
+                        ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
+                        <div class="z-10 p-6 flex flex-col ${contentPositionClass} h-full w-full text-left">
+                            ${infoMarkup}
+                            ${segment.showButton ? `
                             <button 
                                 class="read-more-btn btn-glass font-bold text-sm self-start transition-transform hover:scale-105 flex items-center gap-2 group"
                                 data-news-index="${newsIndex}"
