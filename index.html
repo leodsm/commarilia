@@ -1,388 +1,428 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Flash de Notícias - ComMarília</title>
-
-  <!-- Tailwind + Swiper -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css"/>
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com"/>
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700;800&display=swap" rel="stylesheet"/>
-
-  <style>
-    :root{ --brand-orange:#fd572b; --ink:#111827; --paper:#f3f4f6; }
-    html,body{height:100%}
-    body{font-family:'Poppins',system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,'Helvetica Neue',Arial,'Noto Sans',sans-serif;background-color:var(--paper);overscroll-behavior:contain}
-    .mobile-frame{max-width:450px;width:100%;height:100vh;max-height:900px;overflow:hidden;position:relative;background:transparent;border:12px solid transparent}
-    .swiper-container-v,.swiper-container-h{width:100%;height:100%}
-    .swiper-slide{display:flex;align-items:center;justify-content:center;color:#fff;background-size:cover;background-position:center;position:relative}
-    .slide-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(0,0,0,.85) 0%,rgba(0,0,0,.15) 45%,rgba(0,0,0,.0) 60%)}
-    .swiper-pagination-horizontal{top:60px;bottom:auto}
-    .swiper-pagination-bullet{width:8px;height:8px;background-color:rgba(255,255,255,.6);opacity:1}
-    .swiper-pagination-bullet-active{background-color:var(--brand-orange)}
-    .swiper-container-categories{-webkit-mask-image:linear-gradient(to right,black 92%,transparent);mask-image:linear-gradient(to right,black 92%,transparent)}
-    .category-link{transition:all .2s ease}
-    .category-link.active{background-color:var(--brand-orange);color:#fff;font-weight:700;box-shadow:0 0 16px rgba(253,87,43,.48)}
-    .text-shadow{text-shadow:0 2px 4px rgba(0,0,0,.5)}
-    .media-wrap{position:absolute;inset:0}
-    .media-wrap img,.media-wrap video{width:100%;height:100%;object-fit:cover}
-    .modal{transition:opacity .3s ease,visibility .3s ease}
-    @keyframes pulse-up{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
-    @keyframes pulse-right{0%,100%{transform:translateX(0)}50%{transform:translateX(10px)}}
-    .animate-pulse-up{animation:pulse-up 1.5s infinite}
-    .animate-pulse-right{animation:pulse-right 1.5s infinite}
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Flash de Notícias - ComMarília</title>
+    <!-- Chosen Palette: Marília Sunset -->
+    <!-- Application Structure Plan: A arquitetura é um "Explorador Temático em formato Story". Utiliza um slider vertical principal para navegar entre notícias distintas e sliders horizontais aninhados para explorar segmentos dentro de cada notícia. Um menu de categorias no cabeçalho permite a filtragem e navegação rápida, enquanto um modal "Leia Mais" oferece conteúdo detalhado sob demanda. Esta estrutura foi escolhida por ser uma implementação direta do relatório-fonte, otimizada para o consumo de conteúdo em dispositivos móveis e por emular padrões de UX familiares de redes sociais, garantindo uma experiência de utilizador intuitiva e envolvente. -->
+    <!-- Visualization & Content Choices: Informação do Relatório: Estrutura do projeto -> Objetivo: Criar uma app de "stories" interativa -> Método de Apresentação: Sliders aninhados (Swiper.js) para navegação 2D; slides de imagem em ecrã inteiro para imersão; modal para texto detalhado. -> Interação: Gestos de deslizar (swipe), cliques nas categorias para filtrar. -> Justificação: Implementa diretamente o design "mobile-first" do utilizador, replicando uma UX moderna e comprovada para consumo de conteúdo. -> Biblioteca: Swiper.js. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
+    <style>
+        /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
+        body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
+        .font-poppins { font-family: 'Poppins', sans-serif; }
+        /* MODIFICATION: Removed fixed width/height and max-width/height. 
+           Dimensions are now controlled by JavaScript to enforce a 9:16 aspect ratio. */
+        .mobile-frame { 
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
+            border-radius: 2.5rem; 
+            overflow: hidden; 
+            position: relative; 
+            background-color: #000; 
+            border: 12px solid #1f2937; 
+            transition: width 0.2s ease, height 0.2s ease; /* Added a smooth transition for resizing */
+        }
+        .swiper-container-v, .swiper-container-h, .swiper { width: 100%; height: 100%; }
+        .swiper-slide { display: flex; text-align: center; color: #fff; background-size: cover; background-position: center; position: relative; overflow: hidden; }
+        .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 100%); }
+        .slide-video-bg { position: absolute; top: 50%; left: 50%; width: auto; height: auto; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: -1; }
+        .swiper-pagination-horizontal { top: 60px; bottom: auto; }
+        .swiper-pagination-bullet { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.6); opacity: 1; }
+        .swiper-pagination-bullet-active { background-color: #fd572b; }
+        .modal { transition: opacity 0.3s ease, visibility 0.3s ease; }
+        .category-link.active { background-color: #fd572b; color: white; font-weight: 700; box-shadow: 0 0 15px rgba(253, 87, 43, 0.5); }
+        .text-shadow { text-shadow: 0 2px 4px rgba(0,0,0,0.5); }
+        .swiper-container-categories { -webkit-mask-image: linear-gradient(to right, transparent, black 1.5rem); mask-image: linear-gradient(to right, transparent, black 1.5rem); }
+        .prose p { margin-bottom: 1em; }
+        .prose h1, .prose h2, .prose h3, .prose h4, .prose h5, .prose h6 { font-family: 'Poppins', sans-serif; margin-top: 1.5em; margin-bottom: 0.5em; }
+        #loader { border: 4px solid #f3f3f3; border-top: 4px solid #fd572b; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    </style>
 </head>
-<body class="flex items-center justify-center min-h-screen p-2 md:p-4">
-  <div class="mobile-frame">
-    <div id="app" class="w-full h-full relative">
-      <!-- Header -->
-      <header class="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/50 backdrop-blur-sm">
-        <h1 class="text-2xl font-extrabold tracking-tight flex-shrink-0">
-          <span class="text-[var(--brand-orange)]">Com</span><span class="text-white">Marília.</span>
-        </h1>
-        <div class="swiper-container-categories flex-grow min-w-0">
-          <div class="swiper-wrapper" id="categories-wrapper"></div>
-        </div>
-      </header>
+<!-- MODIFICATION: Changed body classes to prevent page scrolling and add a dark background for better contrast. -->
+<body class="flex items-center justify-center h-screen bg-gray-800 overflow-hidden">
 
-      <!-- Loader -->
-      <div id="loader" class="absolute inset-0 grid place-items-center text-white z-10">
-        <div class="w-24 h-24 rounded-full border-4 border-white/20 border-t-[var(--brand-orange)] animate-spin"></div>
-      </div>
-
-      <!-- Main Vertical Swiper -->
-      <div class="swiper-container-v opacity-0">
-        <div class="swiper-wrapper" id="news-wrapper"></div>
-      </div>
-
-      <!-- Onboarding -->
-      <div id="onboarding-overlay" class="absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center text-white text-center p-8 cursor-pointer transition-opacity duration-500 space-y-12">
-        <div class="flex flex-col items-center gap-2">
-          <div class="text-3xl animate-pulse-up">&#9650;</div>
-          <p class="font-extrabold tracking-wide">ARRASTE PARA CIMA</p>
-          <p class="text-sm text-white/70">Para ver a próxima notícia</p>
-        </div>
-        <div class="flex flex-col items-center gap-2">
-          <div class="text-3xl animate-pulse-right">&#9654;</div>
-          <p class="font-extrabold tracking-wide">ARRASTE PARA O LADO</p>
-          <p class="text-sm text-white/70">Para ver mais sobre este assunto</p>
-        </div>
-        <p class="text-base text-white/80">Toque em qualquer lugar para começar</p>
-      </div>
-
-      <!-- Modal Leia Mais -->
-      <div id="read-more-modal" class="modal invisible opacity-0 fixed inset-0 z-50 bg-black/70 flex items-end justify-center">
-        <div class="bg-white w-full h-full md:w-[450px] md:max-h-[90vh] md:rounded-t-2xl overflow-y-auto relative">
-          <button id="close-modal-btn" class="absolute top-4 right-4 text-gray-700 bg-white/80 rounded-full z-10 w-9 h-9 flex items-center justify-center shadow">
-            <span class="text-2xl leading-none">&times;</span>
-          </button>
-          <div id="modal-content">
-            <img id="modal-img" alt="Imagem da notícia" class="w-full h-64 object-cover">
-            <div class="p-6">
-              <h2 id="modal-title" class="text-3xl font-extrabold text-[var(--ink)] mb-3 tracking-tight"></h2>
-              <div id="modal-body" class="text-gray-700 leading-relaxed prose max-w-none"></div>
+    <div class="mobile-frame">
+        <div id="app" class="w-full h-full relative">
+            <div id="loader-container" class="absolute inset-0 z-40 bg-black flex items-center justify-center">
+                <div id="loader"></div>
             </div>
-          </div>
-        </div>
-      </div>
 
-      <!-- Toast de erro -->
-      <div id="toast" class="hidden absolute bottom-4 left-1/2 -translate-x-1/2 z-50 bg-black/80 text-white text-sm px-4 py-2 rounded-full">Erro ao carregar. Tente novamente.</div>
+            <header class="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/50 backdrop-blur-sm">
+                <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
+                <div class="swiper-container-categories flex-grow min-w-0">
+                    <div class="swiper-wrapper" id="categories-wrapper"></div>
+                </div>
+            </header>
+
+            <div class="swiper swiper-container-v">
+                <div class="swiper-wrapper" id="news-wrapper"></div>
+            </div>
+            
+            <div id="onboarding-overlay" class="hidden absolute inset-0 z-30 bg-black/80 flex flex-col items-center justify-center text-white text-center p-8 cursor-pointer transition-opacity duration-500">
+                <h2 class="text-3xl font-poppins font-bold mb-12">Como Navegar</h2>
+                <div class="flex flex-col gap-10">
+                    <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9650;</div><p class="font-bold tracking-wider">ARRASTE PARA CIMA</p><p class="text-sm text-white/70">Para ver a próxima notícia</p></div>
+                    <div class="flex flex-col items-center gap-2"><div class="text-3xl">&#9654;</div><p class="font-bold tracking-wider">ARRASTE PARA O LADO</p><p class="text-sm text-white/70">Para ver mais sobre este assunto</p></div>
+                </div>
+                <p class="absolute bottom-10 text-sm text-white/50">Toque em qualquer lugar para começar</p>
+            </div>
+
+            <div id="read-more-modal" class="modal invisible opacity-0 fixed inset-0 z-50 bg-black/70 flex items-center justify-center">
+                <div class="bg-white w-full h-full md:w-[450px] md:h-auto md:max-h-[90vh] md:rounded-2xl overflow-y-auto relative">
+                     <button id="close-modal-btn" class="sticky top-4 right-4 float-right text-gray-600 bg-white/70 rounded-full p-1 z-10 mr-4"><span class="text-2xl font-bold">&times;</span></button>
+                    <div id="modal-content">
+                        <img id="modal-img" src="" alt="Imagem da notícia" class="w-full h-64 object-cover">
+                        <div class="p-6">
+                            <h2 id="modal-title" class="text-2xl font-bold font-poppins text-gray-800 mb-4"></h2>
+                            <div id="modal-body" class="text-gray-700 leading-relaxed prose"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
     </div>
-  </div>
 
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const ENDPOINT = 'https://portal.commarilia.com/graphql';
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            // --- START: Aspect Ratio & Resize Logic ---
+            const mobileFrame = document.querySelector('.mobile-frame');
 
-      const newsWrapper = document.getElementById('news-wrapper');
-      const categoriesWrapper = document.getElementById('categories-wrapper');
-      const modal = document.getElementById('read-more-modal');
-      const closeModalBtn = document.getElementById('close-modal-btn');
-      const onboardingOverlay = document.getElementById('onboarding-overlay');
-      const loader = document.getElementById('loader');
-      const toast = document.getElementById('toast');
+            function resizeAndPositionFrame() {
+                const aspectRatio = 9 / 16;
+                const viewportWidth = window.innerWidth;
+                const viewportHeight = window.innerHeight;
 
-      let newsData = [];
-      let mainSwiper;
+                let frameWidth;
+                let frameHeight;
 
-      /* ================= Helpers ================= */
-      function stripHtml(html){
-        if(!html) return '';
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        return (div.textContent || div.innerText || '').replace(/\s+/g,' ').trim();
-      }
-      function clampText(str, max=180){
-        if(!str) return '';
-        if(str.length <= max) return str;
-        const cut = str.slice(0, max);
-        // evita cortar no meio da palavra
-        return cut.replace(/\s\S*$/, '') + '…';
-      }
+                // Determine the limiting dimension to maintain the aspect ratio within the viewport
+                if ((viewportWidth / viewportHeight) > aspectRatio) {
+                    // Viewport is wider than 9:16, so height is the limiting factor
+                    frameHeight = viewportHeight;
+                    frameWidth = frameHeight * aspectRatio;
+                } else {
+                    // Viewport is taller or equal to 9:16, so width is the limiting factor
+                    frameWidth = viewportWidth;
+                    frameHeight = frameWidth / aspectRatio;
+                }
 
-      /* ================= GraphQL ================= */
-      async function fetchGraphQL(query, variables = {}) {
-        const res = await fetch(ENDPOINT, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ query, variables })
-        });
-        if (!res.ok) throw new Error('GraphQL HTTP ' + res.status);
-        const json = await res.json();
-        if (json.errors) console.warn('GraphQL errors:', json.errors);
-        return json.data;
-      }
-
-      const QUERY = /* GraphQL */ `
-        query GetStories($first:Int = 10) {
-          posts(first:$first, where:{status:PUBLISH, orderby:{field:DATE, order:DESC}}) {
-            nodes {
-              id
-              date
-              title
-              content
-              excerpt
-              featuredImage { node { sourceUrl } }
-              categories { nodes { name, slug } }
-              storiesSimples {
-                stories { type title text showButton media { nodes { sourceUrl mimeType mediaDetails { width height } } } }
-              }
+                // Apply the new dimensions
+                mobileFrame.style.width = `${frameWidth}px`;
+                mobileFrame.style.height = `${frameHeight}px`;
             }
-          }
-        }
-      `;
+            // --- END: Aspect Ratio & Resize Logic ---
 
-      /* ============== Normalização dos dados ============== */
-      function firstMedia(media){
-        const n = media?.nodes?.[0];
-        return n ? { url:n.sourceUrl||'', mime:n.mimeType||'' } : { url:'', mime:'' };
-      }
+            const GRAPHQL_ENDPOINT = 'https://portal.commarilia.com/graphql';
+            const newsWrapper = document.getElementById('news-wrapper');
+            const categoriesWrapper = document.getElementById('categories-wrapper');
+            const modal = document.getElementById('read-more-modal');
+            const closeModalBtn = document.getElementById('close-modal-btn');
+            const onboardingOverlay = document.getElementById('onboarding-overlay');
+            const loaderContainer = document.getElementById('loader-container');
 
-      function extractImagesFromContent(html){
-        if(!html) return [];
-        const div = document.createElement('div');
-        div.innerHTML = html;
-        const imgs = Array.from(div.querySelectorAll('img')).map(img => ({ url: img.getAttribute('src'), mime: 'image/jpeg' }));
-        return imgs;
-      }
+            let mainSwiper;
+            let newsData = [];
 
-      function normalize(data){
-        const posts = data?.posts?.nodes || [];
-        return posts.map(post => {
-          const category = post.categories?.nodes?.[0]?.name || 'Geral';
-          const featuredUrl = post.featuredImage?.node?.sourceUrl || '';
-          const acfStories = post.storiesSimples?.stories || [];
-
-          let segments = [];
-          if (acfStories.length){
-            segments = acfStories.map(s => {
-              const m = firstMedia(s.media || {});
-              const t = stripHtml(s.title || post.title || '');
-              const d = clampText(stripHtml(s.text || ''));
-              return {
-                mediaUrl: m.url,
-                mediaMime: m.mime,
-                displayTitle: t,
-                displayDescription: d,
-                fullHTML: post.content || ''
-              };
+            // --- ADDITION: Add resize listener to update frame and swipers ---
+            window.addEventListener('resize', () => {
+                resizeAndPositionFrame();
+                // Update swipers to recalculate their dimensions, crucial for responsiveness
+                if (mainSwiper && mainSwiper.slides.length > 0) {
+                    mainSwiper.update();
+                    mainSwiper.slides.forEach(slide => {
+                        const horizontalSwiper = slide.querySelector('.swiper-container-h')?.swiper;
+                        if (horizontalSwiper) {
+                            horizontalSwiper.update();
+                        }
+                    });
+                }
             });
-          } else {
-            // Fallback: usa imagem destacada + imagens do conteúdo
-            const contentImgs = extractImagesFromContent(post.content);
-            const imgs = [featuredUrl ? {url:featuredUrl,mime:'image/jpeg'} : null, ...contentImgs].filter(Boolean);
-            const plainExcerpt = clampText(stripHtml(post.excerpt || ''));
-            segments = (imgs.length ? imgs : [{url:'',mime:''}]).map((m,i) => ({
-              mediaUrl: m.url,
-              mediaMime: m.mime,
-              displayTitle: stripHtml(post.title || 'Sem título'),
-              displayDescription: i === 0 ? plainExcerpt : '',
-              fullHTML: post.content || ''
-            }));
-          }
 
-          return {
-            category,
-            postTitle: stripHtml(post.title || ''),
-            postContent: post.content || '',
-            postImage: featuredUrl,
-            date: post.date,
-            segments
-          };
-        });
-      }
+            const GQL_QUERY = `
+                query GetStories {
+                    posts(first: 50) {
+                        nodes {
+                            title
+                            content
+                            featuredImage {
+                                node {
+                                    sourceUrl(size: LARGE)
+                                }
+                            }
+                            categories {
+                                nodes {
+                                    name
+                                }
+                            }
+                            conteudoDosStories {
+                                conteudo {
+                                    slides {
+                                        media {
+                                            node {
+                                                mediaItemUrl
+                                                mimeType
+                                            }
+                                        }
+                                        title
+                                        text
+                                        contentPosition
+                                        textSize
+                                        showOverlay
+                                        showButton
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }`;
 
-      /* ================= UI Builders ================= */
-      function createSegmentHTML(segment, newsIndex, segmentIndex){
-        const isVideo = segment.mediaMime?.startsWith('video/');
-        const bg = !isVideo && segment.mediaUrl ? ` style="background-image:url('${segment.mediaUrl}')"` : '';
-        const safeTitle = (segment.displayTitle || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        const safeDesc  = (segment.displayDescription || '').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        return `
-          <div class="swiper-slide"${bg}>
-            <div class="media-wrap">
-              ${isVideo ? `<video src="${segment.mediaUrl}" playsinline muted preload="metadata"></video>` : ''}
-            </div>
-            <div class="slide-overlay"></div>
-            <div class="z-10 p-6 pb-14 flex flex-col justify-end h-full w-full text-left">
-              <div class="mb-8">
-                <h2 class="text-[clamp(22px,3.2vw,32px)] font-extrabold leading-tight mb-2 text-shadow">${safeTitle}</h2>
-                <p class="text-sm md:text-base text-white/90 text-shadow">${safeDesc}</p>
-              </div>
-              <div class="flex items-center gap-2">
-                <button class="read-more-btn bg-white/60 hover:bg-white text-[var(--ink)] font-semibold py-2 px-4 text-xs rounded-full backdrop-blur-sm transition-transform hover:scale-[1.03] shadow-lg" data-news-index="${newsIndex}" data-segment-index="${segmentIndex}">Leia mais</button>
-                ${isVideo ? `<button class="toggle-video-btn bg-black/50 text-white text-xs py-2 px-3 rounded-full" data-news-index="${newsIndex}" data-segment-index="${segmentIndex}">▶︎/❚❚</button>` : ''}
-              </div>
-            </div>
-          </div>
-        `;
-      }
-
-      function render(){
-        const categories = ['Todas', ...new Set(newsData.map(n => n.category))];
-        categoriesWrapper.innerHTML = categories.map(cat => `
-          <div class="swiper-slide !w-auto">
-            <a href="#" class="category-link inline-block text-white/85 text-xs py-1.5 px-3 rounded-full bg-white/10 backdrop-blur-sm" data-category="${cat}">${cat}</a>
-          </div>
-        `).join('');
-
-        newsWrapper.innerHTML = newsData.map((item, newsIndex) => `
-          <div class="swiper-slide" data-category="${item.category}">
-            <div class="swiper-container-h">
-              <div class="swiper-wrapper">
-                ${item.segments.map((seg, i) => createSegmentHTML(seg, newsIndex, i)).join('')}
-              </div>
-              <div class="swiper-pagination"></div>
-            </div>
-          </div>
-        `).join('');
-      }
-
-      /* ================= Swipers + Behaviors ================= */
-      function initSwipers(){
-        new Swiper('.swiper-container-categories', { slidesPerView:'auto', spaceBetween:10, freeMode:true });
-
-        mainSwiper = new Swiper('.swiper-container-v', {
-          direction:'vertical',
-          speed:500,
-          on:{
-            init(){
-              this.slides.forEach(slide => {
-                const inner = new Swiper(slide.querySelector('.swiper-container-h'), {
-                  speed:500,
-                  pagination:{ el: slide.querySelector('.swiper-pagination'), clickable:true }
-                });
-                slide._innerSwiper = inner;
-              });
-              updateActiveCategory(this);
-              attachVideoAutoplay();
-            },
-            slideChange(){
-              updateActiveCategory(this);
-              attachVideoAutoplay();
+            async function fetchNewsData() {
+                try {
+                    const response = await fetch(GRAPHQL_ENDPOINT, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: GQL_QUERY })
+                    });
+                    const json = await response.json();
+                    if (json.errors) {
+                        throw new Error('GraphQL Error: ' + json.errors.map(e => e.message).join('\n'));
+                    }
+                    return transformData(json.data.posts.nodes);
+                } catch (error) {
+                    console.error("Failed to fetch news data:", error);
+                    loaderContainer.innerHTML = `<p class="text-white text-center">Não foi possível carregar o conteúdo.<br>Tente novamente mais tarde.</p>`;
+                    return null;
+                }
             }
-          }
+
+            function generateDescription(html) {
+                if (!html) return '';
+                const div = document.createElement('div');
+                div.innerHTML = html;
+
+                const listItems = div.querySelectorAll('li');
+
+                if (listItems.length > 0) {
+                    let htmlContent = '';
+                    listItems.forEach(li => {
+                        // Adiciona um bullet, o texto do item e uma quebra de linha HTML.
+                        htmlContent += `• ${li.textContent.trim()}<br>`;
+                    });
+                    // Retorna o conteúdo completo formatado como HTML, sem truncar.
+                    return htmlContent;
+                } else {
+                    // Para textos sem lista, retorna o texto completo sem truncar.
+                    const text = div.textContent || div.innerText || '';
+                    return text;
+                }
+            }
+            
+            function transformData(nodes) {
+                return nodes.map(post => {
+                    const slides = post.conteudoDosStories?.conteudo?.slides || [];
+                    return {
+                        category: post.categories?.nodes[0]?.name || 'Geral',
+                        postTitle: post.title,
+                        postContent: post.content || '<p>Conteúdo principal não disponível.</p>',
+                        featuredImageUrl: post.featuredImage?.node?.sourceUrl,
+                        segments: slides.map(slide => ({
+                            mediaUrl: slide.media?.node?.mediaItemUrl,
+                            mediaType: slide.media?.node?.mimeType,
+                            title: slide.title || post.title,
+                            description: generateDescription(slide.text),
+                            fullContent: slide.text || '<p>Conteúdo do slide não disponível.</p>',
+                            contentPosition: slide.contentPosition || 'bottom',
+                            textSize: slide.textSize || 'medium',
+                            showOverlay: slide.showOverlay !== false,
+                            showButton: slide.showButton !== false
+                        }))
+                    };
+                }).filter(story => story.segments.length > 0);
+            }
+            
+            function populateNewsAndCategories() {
+                newsWrapper.innerHTML = '';
+                categoriesWrapper.innerHTML = '';
+
+                newsData.forEach((newsItem, newsIndex) => {
+                    const verticalSlide = document.createElement('div');
+                    verticalSlide.className = 'swiper-slide';
+                    verticalSlide.dataset.category = newsItem.category;
+                    
+                    const slidesHTML = newsItem.segments.map((segment, segmentIndex) => {
+                        const isVideo = segment.mediaType && segment.mediaType.startsWith('video/');
+                        const mediaTag = isVideo 
+                            ? `<video class="slide-video-bg" autoplay muted loop playsinline src="${segment.mediaUrl}"></video>`
+                            : '';
+                        const bgStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
+
+                        const contentPositionClass = {
+                            top: 'justify-start',
+                            center: 'justify-center',
+                            bottom: 'justify-end'
+                        }[segment.contentPosition] || 'justify-end';
+                        
+                        const textSizeClasses = {
+                            small: 'text-xl lg:text-2xl',
+                            medium: 'text-2xl lg:text-3xl',
+                            large: 'text-3xl lg:text-4xl'
+                        }[segment.textSize] || 'text-2xl lg:text-3xl';
+
+                        const descriptionSizeClasses = {
+                            small: 'text-xs lg:text-sm',
+                            medium: 'text-sm lg:text-base',
+                            large: 'text-base lg:text-lg'
+                        }[segment.textSize] || 'text-sm lg:text-base';
+                        
+                        return `
+                            <div class="swiper-slide" ${bgStyle}>
+                                ${mediaTag}
+                                ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
+                                <div class="z-10 p-6 pt-20 flex flex-col ${contentPositionClass} h-full w-full text-left">
+                                    <div class="mb-10">
+                                        <h2 class="font-poppins font-bold mb-2 text-shadow ${textSizeClasses}">${segment.title}</h2>
+                                        <div class="text-shadow ${descriptionSizeClasses}">${segment.description}</div>
+                                    </div>
+                                    ${segment.showButton ? `
+                                    <button 
+                                        class="read-more-btn bg-[#fd572b] text-white font-bold py-2 px-4 text-sm rounded-full self-start transition-transform hover:scale-105 shadow-lg flex items-center gap-2 group"
+                                        data-news-index="${newsIndex}"
+                                        data-segment-index="${segmentIndex}">
+                                        <span>Leia Mais</span>
+                                        <span class="transition-transform group-hover:-translate-y-1 text-lg">&#9650;</span>
+                                    </button>` : ''}
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+
+                    verticalSlide.innerHTML = `<div class="swiper swiper-container-h"><div class="swiper-wrapper">${slidesHTML}</div><div class="swiper-pagination"></div></div>`;
+                    newsWrapper.appendChild(verticalSlide);
+                });
+
+                const categories = ['Todas', ...new Set(newsData.map(item => item.category))];
+                categoriesWrapper.innerHTML = categories.map(cat => `
+                    <div class="swiper-slide !w-auto">
+                        <a href="#" class="category-link inline-block text-white/80 text-xs py-1 px-3 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300" data-category="${cat}">${cat}</a>
+                    </div>`
+                ).join('');
+            }
+            
+            function initSwipers() {
+                new Swiper('.swiper-container-categories', { slidesPerView: 'auto', spaceBetween: 10, freeMode: true });
+
+                mainSwiper = new Swiper('.swiper-container-v', {
+                    direction: 'vertical',
+                    speed: 500,
+                    on: {
+                        init: function () {
+                           this.slides.forEach(slide => {
+                                new Swiper(slide.querySelector('.swiper-container-h'), { pagination: { el: '.swiper-pagination', clickable: true }, speed: 500 });
+                            });
+                            updateActiveCategory(this);
+                        },
+                        slideChange: function() { updateActiveCategory(this); }
+                    },
+                });
+            }
+
+            function updateActiveCategory(swiper) {
+                if (!swiper || !swiper.slides || swiper.slides.length === 0) return;
+                const activeSlide = swiper.slides[swiper.activeIndex];
+                if (!activeSlide) return;
+                const activeCategory = activeSlide.dataset.category;
+
+                document.querySelectorAll('.category-link').forEach(link => {
+                    link.classList.toggle('active', link.dataset.category === activeCategory);
+                });
+                const anyOtherCategoryIsActive = Array.from(document.querySelectorAll('.category-link.active')).some(link => link.dataset.category !== 'Todas');
+                document.querySelector('.category-link[data-category="Todas"]')?.classList.toggle('active', !anyOtherCategoryIsActive);
+            }
+            
+            function openModal(newsIndex, segmentIndex) {
+                const story = newsData[newsIndex];
+                const segment = story.segments[segmentIndex];
+
+                const imageUrl = story.featuredImageUrl || segment.mediaUrl;
+                
+                document.getElementById('modal-img').src = imageUrl || '';
+                document.getElementById('modal-img').style.display = imageUrl ? 'block' : 'none';
+                
+                document.getElementById('modal-title').innerText = story.postTitle;
+                document.getElementById('modal-body').innerHTML = story.postContent;
+                modal.classList.remove('invisible', 'opacity-0');
+            }
+
+            function closeModal() { modal.classList.add('invisible', 'opacity-0'); }
+
+            function setupEventListeners() {
+                categoriesWrapper.addEventListener('click', (e) => {
+                    if (e.target.classList.contains('category-link')) {
+                        e.preventDefault();
+                        const category = e.target.dataset.category;
+                        let slideIndex = 0;
+                        if (category !== 'Todas') {
+                           slideIndex = newsData.findIndex(item => item.category === category);
+                        }
+                        if(mainSwiper && slideIndex !== -1) mainSwiper.slideTo(slideIndex);
+                    }
+                });
+
+                newsWrapper.addEventListener('click', (e) => {
+                    const readMoreBtn = e.target.closest('.read-more-btn');
+                    if (readMoreBtn) {
+                        const { newsIndex, segmentIndex } = readMoreBtn.dataset;
+                        openModal(newsIndex, segmentIndex);
+                    }
+                });
+
+                closeModalBtn.addEventListener('click', closeModal);
+                modal.addEventListener('click', (e) => { if (e.target === modal) closeModal(); });
+
+                if (onboardingOverlay) {
+                    onboardingOverlay.addEventListener('click', () => {
+                        onboardingOverlay.classList.add('opacity-0', 'pointer-events-none');
+                        setTimeout(() => onboardingOverlay.style.display = 'none', 500);
+                    });
+                }
+            }
+
+            async function main() {
+                // Call initially to set the size as soon as the DOM is ready
+                resizeAndPositionFrame();
+                
+                const fetchedData = await fetchNewsData();
+                if (fetchedData) {
+                    newsData = fetchedData;
+                    populateNewsAndCategories();
+                    initSwipers();
+                    setupEventListeners();
+                    loaderContainer.classList.add('hidden');
+
+                    const isFirstVisit = !localStorage.getItem('hasVisitedComMarilia');
+                    if (isFirstVisit) {
+                        onboardingOverlay.classList.remove('hidden');
+                        onboardingOverlay.classList.add('flex'); // Make sure it's a flex container
+                        setTimeout(() => onboardingOverlay.classList.add('opacity-100'), 50);
+                        localStorage.setItem('hasVisitedComMarilia', 'true');
+                    }
+                }
+            }
+
+            main();
         });
-
-        document.querySelector('.swiper-container-v').classList.remove('opacity-0');
-        loader?.classList.add('hidden');
-      }
-
-      function updateActiveCategory(swiper){
-        const activeSlide = swiper?.slides?.[swiper.activeIndex];
-        const activeCategory = activeSlide?.dataset?.category;
-        document.querySelectorAll('.category-link').forEach(link => {
-          link.classList.toggle('active', link.dataset.category === activeCategory);
-        });
-        const todas = document.querySelector('.category-link[data-category="Todas"]');
-        if (todas){
-          const any = Array.from(document.querySelectorAll('.category-link.active')).some(l => l.dataset.category !== 'Todas');
-          todas.classList.toggle('active', !any);
-        }
-      }
-
-      function attachVideoAutoplay(){
-        const active = document.querySelector('.swiper-container-v .swiper-slide-active');
-        document.querySelectorAll('.media-wrap video').forEach(v => { try{ v.pause(); }catch(e){} });
-        if(active){ active.querySelectorAll('video').forEach(v => { v.muted = true; v.play().catch(()=>{}); }); }
-      }
-
-      /* ================= Modal ================= */
-      function openModal(newsIndex, segmentIndex){
-        const news = newsData[newsIndex];
-        const seg = news.segments[segmentIndex];
-        document.getElementById('modal-img').src = news.postImage || seg.mediaUrl || '';
-        document.getElementById('modal-title').textContent = seg.displayTitle || news.postTitle || '';
-        document.getElementById('modal-body').innerHTML = seg.fullHTML || news.postContent || '';
-        modal.classList.remove('invisible','opacity-0');
-      }
-      function closeModal(){ modal.classList.add('invisible','opacity-0'); }
-
-      /* ================= Listeners ================= */
-      function setupListeners(){
-        categoriesWrapper.addEventListener('click', e => {
-          const link = e.target.closest('.category-link');
-          if(!link) return; e.preventDefault();
-          const category = link.dataset.category; let idx = 0;
-          if(category !== 'Todas') idx = newsData.findIndex(n => n.category === category);
-          if(idx >= 0) mainSwiper.slideTo(idx);
-        });
-
-        newsWrapper.addEventListener('click', e => {
-          const btnMore = e.target.closest('.read-more-btn');
-          if (btnMore){ const { newsIndex, segmentIndex } = btnMore.dataset; openModal(Number(newsIndex), Number(segmentIndex)); return; }
-          const btnVid = e.target.closest('.toggle-video-btn');
-          if (btnVid){ const active = document.querySelector('.swiper-container-v .swiper-slide-active'); const videos = active?.querySelectorAll('video') || []; videos.forEach(v => { v.paused ? v.play().catch(()=>{}) : v.pause(); }); }
-        });
-
-        closeModalBtn.addEventListener('click', closeModal);
-        modal.addEventListener('click', e => { if(e.target === modal) closeModal(); });
-
-        onboardingOverlay.addEventListener('click', () => {
-          onboardingOverlay.classList.add('opacity-0','pointer-events-none');
-          setTimeout(() => onboardingOverlay.classList.add('hidden'), 400);
-        });
-
-        window.addEventListener('keydown', e => {
-          if(!mainSwiper) return;
-          if(e.key === 'ArrowUp') mainSwiper.slidePrev();
-          if(e.key === 'ArrowDown') mainSwiper.slideNext();
-        });
-      }
-
-      /* ================= Boot ================= */
-      async function main(){
-        try{
-          const data = await fetchGraphQL(QUERY, { first: 12 });
-          newsData = normalize(data);
-          if(!newsData.length){
-            newsData = [{ category:'Geral', postTitle:'Sem conteúdo disponível', postContent:'Publique posts com o grupo ACF "storiesSimples" para visualizar os stories aqui.', postImage:'', segments:[{ mediaUrl:'', mediaMime:'', displayTitle:'Aguardando conteúdo', displayDescription:'', fullHTML:'' }] }];
-          }
-          render();
-          initSwipers();
-          setupListeners();
-        }catch(err){
-          console.error(err);
-          showToast('Erro ao carregar dados do GraphQL. Verifique endpoint, CORS e WPGraphQL/ACF.');
-          loader?.classList.add('hidden');
-          newsWrapper.innerHTML = `<div class='swiper-slide'><div class='p-6 text-left'><h2 class='text-2xl font-extrabold'>Erro ao carregar</h2><p class='mt-2 text-white/90'>Não foi possível obter os dados. Tente atualizar a página.</p></div></div>`;
-          document.querySelector('.swiper-container-v').classList.remove('opacity-0');
-          initSwipers();
-        }
-      }
-
-      function showToast(msg){ if(!toast) return; toast.textContent = msg; toast.classList.remove('hidden'); setTimeout(()=> toast.classList.add('hidden'), 3000); }
-
-      main();
-    });
-  </script>
+    </script>
 </body>
 </html>
+
+
+
