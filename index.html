@@ -15,23 +15,20 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Poppins:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        /* MODIFICATION: Removed background-color as it's now handled by Tailwind on the body tag for a better frame effect. */
         body { font-family: 'Inter', sans-serif; overscroll-behavior: contain; }
         .font-poppins { font-family: 'Poppins', sans-serif; }
-        /* MODIFICATION: Reverted to fully rounded corners as the frame is now a distinct element from the header. */
         .mobile-frame { 
             box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15); 
             border-radius: 2.5rem; 
             overflow: hidden; 
             position: relative; 
             background-color: #000; 
-            transition: width 0.2s ease, height 0.2s ease; /* Added a smooth transition for resizing */
+            transition: width 0.2s ease, height 0.2s ease;
         }
         .swiper-container-v, .swiper-container-h, .swiper { width: 100%; height: 100%; }
         .swiper-slide { display: flex; text-align: center; color: #fff; background-size: cover; background-position: center; position: relative; overflow: hidden; }
         .slide-overlay { position: absolute; inset: 0; background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, rgba(0, 0, 0, 0) 50%, rgba(0, 0, 0, 0.2) 100%); }
         .slide-video-bg { position: absolute; top: 50%; left: 50%; width: auto; height: auto; min-width: 100%; min-height: 100%; transform: translate(-50%, -50%); z-index: -1; }
-        /* MODIFICATION: Adjusted top position for the new layout where the header is not overlaying the content. */
         .swiper-pagination-horizontal { top: 10px; bottom: auto; }
         .swiper-pagination-bullet { width: 8px; height: 8px; background-color: rgba(255, 255, 255, 0.6); opacity: 1; }
         .swiper-pagination-bullet-active { background-color: #fd572b; }
@@ -45,27 +42,24 @@
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
-<!-- MODIFICATION: Changed body to a flex-column layout to accommodate the fixed header. -->
-<body class="flex flex-col h-screen bg-black overflow-hidden">
+<!-- MODIFICATION: Body now centers a single component container. -->
+<body class="flex items-center justify-center h-screen bg-black overflow-hidden">
 
-    <!-- MODIFICATION: Moved header outside the mobile-frame to pin it to the top of the viewport. -->
-    <header class="z-20 p-4 flex items-center gap-4 bg-gray-800 flex-shrink-0">
-        <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
-        <div class="swiper-container-categories flex-grow min-w-0">
-            <div class="swiper-wrapper" id="categories-wrapper"></div>
-        </div>
-    </header>
+    <!-- MODIFICATION: A new wrapper to group header and frame, allowing them to be centered as a single block. -->
+    <div class="flex flex-col">
+        <header class="z-20 p-4 flex items-center gap-4 bg-gray-800 flex-shrink-0">
+            <h1 class="text-white text-xl font-poppins font-bold flex-shrink-0">Com<span class="text-[#fd572b]">Marília</span></h1>
+            <div class="swiper-container-categories flex-grow min-w-0">
+                <div class="swiper-wrapper" id="categories-wrapper"></div>
+            </div>
+        </header>
 
-    <!-- MODIFICATION: Added a container to center the mobile frame in the remaining space. -->
-    <div id="frame-container" class="flex-grow relative flex items-center justify-center p-4">
         <div class="mobile-frame">
-            <!-- MODIFICATION: App container simplified as it no longer holds the header. -->
             <div id="app" class="w-full h-full relative bg-black">
                 <div id="loader-container" class="absolute inset-0 z-40 bg-black flex items-center justify-center">
                     <div id="loader"></div>
                 </div>
 
-                <!-- MODIFICATION: Swiper container now takes full height of its parent. -->
                 <div class="swiper swiper-container-v h-full">
                     <div class="swiper-wrapper" id="news-wrapper"></div>
                 </div>
@@ -99,33 +93,43 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             // --- START: Aspect Ratio & Resize Logic ---
+            // MODIFICATION: Get header to sync its width with the frame.
+            const header = document.querySelector('header');
             const mobileFrame = document.querySelector('.mobile-frame');
-            // MODIFICATION: Get the new container for calculations.
-            const frameContainer = document.getElementById('frame-container');
 
             function resizeAndPositionFrame() {
                 const aspectRatio = 9 / 16;
-                // MODIFICATION: Use the container's dimensions for calculation, not the full window.
-                const containerWidth = frameContainer.offsetWidth;
-                const containerHeight = frameContainer.offsetHeight;
+                const availableWidth = window.innerWidth;
+                const availableHeight = window.innerHeight;
 
-                let frameWidth;
-                let frameHeight;
+                const headerHeight = header.offsetHeight;
+                if (!headerHeight) { // Retry if header hasn't rendered yet
+                    setTimeout(resizeAndPositionFrame, 50);
+                    return;
+                }
+                
+                let finalFrameWidth;
+                let finalFrameHeight;
 
-                // Determine the limiting dimension to maintain the aspect ratio within the container
-                if ((containerWidth / containerHeight) > aspectRatio) {
-                    // Container is wider than 9:16, so height is the limiting factor
-                    frameHeight = containerHeight;
-                    frameWidth = frameHeight * aspectRatio;
+                // Calculate dimensions assuming width is the constraint first
+                let potentialFrameWidth = availableWidth;
+                let potentialFrameHeight = potentialFrameWidth / aspectRatio;
+                
+                // Check if the combined height of header and frame fits in the viewport
+                if (potentialFrameHeight + headerHeight <= availableHeight) {
+                    // It fits. Width is the limiting factor.
+                    finalFrameWidth = potentialFrameWidth;
+                    finalFrameHeight = potentialFrameHeight;
                 } else {
-                    // Container is taller or equal to 9:16, so width is the limiting factor
-                    frameWidth = containerWidth;
-                    frameHeight = frameWidth / aspectRatio;
+                    // It doesn't fit. Height is the limiting factor.
+                    finalFrameHeight = availableHeight - headerHeight;
+                    finalFrameWidth = finalFrameHeight * aspectRatio;
                 }
 
-                // Apply the new dimensions
-                mobileFrame.style.width = `${frameWidth}px`;
-                mobileFrame.style.height = `${frameHeight}px`;
+                // Apply the calculated width to both header and frame for visual consistency
+                header.style.width = `${finalFrameWidth}px`;
+                mobileFrame.style.width = `${finalFrameWidth}px`;
+                mobileFrame.style.height = `${finalFrameHeight}px`;
             }
             // --- END: Aspect Ratio & Resize Logic ---
 
@@ -140,10 +144,8 @@
             let mainSwiper;
             let newsData = [];
 
-            // --- ADDITION: Add resize listener to update frame and swipers ---
             window.addEventListener('resize', () => {
                 resizeAndPositionFrame();
-                // Update swipers to recalculate their dimensions, crucial for responsiveness
                 if (mainSwiper && mainSwiper.slides.length > 0) {
                     mainSwiper.update();
                     mainSwiper.slides.forEach(slide => {
@@ -222,13 +224,10 @@
                 if (listItems.length > 0) {
                     let htmlContent = '';
                     listItems.forEach(li => {
-                        // Adiciona um bullet, o texto do item e uma quebra de linha HTML.
                         htmlContent += `• ${li.textContent.trim()}<br>`;
                     });
-                    // Retorna o conteúdo completo formatado como HTML, sem truncar.
                     return htmlContent;
                 } else {
-                    // Para textos sem lista, retorna o texto completo sem truncar.
                     const text = div.textContent || div.innerText || '';
                     return text;
                 }
@@ -405,7 +404,6 @@
             }
 
             async function main() {
-                // Call initially to set the size as soon as the DOM is ready
                 resizeAndPositionFrame();
                 
                 const fetchedData = await fetchNewsData();
@@ -419,7 +417,7 @@
                     const isFirstVisit = !localStorage.getItem('hasVisitedComMarilia');
                     if (isFirstVisit) {
                         onboardingOverlay.classList.remove('hidden');
-                        onboardingOverlay.classList.add('flex'); // Make sure it's a flex container
+                        onboardingOverlay.classList.add('flex');
                         setTimeout(() => onboardingOverlay.classList.add('opacity-100'), 50);
                         localStorage.setItem('hasVisitedComMarilia', 'true');
                     }
