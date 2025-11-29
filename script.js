@@ -250,8 +250,7 @@
         const isVideo = segment.mediaType && segment.mediaType.startsWith('video/');
         const mediaTag = isVideo
             ? `<video class="slide-video-bg" autoplay muted loop playsinline src="${segment.mediaUrl}"></video>`
-            : '';
-        const backgroundStyle = isVideo ? '' : `style="background-image: url('${segment.mediaUrl}')"`;
+            : `<img class="slide-image-bg" src="${segment.mediaUrl}" alt="">`;
         const contentPositionKey = segment.contentPosition || 'bottom';
         const textSizeKey = segment.textSize || 'medium';
         const contentPositionClass = CONTENT_POSITION_CLASSES[contentPositionKey] || CONTENT_POSITION_CLASSES.bottom;
@@ -286,7 +285,7 @@
             : '';
 
         return `
-            <div class="swiper-slide" data-segment-id="${segment.segmentId}" ${backgroundStyle}>
+            <div class="swiper-slide" data-segment-id="${segment.segmentId}">
                 ${mediaTag}
                 ${segment.showOverlay ? '<div class="slide-overlay"></div>' : ''}
                 <div class="z-10 p-6 flex flex-col ${contentPositionClass} ${bottomOffsetClass} h-full w-full text-left">
@@ -481,6 +480,3 @@
 
     main();
 });
-
-
-
