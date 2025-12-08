@@ -129,14 +129,20 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryI
   const activeStory = stories[activeStoryIndex];
   const modalImage = activeStory?.image;
 
-  if (!stories.length) return <div className="h-screen bg-black flex items-center justify-center text-white">Carregando Stories...</div>;
+  if (!stories.length) {
+    return (
+      <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
+        Carregando Stories...
+      </div>
+    );
+  }
 
   return (
-    <div className="w-full h-[100dvh] bg-gray-50 flex flex-col items-center justify-center overflow-hidden">
+    <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center overflow-hidden">
         
-        {/* Player Frame: 
+        {/* Player Frame:
             Desktop: Centered, fixed aspect ratio 9/16, max height
-            Mobile: Full width, full height (100dvh), no rounding
+            Mobile: Full width, full height, no rounding
         */}
         <div className="relative w-full h-full md:w-auto md:aspect-[9/16] md:h-[calc(100vh-2rem)] md:max-h-[900px] bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col">
             

@@ -32,7 +32,7 @@ export const Modal: React.FC<ModalProps> = ({ isOpen, onClose, title, image, con
       />
       
       {/* Panel */}
-      <div className="relative w-full h-[95dvh] md:h-auto md:max-h-[90vh] md:max-w-3xl bg-white md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-transform duration-300 translate-y-0 animate-in slide-in-from-bottom-10">
+      <div className="relative w-full h-[95vh] md:h-auto md:max-h-[90vh] md:max-w-3xl bg-white md:rounded-2xl shadow-2xl overflow-hidden flex flex-col transform transition-transform duration-300 translate-y-0 animate-in slide-in-from-bottom-10">
         
         {/* Header/Close */}
         <button 
