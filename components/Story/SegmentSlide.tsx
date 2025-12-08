@@ -11,6 +11,14 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
   const videoRef = useRef<HTMLVideoElement>(null);
   const [isLoaded, setIsLoaded] = useState(false);
 
+  // Reset loading state whenever the media changes
+  useEffect(() => {
+    setIsLoaded(false);
+    if (segment.mediaType === 'video' && videoRef.current) {
+      videoRef.current.load();
+    }
+  }, [segment.mediaType, segment.mediaUrl]);
+
   // Smart Video Handling: Only play when active to save resources
   useEffect(() => {
     if (segment.mediaType === 'video' && videoRef.current) {
@@ -24,6 +32,7 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
         }
       } else {
         videoRef.current.pause();
+        videoRef.current.currentTime = 0;
       }
     }
   }, [isActive, segment.mediaType]);
@@ -61,13 +70,16 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
             muted
             loop
             playsInline
+            autoPlay={isActive}
+            preload="auto"
             onLoadedData={handleLoad}
           />
         ) : (
           <img
             src={segment.mediaUrl}
             alt={segment.title}
-            className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'} bg-red-500`}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+            loading="lazy"
             onLoad={handleLoad}
           />
         )}
