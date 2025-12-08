@@ -48,6 +48,57 @@ const GQL_QUERY = `
       }
   }`;
 
+/**
+ * Remove trechos problemáticos do HTML vindo do WordPress
+ * (carrosséis, containers Angular, scripts, etc.) que podem
+ * injetar elementos de tela cheia ou fundos estranhos (como a tela azul).
+ */
+function sanitizeStoryHtml(html: string): string {
+  if (!html) return '';
+
+  try {
+    // DOMParser existe apenas no browser; em SSR simplesmente retorna o HTML cru
+    if (typeof DOMParser === 'undefined') {
+      return html;
+    }
+
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(html, 'text/html');
+
+    // Remove scripts, styles e iframes por segurança
+    doc.querySelectorAll('script, style, iframe').forEach((el) => el.remove());
+
+    // Remove blocos de carrossel/container que vêm nos textos
+    const selectors = [
+      '.container.ng-tns-*',
+      '[class*="carousel-container"]',
+      '[class*="sources-carousel"]',
+      '[class*="ng-tns-"]',
+    ];
+
+    selectors.forEach((selector) => {
+      // querySelectorAll não suporta wildcard em classe, então tratamos dois casos:
+      if (selector.includes('*')) {
+        const attr = 'class';
+        const token = selector.replace(/[\.\[\]\*]/g, '').replace('class=', '');
+        doc.querySelectorAll(`[${attr}]`).forEach((el) => {
+          const className = el.getAttribute('class') || '';
+          if (className.includes(token)) {
+            el.remove();
+          }
+        });
+      } else {
+        doc.querySelectorAll(selector).forEach((el) => el.remove());
+      }
+    });
+
+    return doc.body.innerHTML;
+  } catch (e) {
+    console.warn('sanitizeStoryHtml failed', e);
+    return html;
+  }
+}
+
 function slugify(value: string): string {
   return (value || '')
     .normalize('NFD')
@@ -59,9 +110,8 @@ function slugify(value: string): string {
 
 function generateDescriptionHTML(html: string): string {
   if (!html) return '';
-  // Basic HTML cleanup/formatting if needed. 
-  // In a real React app, we might use DOMParser, but raw string manip is faster for simple cleaning.
-  return html.replace(/<p>/g, '').replace(/<\/p>/g, '<br/>'); 
+  const sanitized = sanitizeStoryHtml(html);
+  return sanitized;
 }
 
 function transformData(nodes: StoryNode[]): TransformedStory[] {
@@ -74,7 +124,7 @@ function transformData(nodes: StoryNode[]): TransformedStory[] {
       const segments: TransformedSegment[] = rawSlides.map((slide, segIndex) => ({
         id: slugify(slide.title) || `segment-${segIndex}`,
         title: (slide.title || '').trim(),
-        descriptionHTML: slide.text || '', // Keep raw HTML for parsing later
+        descriptionHTML: generateDescriptionHTML(slide.text || ''),
         mediaUrl: slide.media?.node?.mediaItemUrl || '',
         mediaType: slide.media?.node?.mimeType?.startsWith('video/') ? 'video' : 'image',
         contentPosition: slide.contentPosition || 'bottom',
