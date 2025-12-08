@@ -4,6 +4,7 @@ import { fetchStories } from './services/api';
 import { TransformedStory } from './types';
 import { Home } from './pages/Home';
 import { StoryViewer } from './components/Story/StoryViewer';
+import { safeGetItem, safeSetItem } from './services/storage';
 
 // Onboarding Overlay Component (Simple functional component)
 const Onboarding = ({ onDismiss }: { onDismiss: () => void }) => (
@@ -56,7 +57,7 @@ const App: React.FC = () => {
   // Check for onboarding only when entering player for the first time
   useEffect(() => {
     if (location.pathname === '/player') {
-        const hasVisited = localStorage.getItem('hasVisitedComMarilia');
+        const hasVisited = safeGetItem('hasVisitedComMarilia');
         if (!hasVisited) {
             setShowOnboarding(true);
         }
@@ -65,7 +66,7 @@ const App: React.FC = () => {
 
   const handleDismissOnboarding = () => {
       setShowOnboarding(false);
-      localStorage.setItem('hasVisitedComMarilia', 'true');
+      safeSetItem('hasVisitedComMarilia', 'true');
   };
 
   return (

@@ -1,4 +1,5 @@
 import { StoryNode, TransformedStory, TransformedSegment, CacheData } from '../types';
+import { safeGetItem, safeSetItem } from './storage';
 
 const GRAPHQL_ENDPOINT = 'https://portal.commarilia.com/graphql';
 const CACHE_KEY = 'commarilia_cache_v1';
@@ -102,7 +103,7 @@ export async function fetchStories(forceRefresh: boolean = false): Promise<Trans
   // 2. Check LocalStorage (skip if forcing refresh)
   if (!forceRefresh) {
     try {
-        const cached = localStorage.getItem(CACHE_KEY);
+        const cached = safeGetItem(CACHE_KEY);
         if (cached) {
         const parsed: CacheData = JSON.parse(cached);
         if (Date.now() - parsed.timestamp < CACHE_DURATION) {
@@ -130,10 +131,13 @@ export async function fetchStories(forceRefresh: boolean = false): Promise<Trans
     
     // Update Caches
     memoryCache = transformed;
-    localStorage.setItem(CACHE_KEY, JSON.stringify({
-      stories: transformed,
-      timestamp: Date.now()
-    }));
+    safeSetItem(
+      CACHE_KEY,
+      JSON.stringify({
+        stories: transformed,
+        timestamp: Date.now(),
+      }),
+    );
 
     return transformed;
   } catch (error) {
