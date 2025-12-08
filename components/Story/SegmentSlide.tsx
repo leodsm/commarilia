@@ -104,23 +104,27 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
                 dangerouslySetInnerHTML={{ __html: segment.descriptionHTML }}
             />
             )}
-
-            {segment.showButton && (
-            <button
-                onClick={(e) => {
-                    e.stopPropagation(); // Prevent swiping/clicking issues
-                    onReadMore();
-                }}
-                className="inline-flex items-center bg-white/20 border border-white/30 text-white font-semibold py-2.5 px-6 rounded-full hover:bg-white/30 hover:scale-105 transition-all duration-200 transform-gpu"
-            >
-                <span className="mr-2">Leia Mais</span>
-                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
-                </svg>
-            </button>
-            )}
         </div>
       </div>
+
+      {segment.showButton && (
+        <div className="absolute bottom-6 right-6 z-20 pointer-events-none">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              onReadMore();
+            }}
+            className="flex items-center gap-3 rounded-full bg-white/15 text-white border border-white/40 px-4 py-2 backdrop-blur-md shadow-lg hover:bg-white/25 transition-all duration-200 pointer-events-auto"
+          >
+            <span className="text-base font-semibold">Leia Mais</span>
+            <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white/25 border border-white/40">
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14 5l7 7m0 0l-7 7m7-7H3" />
+              </svg>
+            </span>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

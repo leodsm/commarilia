@@ -49,9 +49,24 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     () => ({
       height: viewportHeight,
       minHeight: '100vh',
+      overscrollBehavior: 'contain' as const,
+      touchAction: 'pan-y pinch-zoom' as const,
     }),
     [viewportHeight]
   );
+
+  // Prevent the underlying page from scrolling while the player is active
+  useEffect(() => {
+    const previousOverflow = document.body.style.overflow;
+    const previousTouch = document.body.style.touchAction;
+    document.body.style.overflow = 'hidden';
+    document.body.style.touchAction = 'none';
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+      document.body.style.touchAction = previousTouch;
+    };
+  }, []);
 
   // This effect runs once when stories are loaded OR when the category filter changes.
   useEffect(() => {
@@ -168,6 +183,12 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     if (innerSwiper) {
       innerSwiper.slideTo(segmentIndex);
     }
+
+    setActiveSegmentIndices((prev) => {
+      const next = [...prev];
+      next[storyIndex] = segmentIndex;
+      return next;
+    });
   };
 
   if (loading && !isInitialized) {
@@ -195,6 +216,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     >
       <div
         className="relative aspect-[9/16] w-full max-w-full max-h-full bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
+        style={{ WebkitOverflowScrolling: 'touch' }}
       >
         <header className="absolute top-0 left-0 right-0 z-30 p-4 flex items-center gap-3 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex-shrink-0">
           <h1 className="flex-shrink-0">
@@ -251,6 +273,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
               resistance
               resistanceRatio={0.85}
               speed={400}
+              allowTouchMove={!isModalOpen}
+              touchStartPreventDefault={false}
+              touchMoveStopPropagation={false}
               loop={true}
             >
               {filteredStories.map((story, sIndex) => {
@@ -274,6 +299,9 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
                         touchAngle={45}
                         observer
                         observeParents
+                        allowTouchMove={!isModalOpen}
+                        touchStartPreventDefault={false}
+                        touchMoveStopPropagation={false}
                       >
                         {story.segments.map((segment, segIndex) => (
                           <SwiperSlide key={segment.id}>
