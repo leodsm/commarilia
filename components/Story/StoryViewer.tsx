@@ -194,7 +194,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
       style={playerStyle}
     >
       <div
-        className="relative aspect-[9/16] h-full max-h-[900px] w-auto bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
+        className="relative aspect-[9/16] w-full max-w-full max-h-full bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
       >
         <header className="absolute top-0 left-0 right-0 z-30 p-4 flex items-center gap-3 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex-shrink-0">
           <h1 className="flex-shrink-0">
