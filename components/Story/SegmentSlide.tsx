@@ -67,7 +67,7 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
           <img
             src={segment.mediaUrl}
             alt={segment.title}
-            className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-full object-cover transition-opacity duration-500 ${isLoaded ? 'opacity-100' : 'opacity-0'} bg-red-500`}
             onLoad={handleLoad}
           />
         )}
