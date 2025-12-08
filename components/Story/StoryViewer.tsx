@@ -176,7 +176,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
       style={playerStyle}
     >
       <div
-        className="relative w-full h-full md:w-auto md:aspect-[9/16] md:h-[calc(100vh-2rem)] md:max-h-[900px] bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
+        className="relative aspect-[9/16] h-full max-h-[900px] w-auto bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
       >
         <header className="absolute top-0 left-0 right-0 z-30 p-4 flex items-center gap-3 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex-shrink-0">
           <h1 className="flex-shrink-0">
@@ -269,7 +269,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
                       </Swiper>
 
                       <div className="absolute bottom-6 left-0 right-0 z-30 px-6 pointer-events-none">
-                        <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-full bg-black/30 px-3 py-2 backdrop-blur-md pointer-events-auto">
+                        <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-full px-3 py-2 pointer-events-auto">
                           {story.segments.map((segment, segIndex) => {
                             const isActiveSegment = segIndex === activeSegmentIndex;
                             return (

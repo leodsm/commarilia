@@ -111,7 +111,7 @@ export const SegmentSlide: React.FC<SegmentSlideProps> = ({ segment, isActive, o
                     e.stopPropagation(); // Prevent swiping/clicking issues
                     onReadMore();
                 }}
-                className="inline-flex items-center backdrop-blur-md bg-white/20 border border-white/30 text-white font-semibold py-2.5 px-6 rounded-full hover:bg-white/30 hover:scale-105 transition-all duration-200"
+                className="inline-flex items-center bg-white/20 border border-white/30 text-white font-semibold py-2.5 px-6 rounded-full hover:bg-white/30 hover:scale-105 transition-all duration-200 transform-gpu"
             >
                 <span className="mr-2">Leia Mais</span>
                 <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
