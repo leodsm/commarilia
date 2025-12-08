@@ -45,7 +45,7 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
   }, [stories, selectedCategory]);
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 font-inter">
+    <div className="flex flex-col bg-gray-50 font-inter">
       {/* Legacy Style Header */}
       <header className="sticky top-0 z-50 bg-white border-b border-gray-100 h-16 flex items-center justify-center relative shadow-sm">
         <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative h-full">
@@ -104,7 +104,7 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
             </div>
         }
       > */}
-          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8 min-h-[calc(100vh-160px)]">
+          <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
             {isLoading ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     {[1,2,3,4].map(i => (
