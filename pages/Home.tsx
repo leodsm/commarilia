@@ -1,16 +1,12 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
 import PullToRefresh from 'react-simple-pull-to-refresh';
-import { TransformedStory } from '../types';
-import { Skeleton } from '../components/ui/Skeleton';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useStories } from '@/components/contexts/StoryContext';
+import { Layout } from '@/components/ui/Layout';
 
-interface HomeProps {
-  stories: TransformedStory[];
-  isLoading: boolean;
-  onRefresh: () => Promise<void>;
-}
-
-export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => {
+export const Home: React.FC = () => {
+  const { stories, loading: isLoading, refreshStories } = useStories();
   const [searchParams, setSearchParams] = useSearchParams();
   const urlCategory = searchParams.get('category');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
@@ -45,19 +41,7 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
   }, [stories, selectedCategory]);
 
   return (
-    <div className="flex flex-col bg-gray-50 font-inter">
-      {/* Legacy Style Header */}
-      <header className="sticky top-0 z-50 bg-white border-b border-gray-100 h-16 flex items-center justify-center relative shadow-sm">
-        <div className="max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 flex items-center justify-center relative h-full">
-            {/* Centered Logo */}
-            <div className="flex items-center gap-2">
-                <Link to="/" className="font-poppins font-bold text-[1.75rem] tracking-tight text-gray-900 leading-none">
-                    Com<span className="text-[#fd572b]">Marília</span>
-                </Link>
-            </div>
-        </div>
-      </header>
-
+    <Layout>
       {/* Legacy Style Categories Bar */}
       <div className="bg-white border-b border-gray-100 py-4 shadow-sm z-40">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -91,8 +75,8 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
       </div>
 
       {/* Grid with Pull To Refresh */}
-      {/* <PullToRefresh
-        onRefresh={onRefresh}
+      <PullToRefresh
+        onRefresh={() => refreshStories(true)}
         pullingContent={
             <div className="w-full flex justify-center p-4">
                  <div className="text-gray-400 text-sm">Puxe para atualizar...</div>
@@ -103,9 +87,9 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
                  <div className="w-6 h-6 border-2 border-[#fd572b] border-t-transparent rounded-full animate-spin" />
             </div>
         }
-      > */}
+      >
           <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-8">
-            {isLoading ? (
+            {isLoading && filteredStories.length === 0 ? (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6">
                     {[1,2,3,4].map(i => (
                         <div key={i} className="aspect-[4/5] rounded-xl overflow-hidden shadow-sm">
@@ -146,7 +130,7 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
                         </Link>
                     ))}
                     
-                    {filteredStories.length === 0 && (
+                    {filteredStories.length === 0 && !isLoading && (
                         <div className="col-span-full py-20 flex flex-col items-center justify-center text-center">
                             <p className="text-gray-500 text-lg">Nenhuma história encontrada nesta categoria.</p>
                             <button 
@@ -160,14 +144,7 @@ export const Home: React.FC<HomeProps> = ({ stories, isLoading, onRefresh }) => 
                 </div>
             )}
           </main>
-      {/* </PullToRefresh> */}
-      
-      {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-12 py-8">
-        <div className="max-w-7xl mx-auto px-4 text-center">
-            <p className="text-gray-400 text-sm">© 2024 ComMarília. Todos os direitos reservados.</p>
-        </div>
-      </footer>
-    </div>
+      </PullToRefresh>
+    </Layout>
   );
 };

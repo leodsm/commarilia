@@ -4,18 +4,19 @@ import { Pagination, Virtual } from 'swiper/modules';
 import { Swiper as SwiperClass } from 'swiper/types';
 import { useNavigate, Link } from 'react-router-dom';
 
-import { TransformedStory } from '../../types';
+import { TransformedStory } from '@/types';
 import { SegmentSlide } from './SegmentSlide';
-import { Modal } from '../ui/Modal';
-import { Skeleton } from '../ui/Skeleton';
+import { Modal } from '@/components/ui/Modal';
+import { Skeleton } from '@/components/ui/Skeleton';
+import { useStories } from '@/components/contexts/StoryContext';
 
 interface StoryViewerProps {
-  stories: TransformedStory[];
   initialStoryId?: string;
   initialSegmentId?: string;
 }
 
-export const StoryViewer: React.FC<StoryViewerProps> = ({ stories, initialStoryId, initialSegmentId }) => {
+export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initialSegmentId }) => {
+  const { stories } = useStories();
   const navigate = useNavigate();
   
   // Find initial indices

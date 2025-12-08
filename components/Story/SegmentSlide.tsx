@@ -1,5 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react';
-import { TransformedSegment } from '../../types';
+import { TransformedSegment } from '@/types';
 
 interface SegmentSlideProps {
   segment: TransformedSegment;
