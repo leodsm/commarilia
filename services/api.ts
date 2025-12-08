@@ -77,17 +77,14 @@ function sanitizeStoryHtml(html: string): string {
     ];
 
     selectors.forEach((selector) => {
-      // querySelectorAll não suporta wildcard em classe, então tratamos dois casos:
+      // Seletor com wildcard (ex: 'ng-tns-*')
       if (selector.includes('*')) {
-        const attr = 'class';
         const token = selector.replace(/[\.\[\]\*]/g, '').replace('class=', '');
-        doc.querySelectorAll(`[${attr}]`).forEach((el) => {
-          const className = el.getAttribute('class') || '';
-          if (className.includes(token)) {
-            el.remove();
-          }
+        doc.querySelectorAll(`[class*="${token}"]`).forEach(el => {
+          el.remove();
         });
       } else {
+        // Seletor normal
         doc.querySelectorAll(selector).forEach((el) => el.remove());
       }
     });
