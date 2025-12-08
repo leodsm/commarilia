@@ -28,6 +28,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
   const [activeSegmentIndices, setActiveSegmentIndices] = useState<number[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [playerCategory, setPlayerCategory] = useState('Todas');
 
   const verticalSwiperRef = useRef<SwiperClass | null>(null);
   const horizontalSwiperRefs = useRef<SwiperRegistry>({});
@@ -37,6 +38,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     return ['Todas', ...Array.from(cats)];
   }, [stories]);
 
+  const filteredStories = useMemo(() => {
+    if (playerCategory === 'Todas') {
+      return stories;
+    }
+    return stories.filter((s) => s.category === playerCategory);
+  }, [stories, playerCategory]);
+
   const playerStyle = useMemo(
     () => ({
       height: viewportHeight,
@@ -45,43 +53,55 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     [viewportHeight]
   );
 
-  // This effect runs once when stories are loaded to set the initial state.
+  // This effect runs once when stories are loaded OR when the category filter changes.
   useEffect(() => {
-    if (stories.length > 0 && !isInitialized) {
-      const targetStoryIndex = initialStoryId
-        ? stories.findIndex((story) => story.id === initialStoryId)
+    if (filteredStories.length > 0) {
+      const isNewFilter = isInitialized; // If already initialized, it's a filter change.
+      
+      const targetStoryId = isNewFilter ? filteredStories[0]?.id : initialStoryId;
+
+      const targetStoryIndex = targetStoryId
+        ? filteredStories.findIndex((story) => story.id === targetStoryId)
         : 0;
       const safeStoryIndex = Math.max(0, targetStoryIndex);
 
       let targetSegmentIndex = 0;
-      if (initialSegmentId && stories[safeStoryIndex]) {
-        const found = stories[safeStoryIndex].segments.findIndex((seg) => seg.id === initialSegmentId);
+      if (initialSegmentId && !isNewFilter && filteredStories[safeStoryIndex]) {
+        const found = filteredStories[safeStoryIndex].segments.findIndex((seg) => seg.id === initialSegmentId);
         if (found >= 0) {
           targetSegmentIndex = found;
         }
       }
       
       setActiveStoryIndex(safeStoryIndex);
-      setActiveSegmentIndices(stories.map((_, idx) => (idx === safeStoryIndex ? targetSegmentIndex : 0)));
-      setIsInitialized(true);
+      setActiveSegmentIndices(filteredStories.map((_, idx) => (idx === safeStoryIndex ? targetSegmentIndex : 0)));
+      
+      if (!isInitialized) {
+          setIsInitialized(true);
+      }
+
+      // If the category changed, slide to the beginning.
+      if (isNewFilter) {
+        verticalSwiperRef.current?.slideTo(0);
+      }
     }
-  }, [stories, initialStoryId, initialSegmentId, isInitialized]);
+  }, [filteredStories, initialStoryId, initialSegmentId, isInitialized]);
 
   // This effect syncs the URL with the current state.
   useEffect(() => {
     // Only update URL if initialization is complete
-    if (!isInitialized || !stories[activeStoryIndex]) {
+    if (!isInitialized || !filteredStories[activeStoryIndex]) {
       return;
     }
     
-    const story = stories[activeStoryIndex];
+    const story = filteredStories[activeStoryIndex];
     const segmentIndex = activeSegmentIndices[activeStoryIndex] ?? 0;
     const segment = story.segments[segmentIndex];
 
     if (story && segment) {
       navigate(`/player?story=${story.id}&segment=${segment.id}`, { replace: true });
     }
-  }, [activeStoryIndex, activeSegmentIndices, stories, navigate, isInitialized]);
+  }, [activeStoryIndex, activeSegmentIndices, filteredStories, navigate, isInitialized]);
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -116,13 +136,13 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
   }, [activeStoryIndex, isModalOpen, navigate]);
 
   const handleVerticalSlideChange = (swiper: SwiperClass) => {
-    setActiveStoryIndex(swiper.activeIndex);
+    setActiveStoryIndex(swiper.realIndex); // Use realIndex for loop mode
     setIsModalOpen(false);
   };
 
   const handleHorizontalSlideChange = (storyIndex: number, swiper: SwiperClass) => {
     setActiveSegmentIndices((prev) => {
-      const next = stories.map((_, idx) => prev[idx] ?? 0);
+      const next = [...prev];
       next[storyIndex] = swiper.activeIndex;
       return next;
     });
@@ -139,20 +159,18 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     }
   };
 
+  const handleCategoryClick = (category: string) => {
+    setPlayerCategory(category);
+  }
+
   const goToSegment = (storyIndex: number, segmentIndex: number) => {
     const innerSwiper = horizontalSwiperRefs.current[storyIndex];
     if (innerSwiper) {
       innerSwiper.slideTo(segmentIndex);
     }
-
-    setActiveSegmentIndices((prev) => {
-      const next = stories.map((_, idx) => prev[idx] ?? 0);
-      next[storyIndex] = segmentIndex;
-      return next;
-    });
   };
 
-  if (loading && !stories.length) {
+  if (loading && !isInitialized) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
         Carregando Stories...
@@ -160,7 +178,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     );
   }
 
-  if (!stories.length) {
+  if (!filteredStories.length && isInitialized) {
     return (
       <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
         Nenhuma história encontrada.
@@ -168,7 +186,7 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     );
   }
 
-  const activeStory = stories[activeStoryIndex];
+  const activeStory = filteredStories[activeStoryIndex];
 
   return (
     <div
@@ -187,21 +205,21 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
 
           <div className="flex-grow min-w-0 overflow-x-auto no-scrollbar flex items-center gap-2">
             {categories.map((cat) => {
-              const isActive = activeStory?.category === cat;
+              const isActive = playerCategory === cat;
               const activeClass =
                 'bg-[#fd572b] text-white font-bold border-[#fd572b] shadow-[0_0_15px_rgba(253,87,43,0.5)]';
               const inactiveClass = 'bg-white/10 text-white/80 border-transparent hover:bg-white/20 backdrop-blur-md';
 
               return (
-                <Link
+                <button
                   key={cat}
-                  to={`/?category=${cat}`}
+                  onClick={() => handleCategoryClick(cat)}
                   className={`inline-block text-[10px] uppercase tracking-wider py-1 px-3 rounded-full border transition-all duration-300 whitespace-nowrap ${
                     isActive ? activeClass : inactiveClass
                   }`}
                 >
                   {cat}
-                </Link>
+                </button>
               );
             })}
           </div>
@@ -221,25 +239,25 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
         </header>
 
         <div className="w-full h-full relative overflow-hidden bg-black">
-          <Swiper
-            direction="vertical"
-            className="w-full h-full"
-            onSwiper={(swiper) => {
-              verticalSwiperRef.current = swiper;
-            }}
-            onSlideChange={handleVerticalSlideChange}
-            initialSlide={activeStoryIndex}
-            resistance
-            resistanceRatio={0.85}
-            speed={400}
-          >
-            {stories.map((story, sIndex) => {
-              const shouldRender = Math.abs(activeStoryIndex - sIndex) <= 1;
-              const activeSegmentIndex = activeSegmentIndices[sIndex] ?? 0;
+          {isInitialized && (
+            <Swiper
+              direction="vertical"
+              className="w-full h-full"
+              onSwiper={(swiper) => {
+                verticalSwiperRef.current = swiper;
+              }}
+              onSlideChange={handleVerticalSlideChange}
+              initialSlide={activeStoryIndex}
+              resistance
+              resistanceRatio={0.85}
+              speed={400}
+              loop={true}
+            >
+              {filteredStories.map((story, sIndex) => {
+                const activeSegmentIndex = activeSegmentIndices[sIndex] ?? 0;
 
-              return (
-                <SwiperSlide key={story.id}>
-                  {shouldRender ? (
+                return (
+                  <SwiperSlide key={story.id}>
                     <div className="w-full h-full relative">
                       <Swiper
                         direction="horizontal"
@@ -292,15 +310,11 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
                         </div>
                       </div>
                     </div>
-                  ) : (
-                    <div className="w-full h-full bg-gray-900 flex items-center justify-center">
-                      <Skeleton className="w-full h-full opacity-10" />
-                    </div>
-                  )}
-                </SwiperSlide>
-              );
-            })}
-          </Swiper>
+                  </SwiperSlide>
+                );
+              })}
+            </Swiper>
+          )}
         </div>
 
         {activeStory && (
