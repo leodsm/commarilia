@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ComMarilia Web Stories</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            fontFamily: {
+              sans: ['Montserrat', 'sans-serif'],
+              poppins: ['Poppins', 'sans-serif'],
+              inter: ['Montserrat', 'sans-serif'],
+            }
+          }
+        }
+      }
+    </script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Poppins:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@12/swiper-bundle.min.css" />
+    <style>
+      /* Custom Swiper Styles adjustments for Tailwind */
+      .swiper { width: 100%; height: 100%; }
+      .swiper-slide { display: flex; justify-content: center; align-items: center; }
+      
+      /* Standardized Pagination Styles */
+      .swiper-pagination-bullet { 
+        width: 8px; 
+        height: 8px; 
+        background: rgba(253, 87, 43, 0.5); 
+        opacity: 1; 
+        transition: all 0.3s; 
+        display: inline-block;
+        border-radius: 50%;
+        margin: 0 4px !important;
+      }
+      .swiper-pagination-bullet-active { 
+        background: #fd572b; 
+        width: 24px; 
+        border-radius: 4px; 
+        opacity: 1;
+      }
+      
+      /* Hide scrollbar */
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+      
+      /* Smooth transitions */
+      .fade-enter { opacity: 0; }
+      .fade-enter-active { opacity: 1; transition: opacity 300ms ease-in; }
+      .fade-exit { opacity: 1; }
+      .fade-exit-active { opacity: 0; transition: opacity 300ms ease-in; }
+    </style>
+  <script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.2.0",
+    "react/": "https://esm.sh/react@18.2.0/",
+    "react-dom/client": "https://esm.sh/react-dom@18.2.0/client",
+    "react-dom": "https://esm.sh/react-dom@18.2.0",
+    "react-router-dom": "https://esm.sh/react-router-dom@6.22.3?deps=react@18.2.0,react-dom@18.2.0",
+    "swiper/react": "https://esm.sh/swiper@12.0.3/react?deps=react@18.2.0",
+    "swiper/modules": "https://esm.sh/swiper@12.0.3/modules?deps=react@18.2.0",
+    "swiper/types": "https://esm.sh/swiper@12.0.3/types?deps=react@18.2.0",
+    "react-simple-pull-to-refresh": "https://esm.sh/react-simple-pull-to-refresh@1.3.3?deps=react@18.2.0,react-dom@18.2.0",
+    "swiper/": "https://esm.sh/swiper@12.0.3/",
+    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.1/"
+  }
+}
+</script>
+<link rel="stylesheet" href="/index.css">
+</head>
+  <body class="bg-gray-50 text-gray-900 font-sans">
+    <div id="root"></div>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
