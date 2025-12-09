@@ -1,13 +1,12 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { Swiper as SwiperClass } from 'swiper/types';
+import type { Swiper as SwiperClass } from 'swiper/types';
 import { useNavigate, Link } from 'react-router-dom';
-import 'swiper/css';
 
 import { SegmentSlide } from './SegmentSlide';
-import { Modal } from '@/components/ui/Modal';
-import { useStories } from '@/components/contexts/StoryContext';
-import { useViewportHeight } from '@/components/hooks/useViewportHeight';
+import { Modal } from '../ui/Modal';
+import { useStories } from '../contexts/StoryContext';
+import { useViewportHeight } from '../hooks/useViewportHeight';
 
 interface StoryViewerProps {
   initialStoryId?: string;
@@ -16,9 +15,7 @@ interface StoryViewerProps {
 
 type SwiperRegistry = Record<number, SwiperClass>;
 
-const PLAYER_ASPECT_RATIO = '3 / 4';
-const PLAYER_MAX_WIDTH = 1024;
-const PLAYER_MAX_HEIGHT = 1366;
+const PLAYER_ASPECT_RATIO = '9 / 16';
 
 export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initialSegmentId }) => {
   const { stories, loading } = useStories();
@@ -73,8 +70,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
   const frameStyle = useMemo<React.CSSProperties>(
     () => ({
       aspectRatio: PLAYER_ASPECT_RATIO,
-      maxWidth: `${PLAYER_MAX_WIDTH}px`,
-      maxHeight: `${PLAYER_MAX_HEIGHT}px`,
     }),
     [],
   );
@@ -130,8 +125,6 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
     });
   };
 
-
-
   const goToSegment = (storyIndex: number, segmentIndex: number) => {
     horizontalSwiperRefs.current[storyIndex]?.slideTo(segmentIndex);
   };
@@ -148,7 +141,10 @@ export const StoryViewer: React.FC<StoryViewerProps> = ({ initialStoryId, initia
 
   return (
     <div className="fixed inset-0 bg-gray-50 flex flex-col items-center justify-center overflow-hidden" style={playerStyle}>
-      <div className="relative w-full bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col" style={frameStyle}>
+      <div
+        className="relative h-full w-auto max-w-full bg-black shadow-2xl md:rounded-xl overflow-hidden flex flex-col"
+        style={frameStyle}
+      >
         <header className="absolute top-0 left-0 right-0 z-30 p-4 flex items-center gap-3 bg-gradient-to-b from-black/80 to-transparent backdrop-blur-sm flex-shrink-0">
           <h1 className="flex-shrink-0">
             <Link to="/" className="font-poppins font-bold text-xl text-white tracking-tight leading-none drop-shadow-md">
