@@ -4,11 +4,11 @@ export interface MediaNode {
 }
 
 export interface Slide {
-  media: {
+  media?: {
     node: MediaNode;
   };
-  title: string;
-  text: string;
+  title?: string;
+  text?: string;
   contentPosition?: 'top' | 'center' | 'bottom';
   textSize?: 'small' | 'medium' | 'large';
   showOverlay?: boolean;
@@ -19,7 +19,7 @@ export interface StoryNode {
   id: string;
   slug: string;
   title: string;
-  content?: string; // HTML content
+  content: string;
   featuredImage?: {
     node: {
       sourceUrl: string;
@@ -35,29 +35,33 @@ export interface StoryNode {
   };
 }
 
-export interface TransformedStory {
-  id: string; // Unique identifier (slug or generated)
-  title: string;
-  slug: string;
-  category: string;
-  image: string;
-  fullContent: string; // HTML content for the modal
-  segments: TransformedSegment[];
-}
-
 export interface TransformedSegment {
-  id: string; // Slugified title or index
-  title: string;
-  descriptionHTML: string;
+  id: string;
   mediaUrl: string;
-  mediaType: 'video' | 'image';
+  mediaType: string;
+  title: string;
+  description: string;
   contentPosition: 'top' | 'center' | 'bottom';
   textSize: 'small' | 'medium' | 'large';
   showOverlay: boolean;
   showButton: boolean;
 }
 
-export interface CacheData {
-  stories: TransformedStory[];
-  timestamp: number;
+export interface TransformedStory {
+  id: string;
+  originalId: string;
+  title: string;
+  content: string; // HTML content for modal
+  coverImage: string;
+  category: string;
+  segments: TransformedSegment[];
+}
+
+export interface GraphQLResponse {
+  data: {
+    posts: {
+      nodes: StoryNode[];
+    };
+  };
+  errors?: { message: string }[];
 }
