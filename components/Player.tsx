@@ -38,6 +38,7 @@ const StorySegment = React.memo(({
     isActive: boolean,
     onOpenModal: (id: string) => void
 }) => {
+    const iframeRef = useRef<HTMLIFrameElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
     const isVideo = segment?.mediaType?.startsWith('video/') && segment.mediaType !== 'video/youtube';
     const isYouTube = segment?.mediaType === 'video/youtube';
@@ -49,6 +50,19 @@ const StorySegment = React.memo(({
 
     // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
+        if (isYouTube && iframeRef.current) {
+            if (isActive) {
+                // YouTube Autoplay via postMessage if needed, or rely on src autoplay=1
+                // But src autoplay is reliable. We might want to ensure it plays if we swiped back.
+                // Sending playVideo command is safer.
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                setIsPlaying(true);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                setIsPlaying(false);
+            }
+        }
+
         if (!isVideo || !videoRef.current) return;
 
         if (isActive) {
@@ -77,10 +91,22 @@ const StorySegment = React.memo(({
             videoRef.current.pause();
             setIsPlaying(false);
         }
-    }, [isActive, isVideo]);
+    }, [isActive, isVideo, isYouTube]);
 
     const togglePlay = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
+
+        if (isYouTube && iframeRef.current) {
+            if (isPlaying) {
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                setIsPlaying(false);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+                setIsPlaying(true);
+            }
+            return;
+        }
+
         if (!videoRef.current) return;
 
         if (videoRef.current.paused) {
@@ -91,16 +117,28 @@ const StorySegment = React.memo(({
             videoRef.current.pause();
             setIsPlaying(false);
         }
-    }, []);
+    }, [isYouTube, isPlaying]);
 
     const toggleMute = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
+
+        if (isYouTube && iframeRef.current) {
+            if (isMuted) {
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"unMute","args":""}', '*');
+                setIsMuted(false);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"mute","args":""}', '*');
+                setIsMuted(true);
+            }
+            return;
+        }
+
         if (!videoRef.current) return;
 
         const nextMuteState = !videoRef.current.muted;
         videoRef.current.muted = nextMuteState;
         setIsMuted(nextMuteState);
-    }, []);
+    }, [isYouTube, isMuted]);
 
     // Handlers for spinner visibility
     const handleVideoLoad = useCallback(() => setIsLoading(false), []);
@@ -126,6 +164,7 @@ const StorySegment = React.memo(({
     };
 
     const youTubeId = isYouTube ? getYouTubeId(segment.mediaUrl) : null;
+    const showControls = isVideo || (isYouTube && youTubeId);
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black select-none">
@@ -154,55 +193,25 @@ const StorySegment = React.memo(({
                             <Spinner />
                         </div>
                     )}
-
-                    {/* Controls Layer */}
-                    <div className="absolute top-[70px] right-4 z-50 flex flex-col gap-4 pointer-events-auto">
-                        {/* Play/Pause Toggle */}
-                        <button
-                            onClick={togglePlay}
-                            className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
-                            aria-label={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
-                        >
-                            {!isPlaying ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
-                                </svg>
-                            )}
-                        </button>
-
-                        {/* Mute Toggle */}
-                        <button
-                            onClick={toggleMute}
-                            className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
-                            aria-label={isMuted ? "Ativar som" : "Mudo"}
-                        >
-                            {isMuted ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-                                </svg>
-                            ) : (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
-                                </svg>
-                            )}
-                        </button>
-                    </div>
                 </>
             ) : isYouTube && youTubeId ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
+                    {/* Overlay to block direct interaction with iframe so clicks go to togglePlay */}
+                    <div
+                        className="absolute inset-0 z-20 cursor-pointer"
+                        onClick={togglePlay}
+                    ></div>
+
                     <iframe
-                        className="w-full h-full absolute inset-0 pointer-events-auto"
-                        src={`https://www.youtube.com/embed/${youTubeId}?autoplay=1&mute=1&controls=1&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
+                        ref={iframeRef}
+                        className="w-full h-full absolute inset-0 pointer-events-auto z-10"
+                        src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
                         title="YouTube video player"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                         referrerPolicy="strict-origin-when-cross-origin"
                         allowFullScreen
                     ></iframe>
-                    {/* Dark overlay to match other slides if needed, but usually video is full opacity */}
+
                     {segment?.showOverlay && (
                         <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
                     )}
@@ -232,6 +241,45 @@ const StorySegment = React.memo(({
             ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-white/50">
                     Mídia indisponível
+                </div>
+            )}
+
+            {/* Shared Controls Layer */}
+            {showControls && (
+                <div className="absolute top-[70px] right-4 z-50 flex flex-col gap-4 pointer-events-auto">
+                    {/* Play/Pause Toggle */}
+                    <button
+                        onClick={togglePlay}
+                        className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
+                        aria-label={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
+                    >
+                        {!isPlaying ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z" />
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25v13.5m-7.5-13.5v13.5" />
+                            </svg>
+                        )}
+                    </button>
+
+                    {/* Mute Toggle */}
+                    <button
+                        onClick={toggleMute}
+                        className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
+                        aria-label={isMuted ? "Ativar som" : "Mudo"}
+                    >
+                        {isMuted ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M17.25 9.75L19.5 12m0 0l2.25 2.25M19.5 12l2.25-2.25M19.5 12l-2.25 2.25m-10.5-6l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.114 5.636a9 9 0 010 12.728M16.463 8.288a5.25 5.25 0 010 7.424M6.75 8.25l4.72-4.72a.75.75 0 011.28.53v15.88a.75.75 0 01-1.28.53l-4.72-4.72H4.51c-.88 0-1.704-.507-1.938-1.354A9.01 9.01 0 012.25 12c0-.83.112-1.633.322-2.396C2.806 8.756 3.63 8.25 4.51 8.25H6.75z" />
+                            </svg>
+                        )}
+                    </button>
                 </div>
             )}
 
