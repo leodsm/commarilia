@@ -37,6 +37,7 @@ const StorySegment = React.memo(({
 
     // Effect to handle Auto-Play and Auto-Pause based on slide activity
     useEffect(() => {
+        // Version 2.0.1 - Fixed Video Controls
         if (!isVideo || !videoRef.current) return;
 
         if (isActive) {
