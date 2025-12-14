@@ -4,6 +4,8 @@ export interface MediaNode {
 }
 
 export interface Slide {
+  mediaSource?: 'file' | 'youtube';
+  youtubeUrl?: string;
   media?: {
     node: MediaNode;
   };

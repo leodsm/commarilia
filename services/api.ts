@@ -23,6 +23,8 @@ const GQL_QUERY = `
               conteudoDosStories {
                   conteudo {
                       slides {
+                          mediaSource
+                          youtubeUrl
                           media {
                               node {
                                   mediaItemUrl
@@ -48,7 +50,7 @@ function generateDescription(html: string): string {
   const parser = new DOMParser();
   const doc = parser.parseFromString(html, 'text/html');
   const listItems = doc.querySelectorAll('li');
-  
+
   if (listItems.length > 0) {
     return Array.from(listItems).map(li => `• ${li.textContent?.trim()}`).join('<br>');
   }
@@ -101,17 +103,30 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
           content: post.content || '<p>Conteúdo indisponível</p>',
           coverImage: post.featuredImage?.node?.sourceUrl || 'https://picsum.photos/400/500',
           category: post.categories?.nodes[0]?.name || 'Geral',
-          segments: slides.map((slide, sIdx) => ({
-            id: `${storyId}-seg-${sIdx}`,
-            mediaUrl: slide.media?.node?.mediaItemUrl || '',
-            mediaType: slide.media?.node?.mimeType || 'image/jpeg',
-            title: (slide.title || '').trim(),
-            description: generateDescription(slide.text || ''),
-            contentPosition: slide.contentPosition || 'bottom',
-            textSize: slide.textSize || 'medium',
-            showOverlay: slide.showOverlay !== false,
-            showButton: slide.showButton !== false,
-          })),
+          segments: slides.map((slide, sIdx) => {
+            let mediaUrl = slide.media?.node?.mediaItemUrl || '';
+            let mediaType = slide.media?.node?.mimeType || 'image/jpeg';
+
+            // Safely get mediaSource value (it might be an array or string)
+            const source = Array.isArray(slide.mediaSource) ? slide.mediaSource[0] : slide.mediaSource;
+
+            if (source === 'youtube' && slide.youtubeUrl) {
+              mediaUrl = slide.youtubeUrl;
+              mediaType = 'video/youtube';
+            }
+
+            return {
+              id: `${storyId}-seg-${sIdx}`,
+              mediaUrl: mediaUrl,
+              mediaType: mediaType,
+              title: (slide.title || '').trim(),
+              description: generateDescription(slide.text || ''),
+              contentPosition: slide.contentPosition || 'bottom',
+              textSize: slide.textSize || 'medium',
+              showOverlay: slide.showOverlay !== false,
+              showButton: slide.showButton !== false,
+            };
+          }),
         };
       })
       .filter((story): story is TransformedStory => story !== null);

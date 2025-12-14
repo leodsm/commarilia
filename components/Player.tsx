@@ -17,6 +17,15 @@ interface PlayerProps {
     isModalOpen: boolean;
 }
 
+// Helper to extract YouTube ID
+const getYouTubeId = (url: string) => {
+    if (!url) return null;
+    // Updated regex to include shorts
+    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
+    const match = url.match(regExp);
+    return (match && match[2].length === 11) ? match[2] : null;
+};
+
 // Inner Component for individual segment (Media + Text)
 const StorySegment = React.memo(({
     segment,
@@ -30,7 +39,8 @@ const StorySegment = React.memo(({
     onOpenModal: (id: string) => void
 }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const isVideo = segment?.mediaType?.startsWith('video/');
+    const isVideo = segment?.mediaType?.startsWith('video/') && segment.mediaType !== 'video/youtube';
+    const isYouTube = segment?.mediaType === 'video/youtube';
 
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
@@ -115,15 +125,17 @@ const StorySegment = React.memo(({
         large: 'text-base lg:text-lg'
     };
 
+    const youTubeId = isYouTube ? getYouTubeId(segment.mediaUrl) : null;
+
     return (
         <div className="relative w-full h-full overflow-hidden bg-black select-none">
 
             {/* Media Layer */}
-            {isVideo ? (
+            {isVideo && segment?.mediaUrl ? (
                 <>
                     <video
                         ref={videoRef}
-                        src={segment?.mediaUrl}
+                        src={segment.mediaUrl}
                         className="absolute top-1/2 left-1/2 max-w-full max-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2 z-0 object-cover min-w-full min-h-full cursor-pointer"
                         playsInline
                         muted={true} // Initial state expected by browser for autoplay
@@ -180,18 +192,33 @@ const StorySegment = React.memo(({
                         </button>
                     </div>
                 </>
-            ) : (
+            ) : isYouTube && youTubeId ? (
+                <div className="absolute inset-0 w-full h-full bg-black">
+                    <iframe
+                        className="w-full h-full absolute inset-0 pointer-events-auto"
+                        src={`https://www.youtube.com/embed/${youTubeId}?autoplay=1&mute=1&controls=1&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
+                        title="YouTube video player"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                        referrerPolicy="strict-origin-when-cross-origin"
+                        allowFullScreen
+                    ></iframe>
+                    {/* Dark overlay to match other slides if needed, but usually video is full opacity */}
+                    {segment?.showOverlay && (
+                        <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
+                    )}
+                </div>
+            ) : segment?.mediaUrl ? (
                 <>
                     {/* Background Blur Layer */}
                     <div
                         className="absolute inset-0 w-full h-full bg-cover bg-center blur-md scale-110 opacity-70"
-                        style={{ backgroundImage: `url('${segment?.mediaUrl}')` }}
+                        style={{ backgroundImage: `url('${segment.mediaUrl}')` }}
                     ></div>
 
                     {/* Foreground Image Layer - Respects Header Space (top-[54px]) */}
                     <div className="absolute left-0 right-0 bottom-0 top-[54px] z-0">
                         <img
-                            src={segment?.mediaUrl}
+                            src={segment.mediaUrl}
                             alt={segment?.title}
                             className="w-full h-full object-contain"
                             loading="lazy"
@@ -202,6 +229,10 @@ const StorySegment = React.memo(({
                         <div className="absolute left-0 right-0 bottom-0 top-[54px] bg-black/40 z-0"></div>
                     )}
                 </>
+            ) : (
+                <div className="absolute inset-0 flex items-center justify-center text-white/50">
+                    Mídia indisponível
+                </div>
             )}
 
             {/* Content Layer */}
