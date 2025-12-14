@@ -190,25 +190,41 @@ const Player: React.FC<PlayerProps> = ({
             <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 h-[54px]">
                 {/* Logo Section */}
                 {/* Logo & Back Button Section */}
-                <h1
-                    className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer shadow-sm hover:opacity-80 transition-opacity"
-                    onClick={onClose}
-                >
-                    Com<span className="text-[#fd572b]">Marília</span>
-                </h1>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={onClose}
+                        className="w-10 h-10 md:w-[30px] md:h-[30px] flex items-center justify-center rounded-full group focus:outline-none z-50 hover:bg-white/10 md:bg-black/20 md:backdrop-blur-sm md:hover:bg-black/40 transition-all duration-300 aspect-square"
+                        aria-label="Fechar"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 md:w-4 md:h-4 text-white/80 group-hover:text-white transition-colors">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                    <h1
+                        className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer shadow-sm hover:opacity-80 transition-opacity"
+                        onClick={onClose}
+                    >
+                        Com<span className="text-[#fd572b]">Marília</span>
+                    </h1>
+                </div>
 
                 {/* Categories Swiper with Mousewheel & Drag */}
-                <div className="flex-grow min-w-0 mask-gradient">
+                {/* Categories Swiper with Mousewheel & Drag */}
+                <div className="flex-grow min-w-0 mask-gradient" style={{ overflow: 'hidden' }}>
                     <Swiper
                         modules={[FreeMode, Mousewheel]}
                         slidesPerView="auto"
                         spaceBetween={10}
-                        freeMode={true}
+                        freeMode={{
+                            enabled: true,
+                            sticky: true,
+                            momentumRatio: 0.25,
+                        }}
                         grabCursor={true}
                         simulateTouch={true}
                         mousewheel={{
                             forceToAxis: true,
-                            sensitivity: 0.8,
+                            sensitivity: 0.5,
                             releaseOnEdges: true
                         }}
                         className="w-full h-full"
@@ -226,25 +242,16 @@ const Player: React.FC<PlayerProps> = ({
                     </Swiper>
                 </div>
 
-                {/* Close Button Right */}
-                {/* Close Button Right */}
-                <button
-                    onClick={onClose}
-                    className="w-10 h-10 md:w-[30px] md:h-[30px] flex items-center justify-center rounded-full group focus:outline-none z-50 hover:bg-white/10 md:bg-black/20 md:backdrop-blur-sm md:hover:bg-black/40 transition-all duration-300"
-                    aria-label="Fechar"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 md:w-4 md:h-4 text-white/80 group-hover:text-white transition-colors">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
             </div>
 
             {/* Loading State */}
-            {!swiperReady && (
-                <div className="absolute inset-0 flex items-center justify-center z-40 bg-black">
-                    <Spinner />
-                </div>
-            )}
+            {
+                !swiperReady && (
+                    <div className="absolute inset-0 flex items-center justify-center z-40 bg-black">
+                        <Spinner />
+                    </div>
+                )
+            }
 
             {/* Main Vertical Swiper */}
             <Swiper
@@ -306,7 +313,7 @@ const Player: React.FC<PlayerProps> = ({
                     </SwiperSlide>
                 ))}
             </Swiper>
-        </div>
+        </div >
     );
 };
 
