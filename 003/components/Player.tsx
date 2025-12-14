@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Mousewheel, FreeMode } from 'swiper/modules';
 import { TransformedStory } from '../types';
@@ -18,7 +18,7 @@ interface PlayerProps {
 }
 
 // Inner Component for individual segment (Media + Text)
-const StorySegment = ({
+const StorySegment = React.memo(({
     segment,
     storyId,
     isActive,
@@ -30,20 +30,26 @@ const StorySegment = ({
     onOpenModal: (id: string) => void
 }) => {
     const videoRef = useRef<HTMLVideoElement>(null);
-    const isVideo = segment.mediaType.startsWith('video/');
+    const isVideo = segment?.mediaType?.startsWith('video/');
 
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
 
     // Reset state when slide becomes active
     useEffect(() => {
+        let mounted = true;
         if (isActive) {
             setIsMuted(true);
             setIsPlaying(true);
             if (videoRef.current) {
                 videoRef.current.currentTime = 0;
                 videoRef.current.muted = true;
-                videoRef.current.play().catch(e => console.log('Autoplay prevented', e));
+                const playPromise = videoRef.current.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(e => {
+                        // console.log('Autoplay prevented', e);
+                    });
+                }
             }
         } else {
             setIsPlaying(false);
@@ -51,9 +57,10 @@ const StorySegment = ({
                 videoRef.current.pause();
             }
         }
+        return () => { mounted = false; };
     }, [isActive, isVideo]);
 
-    const togglePlay = (e: React.MouseEvent) => {
+    const togglePlay = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (!videoRef.current) return;
 
@@ -64,16 +71,16 @@ const StorySegment = ({
             videoRef.current.play().catch(e => console.log('Play prevented', e));
             setIsPlaying(true);
         }
-    };
+    }, [isPlaying]);
 
-    const toggleMute = (e: React.MouseEvent) => {
+    const toggleMute = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (!videoRef.current) return;
 
         const newMutedState = !isMuted;
         videoRef.current.muted = newMutedState;
         setIsMuted(newMutedState);
-    };
+    }, [isMuted]);
 
     // Position classes matching the reference logic
     const posClasses = {
@@ -102,12 +109,13 @@ const StorySegment = ({
                 <>
                     <video
                         ref={videoRef}
-                        src={segment.mediaUrl}
+                        src={segment?.mediaUrl}
                         className="absolute top-1/2 left-1/2 max-w-full max-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2 z-0 object-cover min-w-full min-h-full cursor-pointer"
                         playsInline
                         muted={isMuted} // State controlled
                         loop
                         onClick={togglePlay}
+                        aria-label="Video Player"
                     />
 
                     {/* Controls Layer */}
@@ -116,6 +124,7 @@ const StorySegment = ({
                         <button
                             onClick={togglePlay}
                             className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
+                            aria-label={isPlaying ? "Pausar vídeo" : "Reproduzir vídeo"}
                         >
                             {!isPlaying ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -132,6 +141,7 @@ const StorySegment = ({
                         <button
                             onClick={toggleMute}
                             className="p-2 rounded-full bg-black/30 backdrop-blur-sm text-white hover:bg-black/50 transition-colors"
+                            aria-label={isMuted ? "Ativar som" : "Mudo"}
                         >
                             {isMuted ? (
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-6 h-6">
@@ -150,50 +160,51 @@ const StorySegment = ({
                     {/* Background Blur Layer */}
                     <div
                         className="absolute inset-0 w-full h-full bg-cover bg-center blur-md scale-110 opacity-70"
-                        style={{ backgroundImage: `url('${segment.mediaUrl}')` }}
+                        style={{ backgroundImage: `url('${segment?.mediaUrl}')` }}
                     ></div>
 
                     {/* Foreground Image Layer - Respects Header Space (top-[54px]) */}
                     <div className="absolute left-0 right-0 bottom-0 top-[54px] z-0">
                         <img
-                            src={segment.mediaUrl}
-                            alt={segment.title}
+                            src={segment?.mediaUrl}
+                            alt={segment?.title}
                             className="w-full h-full object-contain"
                             loading="lazy"
                         />
                     </div>
                     {/* Optional Overlay from reference logic */}
-                    {segment.showOverlay && (
+                    {segment?.showOverlay && (
                         <div className="absolute left-0 right-0 bottom-0 top-[54px] bg-black/40 z-0"></div>
                     )}
                 </>
             )}
 
             {/* Content Layer */}
-            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-6 flex flex-col ${posClasses[segment.contentPosition as keyof typeof posClasses] || posClasses.bottom} ${segment.contentPosition === 'bottom' ? 'pb-12' : ''} text-left pointer-events-none`}>
+            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-6 flex flex-col ${posClasses[segment?.contentPosition as keyof typeof posClasses] || posClasses.bottom} ${segment?.contentPosition === 'bottom' ? 'pb-12' : ''} text-left pointer-events-none`}>
                 <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
                     <div className="flex flex-col gap-2">
-                        {segment.title && (
-                            <h2 className={`font-poppins font-bold text-white text-shadow leading-tight ${textSizes[segment.textSize as keyof typeof textSizes]}`}>
+                        {segment?.title && (
+                            <h2 className={`font-poppins font-bold text-white text-shadow leading-tight ${textSizes[segment?.textSize as keyof typeof textSizes]}`}>
                                 {segment.title}
                             </h2>
                         )}
 
-                        {segment.description && (
+                        {segment?.description && (
                             <div
-                                className={`text-shadow text-white/90 font-medium leading-relaxed ${descSizes[segment.textSize as keyof typeof textSizes] || descSizes.medium}`}
+                                className={`text-shadow text-white/90 font-medium leading-relaxed ${descSizes[segment?.textSize as keyof typeof textSizes] || descSizes.medium}`}
                                 dangerouslySetInnerHTML={{ __html: segment.description }}
                             />
                         )}
                     </div>
 
-                    {segment.showButton && (
+                    {segment?.showButton && (
                         <button
                             onClick={(e) => {
                                 e.stopPropagation();
                                 onOpenModal(storyId);
                             }}
-                            className={`btn-glass self-start hover:scale-105 pointer-events-auto ${segment.contentPosition === 'bottom' ? 'mb-[50px]' : ''}`}
+                            className={`btn-glass self-start hover:scale-105 pointer-events-auto ${segment?.contentPosition === 'bottom' ? 'mb-[50px]' : ''}`}
+                            aria-label="Leia Mais"
                         >
                             Leia Mais
                         </button>
@@ -202,7 +213,7 @@ const StorySegment = ({
             </div>
         </div>
     );
-};
+});
 
 const Player: React.FC<PlayerProps> = ({
     stories,
@@ -225,6 +236,27 @@ const Player: React.FC<PlayerProps> = ({
 
     const [activeStoryIndex, setActiveStoryIndex] = useState(safeInitialIndex);
     const [activeSegmentIndices, setActiveSegmentIndices] = useState<{ [key: number]: number }>({});
+
+    // Optimized Handlers
+    const handleSwiperInit = useCallback((swiper: SwiperType) => {
+        setSwiperReady(true);
+        setVerticalSwiper(swiper);
+    }, []);
+
+    const handleSlideChange = useCallback((swiper: SwiperType) => {
+        setActiveStoryIndex(swiper.activeIndex);
+    }, []);
+
+    const handleHorizontalSwiperInit = useCallback((storyIndex: number) => (swiper: SwiperType) => {
+        horizontalSwipersRef.current[storyIndex] = swiper;
+    }, []);
+
+    const handleHorizontalSlideChange = useCallback((storyIndex: number) => (swiper: SwiperType) => {
+        setActiveSegmentIndices(prev => ({
+            ...prev,
+            [storyIndex]: swiper.activeIndex
+        }));
+    }, []);
 
     // --- Keyboard Navigation Logic ---
     useEffect(() => {
@@ -304,6 +336,8 @@ const Player: React.FC<PlayerProps> = ({
                                 <button
                                     onClick={() => onCategoryChange(cat)}
                                     className={`category-link inline-block text-white/80 text-xs py-1 px-3 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer ${activeCategory === cat ? 'active' : ''}`}
+                                    aria-label={`Filtrar por categoria: ${cat}`}
+                                    aria-pressed={activeCategory === cat}
                                 >
                                     {cat}
                                 </button>
@@ -329,11 +363,8 @@ const Player: React.FC<PlayerProps> = ({
                 direction="vertical"
                 className="w-full h-full"
                 initialSlide={safeInitialIndex}
-                onSwiper={(swiper) => {
-                    setSwiperReady(true);
-                    setVerticalSwiper(swiper);
-                }}
-                onSlideChange={(swiper) => setActiveStoryIndex(swiper.activeIndex)}
+                onSwiper={handleSwiperInit}
+                onSlideChange={handleSlideChange}
                 mousewheel={{ enabled: !isModalOpen }}
                 threshold={10}
             >
@@ -351,16 +382,8 @@ const Player: React.FC<PlayerProps> = ({
                                     // dynamicBullets removed to fix visibility issues
                                 }}
                                 nested={true}
-                                onSwiper={(swiper) => {
-                                    // Save instance reference for keyboard control
-                                    horizontalSwipersRef.current[storyIndex] = swiper;
-                                }}
-                                onSlideChange={(swiper) => {
-                                    setActiveSegmentIndices(prev => ({
-                                        ...prev,
-                                        [storyIndex]: swiper.activeIndex
-                                    }));
-                                }}
+                                onSwiper={handleHorizontalSwiperInit(storyIndex)}
+                                onSlideChange={handleHorizontalSlideChange(storyIndex)}
                             >
                                 {story.segments.map((segment, segIndex) => {
                                     const isStoryActive = storyIndex === activeStoryIndex;
