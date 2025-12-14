@@ -34,16 +34,19 @@ const StorySegment = React.memo(({
 
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
+    // Loading state for buffering feedback
+    const [isLoading, setIsLoading] = useState(true);
 
-    // Effect to handle Auto-Play and Auto-Pause based on slide activity
+    // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
-        // Version 2.0.1 - Fixed Video Controls
         if (!isVideo || !videoRef.current) return;
 
         if (isActive) {
-            // When taking focus: Reset to beginning, mute, and play
+            // Reset logic
             videoRef.current.currentTime = 0;
             videoRef.current.muted = true;
+            // Force browser to load video data immediately
+            videoRef.current.preload = "auto";
 
             const playPromise = videoRef.current.play();
             if (playPromise !== undefined) {
@@ -51,6 +54,8 @@ const StorySegment = React.memo(({
                     .then(() => {
                         setIsPlaying(true);
                         setIsMuted(true);
+                        // If playing started, we are not loading anymore (mostly)
+                        // But we rely on events for accurate spinner control
                     })
                     .catch(error => {
                         // console.warn("Autoplay prevented:", error);
@@ -58,7 +63,7 @@ const StorySegment = React.memo(({
                     });
             }
         } else {
-            // When losing focus: Pause
+            // Pause and stop buffering if possible (browser handles this)
             videoRef.current.pause();
             setIsPlaying(false);
         }
@@ -86,6 +91,10 @@ const StorySegment = React.memo(({
         videoRef.current.muted = nextMuteState;
         setIsMuted(nextMuteState);
     }, []);
+
+    // Handlers for spinner visibility
+    const handleVideoLoad = useCallback(() => setIsLoading(false), []);
+    const handleVideoWaiting = useCallback(() => setIsLoading(true), []);
 
     // Position classes matching the reference logic
     const posClasses = {
@@ -119,9 +128,20 @@ const StorySegment = React.memo(({
                         playsInline
                         muted={true} // Initial state expected by browser for autoplay
                         loop
+                        preload="auto" // Optimization: Load immediately
                         onClick={togglePlay}
+                        onCanPlay={handleVideoLoad}
+                        onWaiting={handleVideoWaiting}
+                        onPlaying={handleVideoLoad}
                         aria-label="Video Player"
                     />
+
+                    {/* Buffer Spinner */}
+                    {(isLoading) && (
+                        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                            <Spinner />
+                        </div>
+                    )}
 
                     {/* Controls Layer */}
                     <div className="absolute top-[70px] right-4 z-50 flex flex-col gap-4 pointer-events-auto">
