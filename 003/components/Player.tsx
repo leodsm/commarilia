@@ -35,52 +35,56 @@ const StorySegment = React.memo(({
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
 
-    // Reset state when slide becomes active
+    // Effect to handle Auto-Play and Auto-Pause based on slide activity
     useEffect(() => {
-        let mounted = true;
+        if (!isVideo || !videoRef.current) return;
+
         if (isActive) {
-            setIsMuted(true);
-            setIsPlaying(true);
-            if (videoRef.current) {
-                videoRef.current.currentTime = 0;
-                videoRef.current.muted = true;
-                const playPromise = videoRef.current.play();
-                if (playPromise !== undefined) {
-                    playPromise.catch(e => {
-                        // console.log('Autoplay prevented', e);
+            // When taking focus: Reset to beginning, mute, and play
+            videoRef.current.currentTime = 0;
+            videoRef.current.muted = true;
+
+            const playPromise = videoRef.current.play();
+            if (playPromise !== undefined) {
+                playPromise
+                    .then(() => {
+                        setIsPlaying(true);
+                        setIsMuted(true);
+                    })
+                    .catch(error => {
+                        // console.warn("Autoplay prevented:", error);
+                        setIsPlaying(false);
                     });
-                }
             }
         } else {
+            // When losing focus: Pause
+            videoRef.current.pause();
             setIsPlaying(false);
-            if (videoRef.current) {
-                videoRef.current.pause();
-            }
         }
-        return () => { mounted = false; };
     }, [isActive, isVideo]);
 
     const togglePlay = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (!videoRef.current) return;
 
-        if (isPlaying) {
+        if (videoRef.current.paused) {
+            videoRef.current.play()
+                .then(() => setIsPlaying(true))
+                .catch(err => console.error("Play failed:", err));
+        } else {
             videoRef.current.pause();
             setIsPlaying(false);
-        } else {
-            videoRef.current.play().catch(e => console.log('Play prevented', e));
-            setIsPlaying(true);
         }
-    }, [isPlaying]);
+    }, []);
 
     const toggleMute = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
         if (!videoRef.current) return;
 
-        const newMutedState = !isMuted;
-        videoRef.current.muted = newMutedState;
-        setIsMuted(newMutedState);
-    }, [isMuted]);
+        const nextMuteState = !videoRef.current.muted;
+        videoRef.current.muted = nextMuteState;
+        setIsMuted(nextMuteState);
+    }, []);
 
     // Position classes matching the reference logic
     const posClasses = {
@@ -112,7 +116,7 @@ const StorySegment = React.memo(({
                         src={segment?.mediaUrl}
                         className="absolute top-1/2 left-1/2 max-w-full max-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2 z-0 object-cover min-w-full min-h-full cursor-pointer"
                         playsInline
-                        muted={isMuted} // State controlled
+                        muted={true} // Initial state expected by browser for autoplay
                         loop
                         onClick={togglePlay}
                         aria-label="Video Player"
