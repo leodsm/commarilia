@@ -31,11 +31,13 @@ const StorySegment = React.memo(({
     segment,
     storyId,
     isActive,
+    shouldLoad,
     onOpenModal
 }: {
     segment: any,
     storyId: string,
     isActive: boolean,
+    shouldLoad: boolean,
     onOpenModal: (id: string) => void
 }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -171,29 +173,36 @@ const StorySegment = React.memo(({
 
             {/* Media Layer */}
             {isVideo && segment?.mediaUrl ? (
-                <>
-                    <video
-                        ref={videoRef}
-                        src={segment.mediaUrl}
-                        className="absolute top-1/2 left-1/2 max-w-full max-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2 z-0 object-cover min-w-full min-h-full cursor-pointer"
-                        playsInline
-                        muted={true} // Initial state expected by browser for autoplay
-                        loop
-                        preload="auto" // Optimization: Load immediately
-                        onClick={togglePlay}
-                        onCanPlay={handleVideoLoad}
-                        onWaiting={handleVideoWaiting}
-                        onPlaying={handleVideoLoad}
-                        aria-label="Video Player"
-                    />
+                shouldLoad ? (
+                    <>
+                        <video
+                            ref={videoRef}
+                            src={segment.mediaUrl}
+                            className="absolute top-1/2 left-1/2 max-w-full max-h-full w-auto h-auto transform -translate-x-1/2 -translate-y-1/2 z-0 object-cover min-w-full min-h-full cursor-pointer"
+                            playsInline
+                            muted={true} // Initial state expected by browser for autoplay
+                            loop
+                            preload="auto" // Optimization: Load immediately
+                            onClick={togglePlay}
+                            onCanPlay={handleVideoLoad}
+                            onWaiting={handleVideoWaiting}
+                            onPlaying={handleVideoLoad}
+                            aria-label="Video Player"
+                        />
 
-                    {/* Buffer Spinner */}
-                    {(isLoading) && (
-                        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-                            <Spinner />
-                        </div>
-                    )}
-                </>
+                        {/* Buffer Spinner */}
+                        {(isLoading) && (
+                            <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+                                <Spinner />
+                            </div>
+                        )}
+                    </>
+                ) : (
+                    /* Placeholder for Video */
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                        <Spinner />
+                    </div>
+                )
             ) : isYouTube && youTubeId ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
                     {/* Overlay to block direct interaction with iframe so clicks go to togglePlay */}
@@ -202,15 +211,22 @@ const StorySegment = React.memo(({
                         onClick={togglePlay}
                     ></div>
 
-                    <iframe
-                        ref={iframeRef}
-                        className="w-full h-full absolute inset-0 pointer-events-auto z-10"
-                        src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
-                        title="YouTube video player"
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                        referrerPolicy="strict-origin-when-cross-origin"
-                        allowFullScreen
-                    ></iframe>
+                    {shouldLoad ? (
+                        <iframe
+                            ref={iframeRef}
+                            className="w-full h-full absolute inset-0 pointer-events-auto z-10"
+                            src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
+                            title="YouTube video player"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                            referrerPolicy="strict-origin-when-cross-origin"
+                            allowFullScreen
+                        ></iframe>
+                    ) : (
+                        /* Placeholder for YouTube when not loaded (e.g. thumbnail) */
+                        <div className="absolute inset-0 bg-black flex items-center justify-center">
+                            <Spinner />
+                        </div>
+                    )}
 
                     {segment?.showOverlay && (
                         <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
@@ -493,6 +509,8 @@ const Player: React.FC<PlayerProps> = ({
                                     const isStoryActive = storyIndex === activeStoryIndex;
                                     const currentSegIndex = activeSegmentIndices[storyIndex] || 0;
                                     const isSegmentActive = isStoryActive && segIndex === currentSegIndex;
+                                    // Load if active or adjacent (prev/next)
+                                    const shouldLoad = Math.abs(currentSegIndex - segIndex) <= 1;
 
                                     return (
                                         <SwiperSlide key={segment.id}>
@@ -500,6 +518,7 @@ const Player: React.FC<PlayerProps> = ({
                                                 segment={segment}
                                                 storyId={story.id}
                                                 isActive={isSegmentActive}
+                                                shouldLoad={shouldLoad}
                                                 onOpenModal={onOpenModal}
                                             />
                                         </SwiperSlide>
