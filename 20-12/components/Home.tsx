@@ -54,8 +54,8 @@ const Home: React.FC<HomeProps> = ({
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
                   className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 active:scale-95 ${activeCategory === cat
-                      ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
+                    ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
                     }`}
                 >
                   {cat}
@@ -83,11 +83,11 @@ const Home: React.FC<HomeProps> = ({
                   src={story.coverImage}
                   alt={story.title}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Modern Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500"></div>
+                {/* Modern Gradient Overlay - Removed */}
+                {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500"></div> */}
 
                 {/* Hover Overlay Light Effect */}
                 <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
@@ -96,25 +96,13 @@ const Home: React.FC<HomeProps> = ({
                 <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end h-full">
 
                   {/* Category Tag - Glassmorphism */}
-                  <div className="mb-auto transform -translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 self-start">
-                    <span className="inline-block bg-white/10 backdrop-blur-md text-white text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full border border-white/20 shadow-lg">
+                  <div className="mb-auto self-start">
+                    <span className="inline-block bg-black/30 backdrop-blur-md text-white/90 text-[10px] uppercase tracking-[0.2em] font-bold px-4 py-1.5 rounded-full border border-white/30 shadow-sm hover:bg-black/40 transition-colors">
                       {story.category}
                     </span>
                   </div>
 
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-white text-xl font-bold font-poppins leading-tight line-clamp-3 group-hover:text-orange-50 transition-colors drop-shadow-md">
-                      {story.title}
-                    </h3>
-
-                    {/* "Read" Indicator/Icon that appears on hover */}
-                    <div className="h-0 overflow-hidden group-hover:h-6 transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 flex items-center gap-2 mt-2">
-                      <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">Ver Storie</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
+                  {/* Title and Subtitle hidden as per request (text in image) */}
                 </div>
               </div>
             ))

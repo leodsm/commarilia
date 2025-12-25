@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import Home from './components/Home';
 import Player from './components/Player';
 import Modal from './components/Modal';
@@ -47,6 +47,40 @@ const App: React.FC = () => {
   const handleCloseModal = useCallback(() => {
     setModalStoryId(null);
   }, []);
+
+  // -- Deep Linking & URL Management --
+  useEffect(() => {
+    if (loading || !stories.length) return;
+
+    // Check for story slug in URL
+    const params = new URLSearchParams(window.location.search);
+    const storySlug = params.get('story');
+
+    if (storySlug) {
+      const story = stories.find(s => s.id === storySlug);
+      if (story) {
+        setActiveStoryId(story.id);
+        setView('player');
+        // Ensure onboarding logic respects this deep link entry if needed
+        if (localStorage.getItem('hasVisitedComMarilia') === null) {
+          setShowOnboarding(true);
+        }
+      }
+    }
+  }, [loading, stories, setShowOnboarding]);
+
+  // Update URL when active story changes
+  useEffect(() => {
+    if (view === 'player' && activeStoryId) {
+      const url = new URL(window.location.href);
+      url.searchParams.set('story', activeStoryId);
+      window.history.replaceState({}, '', url.toString());
+    } else if (view === 'home') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('story');
+      window.history.replaceState({}, '', url.toString());
+    }
+  }, [view, activeStoryId]);
 
   // -- Keyboard Navigation --
 
@@ -120,6 +154,7 @@ const App: React.FC = () => {
               activeCategory={activeCategory}
               onCategoryChange={setActiveCategory}
               isModalOpen={!!modalStoryId}
+              onStoryChange={setActiveStoryId}
             />
 
             {showOnboarding && (

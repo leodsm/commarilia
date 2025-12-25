@@ -113,6 +113,9 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
             if (source === 'youtube' && slide.youtubeUrl) {
               mediaUrl = slide.youtubeUrl;
               mediaType = 'video/youtube';
+            } else if (source === 'vimeo' && slide.youtubeUrl) {
+              mediaUrl = slide.youtubeUrl;
+              mediaType = 'video/vimeo';
             }
 
             return {
