@@ -1,3 +1,5 @@
+@import "tailwindcss";
+
 @font-face {
   font-family: 'Gotham';
   src: local('Gotham Bold'), local('Gotham-Bold');

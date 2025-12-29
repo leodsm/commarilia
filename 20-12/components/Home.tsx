@@ -94,7 +94,10 @@ const Home: React.FC<HomeProps> = ({
                 </div>
 
                 {/* Title and Subtitle */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90 transition-all duration-500"></div>
+                <div
+                  className="absolute inset-0 z-10 transition-all duration-500"
+                  style={{ background: 'linear-gradient(0deg, rgba(0, 0, 0, 0.75) 0%, rgba(255, 255, 255, 0) 83%)' }}
+                ></div>
 
                 <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end z-20">
                   <h3 className="text-white text-lg font-poppins font-bold leading-tight mb-2 drop-shadow-md line-clamp-3">
