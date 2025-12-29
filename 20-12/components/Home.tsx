@@ -86,23 +86,20 @@ const Home: React.FC<HomeProps> = ({
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Modern Gradient Overlay - Removed */}
-                {/* <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500"></div> */}
+                {/* Category Tag moved to top-left */}
+                <div className="absolute top-4 left-4 z-30">
+                  <span className="inline-block bg-black/50 backdrop-blur-md border border-white/30 text-white text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full shadow-sm">
+                    {story.category}
+                  </span>
+                </div>
 
-                {/* Hover Overlay Light Effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+                {/* Title and Subtitle */}
+                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/60 to-transparent opacity-90 transition-all duration-500"></div>
 
-                {/* Card Content */}
-                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end h-full">
-
-                  {/* Category Tag - Glassmorphism */}
-                  <div className="mb-auto self-start">
-                    <span className="inline-block bg-black/30 backdrop-blur-md text-white/90 text-[10px] uppercase tracking-[0.2em] font-bold px-4 py-1.5 rounded-full border border-white/30 shadow-sm hover:bg-black/40 transition-colors">
-                      {story.category}
-                    </span>
-                  </div>
-
-                  {/* Title and Subtitle hidden as per request (text in image) */}
+                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end z-20">
+                  <h3 className="text-white text-lg font-poppins font-bold leading-tight mb-2 drop-shadow-md line-clamp-3">
+                    {story.title}
+                  </h3>
                 </div>
               </div>
             ))

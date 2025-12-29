@@ -12,6 +12,20 @@
   font-style: normal;
 }
 
+@font-face {
+  font-family: 'Gotham';
+  src: local('Gotham Bold'), local('Gotham-Bold');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Gotham';
+  src: local('Gotham Book'), local('Gotham-Book'), local('Gotham');
+  font-weight: 400;
+  font-style: normal;
+}
+
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;

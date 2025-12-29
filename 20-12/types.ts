@@ -32,6 +32,7 @@ export interface StoryNode {
   };
   conteudoDosStories?: {
     conteudo?: {
+      subtitulo?: string;
       slides?: Slide[];
     };
   };
@@ -56,6 +57,7 @@ export interface TransformedStory {
   content: string; // HTML content for modal
   coverImage: string;
   category: string;
+  subtitle?: string;
   segments: TransformedSegment[];
 }
 

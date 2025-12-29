@@ -29,8 +29,8 @@ const getYouTubeId = (url: string) => {
 // Helper to extract Vimeo ID
 const getVimeoId = (url: string) => {
     if (!url) return null;
-    // Regex to capture numeric ID from various Vimeo URL formats
-    const regExp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
+    // Regex to capture numeric ID from various Vimeo URL formats including /manage/videos/
+    const regExp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|manage\/videos\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
     const match = url.match(regExp);
 
     // Also try simple numeric check if the URL is just an ID (unlikely but possible)
@@ -395,7 +395,7 @@ const StorySegment = React.memo(({
 
                         {segment?.description && (
                             <div
-                                className="text-shadow text-white/90 font-gotham font-normal leading-normal tracking-[-0.04em] text-[17px]"
+                                className="text-shadow text-white/90 font-gotham font-light leading-normal tracking-[-0.04em] text-[17px]"
                                 dangerouslySetInnerHTML={{ __html: segment.description }}
                             />
                         )}
@@ -405,6 +405,16 @@ const StorySegment = React.memo(({
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
+                                // Pause video logic
+                                if (isYouTube && iframeRef.current) {
+                                    iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                                } else if (isVimeo && iframeRef.current) {
+                                    iframeRef.current.contentWindow?.postMessage('{"method":"pause"}', '*');
+                                } else if (videoRef.current) {
+                                    videoRef.current.pause();
+                                }
+                                setIsPlaying(false);
+
                                 onOpenModal(storyId);
                             }}
                             className={`group/btn flex flex-col items-center justify-center gap-2 cursor-pointer animate-slide-up transition-all duration-300 hover:scale-105 self-center pointer-events-auto ${segment?.contentPosition === 'bottom' ? 'mb-12' : ''}`}
