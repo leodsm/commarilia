@@ -3,17 +3,11 @@ import Home from './components/Home';
 import Player from './components/Player';
 import Modal from './components/Modal';
 import Onboarding from './components/Onboarding';
-import { HelmetProvider } from 'react-helmet-async';
-import ReactGA from 'react-ga4';
 
 // Hooks
 import { useStories } from './hooks/useStories';
 import { useOnboarding } from './hooks/useOnboarding';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
-
-// Initialize GA4 - Replace 'G-XXXXXXXXXX' with actual ID or ENV
-const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2'; // Updated with user provided ID
-ReactGA.initialize(GA_MEASUREMENT_ID);
 
 const App: React.FC = () => {
   const { stories, loading, error } = useStories();
@@ -32,6 +26,11 @@ const App: React.FC = () => {
 
     // If onboarding is pending, show it now when player opens
     if (localStorage.getItem('hasVisitedComMarilia') === null) {
+      // We use direct localStorage check here or need the hook to expose 'hasVisited' state?
+      // The hook logic handles 'showOnboarding' on mount, but let's re-trigger if needed.
+      // Actually, the original logic was: "If onboarding is pending, show it now when player opens".
+      // The hook sets showOnboarding on mount. If user closed it, it's closed.
+      // The original code re-checked localStorage. Let's replicate safely.
       setShowOnboarding(true);
     }
   }, [setShowOnboarding]);
@@ -121,65 +120,57 @@ const App: React.FC = () => {
     return <div className="p-10 text-center text-red-500">{error}</div>;
   }
 
-  // -- Analytics Tracking --
-  useEffect(() => {
-    // Send pageview with a custom path
-    ReactGA.send({ hitType: "pageview", page: view === 'home' ? '/' : `/story/${activeStoryId || ''}` });
-  }, [view, activeStoryId]);
-
   return (
-    <HelmetProvider>
-      <div className="font-inter text-gray-900 bg-white">
-        {/* Home View */}
-        {view === 'home' && (
-          <Home
-            stories={stories}
-            isLoading={loading}
-            activeCategory={activeCategory}
-            onSelectCategory={setActiveCategory}
-            onSelectStory={handleOpenPlayer}
-          />
-        )}
+    <div className="font-inter text-gray-900 bg-white">
+      {/* Home View */}
+      {view === 'home' && (
+        <Home
+          stories={stories}
+          isLoading={loading}
+          activeCategory={activeCategory}
+          onSelectCategory={setActiveCategory}
+          onSelectStory={handleOpenPlayer}
+        />
+      )}
 
-        {/* Player View Overlay */}
-        {view === 'player' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
-            {/* Backdrop with blur */}
-            <div
-              className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
-              onClick={handleClosePlayer}
-              aria-hidden="true"
+      {/* Player View Overlay */}
+      {view === 'player' && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+          {/* Backdrop with blur */}
+          <div
+            className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
+            onClick={handleClosePlayer}
+            aria-hidden="true"
+          />
+
+          {/* Player Container */}
+          <div className="w-full h-full md:w-auto md:h-full md:aspect-[9/16] bg-black relative shadow-2xl overflow-hidden md:rounded-none border-gray-800 md:border z-10 transition-all duration-300">
+            <Player
+              stories={playerStories}
+              allCategories={allCategories}
+              initialStoryId={activeStoryId || ''}
+              onClose={handleClosePlayer}
+              onOpenModal={setModalStoryId}
+              activeCategory={activeCategory}
+              onCategoryChange={setActiveCategory}
+              isModalOpen={!!modalStoryId}
+              onStoryChange={setActiveStoryId}
             />
 
-            {/* Player Container */}
-            <div className="w-full h-full md:w-auto md:h-full md:aspect-[9/16] bg-black relative shadow-2xl overflow-hidden md:rounded-none border-gray-800 md:border z-10 transition-all duration-300">
-              <Player
-                stories={playerStories}
-                allCategories={allCategories}
-                initialStoryId={activeStoryId || ''}
-                onClose={handleClosePlayer}
-                onOpenModal={setModalStoryId}
-                activeCategory={activeCategory}
-                onCategoryChange={setActiveCategory}
-                isModalOpen={!!modalStoryId}
-                onStoryChange={setActiveStoryId}
-              />
-
-              {showOnboarding && (
-                <Onboarding onDismiss={handleDismissOnboarding} />
-              )}
-            </div>
+            {showOnboarding && (
+              <Onboarding onDismiss={handleDismissOnboarding} />
+            )}
           </div>
-        )}
+        </div>
+      )}
 
-        {/* Read More Modal */}
-        <Modal
-          isOpen={!!modalStoryId}
-          onClose={handleCloseModal}
-          story={activeModalStory}
-        />
-      </div>
-    </HelmetProvider>
+      {/* Read More Modal */}
+      <Modal
+        isOpen={!!modalStoryId}
+        onClose={handleCloseModal}
+        story={activeModalStory}
+      />
+    </div>
   );
 };
 

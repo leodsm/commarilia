@@ -1,7 +1,6 @@
 import React from 'react';
 import { TransformedStory } from '../types';
 import { CardSkeleton, CategorySkeleton } from './Loader';
-import SEO from './SEO';
 
 interface HomeProps {
   stories: TransformedStory[];
@@ -25,9 +24,8 @@ const Home: React.FC<HomeProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
-      <SEO title="Home" />
       {/* Header */}
-      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-[100] shadow-sm transition-all">
+      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
           <div
             className="flex items-center gap-2 cursor-pointer select-none"
@@ -41,7 +39,7 @@ const Home: React.FC<HomeProps> = ({
       </header>
 
       {/* Categories Bar */}
-      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-[90] shadow-sm">
+      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-30 shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-start sm:justify-center gap-3 overflow-x-auto no-scrollbar pb-1">
             {isLoading ? (
@@ -88,14 +86,31 @@ const Home: React.FC<HomeProps> = ({
                   className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Category Tag moved to top-left */}
-                <div className="absolute top-4 left-4 z-20">
-                  <span className="inline-block bg-black/50 backdrop-blur-md border border-white/30 text-white text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full shadow-sm">
-                    {story.category}
-                  </span>
-                </div>
+                {/* Modern Gradient Overlay - Conditionally Rendered */}
+                {story.showOverlay && (
+                  <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500"></div>
+                )}
 
-                {/* Title and Subtitle removed as per request */}
+                {/* Hover Overlay Light Effect */}
+                <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
+
+                {/* Card Content */}
+                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end h-full">
+
+                  {/* Category Tag - Glassmorphism */}
+                  <div className="mb-auto self-start">
+                    <span className="inline-block bg-black/30 backdrop-blur-md text-white/90 text-[10px] uppercase tracking-[0.2em] font-bold px-4 py-1.5 rounded-full border border-white/30 shadow-sm hover:bg-black/40 transition-colors">
+                      {story.category}
+                    </span>
+                  </div>
+
+                  {/* Title Overlay */}
+                  <div className="mb-0">
+                    <h3 className="text-white text-lg font-bold leading-tight drop-shadow-md font-poppins line-clamp-2">
+                      {story.title}
+                    </h3>
+                  </div>
+                </div>
               </div>
             ))
           ) : (
