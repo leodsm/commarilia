@@ -5,6 +5,7 @@ import { TransformedStory } from '../types';
 import { Spinner } from './Loader';
 // Import Swiper type for instance typing
 import type { Swiper as SwiperType } from 'swiper';
+import SEO from './SEO';
 
 interface PlayerProps {
     stories: TransformedStory[];
@@ -15,15 +16,28 @@ interface PlayerProps {
     activeCategory: string;
     onCategoryChange: (cat: string) => void;
     isModalOpen: boolean;
+    onStoryChange?: (storyId: string) => void;
 }
 
 // Helper to extract YouTube ID
 const getYouTubeId = (url: string) => {
     if (!url) return null;
-    // Updated regex to include shorts
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
     const match = url.match(regExp);
     return (match && match[2].length === 11) ? match[2] : null;
+};
+
+// Helper to extract Vimeo ID
+const getVimeoId = (url: string) => {
+    if (!url) return null;
+    // Regex to capture numeric ID from various Vimeo URL formats including /manage/videos/
+    const regExp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|manage\/videos\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
+    const match = url.match(regExp);
+
+    // Also try simple numeric check if the URL is just an ID (unlikely but possible)
+    if (!match && /^\d+$/.test(url)) return url;
+
+    return (match && match[1]) ? match[1] : null;
 };
 
 // Inner Component for individual segment (Media + Text)
@@ -42,25 +56,46 @@ const StorySegment = React.memo(({
 }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
-    const isVideo = segment?.mediaType?.startsWith('video/') && segment.mediaType !== 'video/youtube';
+    const isVideo = segment?.mediaType?.startsWith('video/') && segment.mediaType !== 'video/youtube' && segment.mediaType !== 'video/vimeo';
     const isYouTube = segment?.mediaType === 'video/youtube';
+    const isVimeo = segment?.mediaType === 'video/vimeo';
 
     const [isMuted, setIsMuted] = useState(true);
     const [isPlaying, setIsPlaying] = useState(true);
     // Loading state for buffering feedback
     const [isLoading, setIsLoading] = useState(true);
+    const [showButtonText, setShowButtonText] = useState(true);
+
+    useEffect(() => {
+        if (isActive) {
+            setShowButtonText(true);
+            const timer = setTimeout(() => {
+                setShowButtonText(false);
+            }, 3000);
+            return () => clearTimeout(timer);
+        } else {
+            setShowButtonText(true);
+        }
+    }, [isActive]);
 
     // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
         if (isYouTube && iframeRef.current) {
             if (isActive) {
-                // YouTube Autoplay via postMessage if needed, or rely on src autoplay=1
-                // But src autoplay is reliable. We might want to ensure it plays if we swiped back.
-                // Sending playVideo command is safer.
                 iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
                 setIsPlaying(true);
             } else {
                 iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                setIsPlaying(false);
+            }
+        }
+
+        if (isVimeo && iframeRef.current) {
+            if (isActive) {
+                iframeRef.current.contentWindow?.postMessage('{"method":"play"}', '*');
+                setIsPlaying(true);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"method":"pause"}', '*');
                 setIsPlaying(false);
             }
         }
@@ -93,7 +128,7 @@ const StorySegment = React.memo(({
             videoRef.current.pause();
             setIsPlaying(false);
         }
-    }, [isActive, isVideo, isYouTube]);
+    }, [isActive, isVideo, isYouTube, isVimeo]);
 
     const togglePlay = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -109,6 +144,17 @@ const StorySegment = React.memo(({
             return;
         }
 
+        if (isVimeo && iframeRef.current) {
+            if (isPlaying) {
+                iframeRef.current.contentWindow?.postMessage('{"method":"pause"}', '*');
+                setIsPlaying(false);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"method":"play"}', '*');
+                setIsPlaying(true);
+            }
+            return;
+        }
+
         if (!videoRef.current) return;
 
         if (videoRef.current.paused) {
@@ -119,7 +165,7 @@ const StorySegment = React.memo(({
             videoRef.current.pause();
             setIsPlaying(false);
         }
-    }, [isYouTube, isPlaying]);
+    }, [isYouTube, isVimeo, isPlaying]);
 
     const toggleMute = useCallback((e: React.MouseEvent) => {
         e.stopPropagation();
@@ -135,12 +181,23 @@ const StorySegment = React.memo(({
             return;
         }
 
+        if (isVimeo && iframeRef.current) {
+            if (isMuted) {
+                iframeRef.current.contentWindow?.postMessage('{"method":"setVolume", "value":1}', '*');
+                setIsMuted(false);
+            } else {
+                iframeRef.current.contentWindow?.postMessage('{"method":"setVolume", "value":0}', '*');
+                setIsMuted(true);
+            }
+            return;
+        }
+
         if (!videoRef.current) return;
 
         const nextMuteState = !videoRef.current.muted;
         videoRef.current.muted = nextMuteState;
         setIsMuted(nextMuteState);
-    }, [isYouTube, isMuted]);
+    }, [isYouTube, isVimeo, isMuted]);
 
     // Handlers for spinner visibility
     const handleVideoLoad = useCallback(() => setIsLoading(false), []);
@@ -166,7 +223,8 @@ const StorySegment = React.memo(({
     };
 
     const youTubeId = isYouTube ? getYouTubeId(segment.mediaUrl) : null;
-    const showControls = isVideo || (isYouTube && youTubeId);
+    const vimeoId = isVimeo ? getVimeoId(segment.mediaUrl) : null;
+    const showControls = isVideo || (isYouTube && youTubeId) || (isVimeo && vimeoId);
 
     return (
         <div className="relative w-full h-full overflow-hidden bg-black select-none">
@@ -232,6 +290,34 @@ const StorySegment = React.memo(({
                         <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
                     )}
                 </div>
+            ) : isVimeo && vimeoId ? (
+                <div className="absolute inset-0 w-full h-full bg-black">
+                    {/* Overlay to block direct interaction with iframe so clicks go to togglePlay */}
+                    <div
+                        className="absolute inset-0 z-20 cursor-pointer"
+                        onClick={togglePlay}
+                    ></div>
+
+                    {shouldLoad ? (
+                        <iframe
+                            ref={iframeRef}
+                            className="w-full h-full absolute inset-0 pointer-events-auto z-10"
+                            src={`https://player.vimeo.com/video/${vimeoId}?autoplay=1&muted=1&controls=0&loop=1&background=1`}
+                            title="Vimeo video player"
+                            allow="autoplay; fullscreen; picture-in-picture"
+                            allowFullScreen
+                        ></iframe>
+                    ) : (
+                        /* Placeholder for Vimeo */
+                        <div className="absolute inset-0 bg-black flex items-center justify-center">
+                            <Spinner />
+                        </div>
+                    )}
+
+                    {segment?.showOverlay && (
+                        <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
+                    )}
+                </div>
             ) : segment?.mediaUrl ? (
                 <>
                     {/* Background Blur Layer */}
@@ -279,7 +365,6 @@ const StorySegment = React.memo(({
                             </svg>
                         )}
                     </button>
-
                     {/* Mute Toggle */}
                     <button
                         onClick={toggleMute}
@@ -304,30 +389,53 @@ const StorySegment = React.memo(({
                 <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
                     <div className="flex flex-col gap-2">
                         {segment?.title && (
-                            <h2 className={`font-poppins font-bold text-white text-shadow leading-tight ${textSizes[segment?.textSize as keyof typeof textSizes]}`}>
+                            <h2 className="font-gotham font-bold text-white text-shadow leading-[32px] tracking-[-0.04em] text-[30px]">
                                 {segment.title}
                             </h2>
                         )}
 
                         {segment?.description && (
                             <div
-                                className={`text-shadow text-white/90 font-medium leading-relaxed ${descSizes[segment?.textSize as keyof typeof textSizes] || descSizes.medium}`}
+                                className="text-shadow text-white/90 font-gotham font-light leading-normal tracking-[-0.04em] text-[17px]"
                                 dangerouslySetInnerHTML={{ __html: segment.description }}
                             />
                         )}
                     </div>
 
                     {segment?.showButton && (
-                        <button
+                        <div
                             onClick={(e) => {
                                 e.stopPropagation();
+                                // Pause video logic
+                                if (isYouTube && iframeRef.current) {
+                                    iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+                                } else if (isVimeo && iframeRef.current) {
+                                    iframeRef.current.contentWindow?.postMessage('{"method":"pause"}', '*');
+                                } else if (videoRef.current) {
+                                    videoRef.current.pause();
+                                }
+                                setIsPlaying(false);
+
                                 onOpenModal(storyId);
                             }}
-                            className={`btn-glass self-start hover:scale-105 pointer-events-auto ${segment?.contentPosition === 'bottom' ? 'mb-[50px]' : ''}`}
+                            className={`group/btn flex flex-col items-center justify-center gap-2 cursor-pointer animate-slide-up transition-all duration-300 hover:scale-105 self-center pointer-events-auto ${segment?.contentPosition === 'bottom' ? 'mb-12' : ''}`}
+                            role="button"
                             aria-label="Leia Mais"
                         >
-                            Leia Mais
-                        </button>
+                            {/* Circle Icon Container */}
+                            <div className={`w-10 h-10 rounded-full border-[1.5px] border-white flex items-center justify-center transition-all duration-500 bg-black/10 backdrop-blur-[2px] shadow-sm group-hover/btn:bg-white/20 group-hover/btn:border-white ${!showButtonText ? 'opacity-80 hover:opacity-100 scale-90 hover:scale-100' : ''}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white translate-y-[1px] group-hover/btn:-translate-y-0.5 transition-transform duration-300">
+                                    <path fillRule="evenodd" d="M11.47 7.72a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 01-1.06-1.06l7.5-7.5z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+
+                            {/* Text with fade out transition */}
+                            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showButtonText ? 'max-h-10 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                <span className="text-white text-[13px] font-gotham font-medium tracking-wide drop-shadow-md whitespace-nowrap">
+                                    Leia Mais
+                                </span>
+                            </div>
+                        </div>
                     )}
                 </div>
             </div>
@@ -343,7 +451,8 @@ const Player: React.FC<PlayerProps> = ({
     onOpenModal,
     activeCategory,
     onCategoryChange,
-    isModalOpen
+    isModalOpen,
+    onStoryChange
 }) => {
     const [swiperReady, setSwiperReady] = useState(false);
     const [verticalSwiper, setVerticalSwiper] = useState<SwiperType | null>(null);
@@ -357,6 +466,23 @@ const Player: React.FC<PlayerProps> = ({
     const [activeStoryIndex, setActiveStoryIndex] = useState(safeInitialIndex);
     const [activeSegmentIndices, setActiveSegmentIndices] = useState<{ [key: number]: number }>({});
 
+    // Derive current story and segment
+    const currentStory = stories[activeStoryIndex];
+    // const currentSegmentIndex = activeSegmentIndices[activeStoryIndex] || 0;
+
+    // Sync activeStoryId state with activeIndex
+    useEffect(() => {
+        if (currentStory && onStoryChange) {
+            onStoryChange(currentStory.id);
+        }
+    }, [currentStory, onStoryChange]);
+
+    // -- SEO --
+    // Use currentStory.content (HTML) to extract a snippet? Or just use "Assista agora no ComMarília".
+    const seoDescription = currentStory?.title
+        ? `Assista "${currentStory.title}" e outras notícias em vídeo no ComMarília.`
+        : undefined;
+
     // Optimized Handlers
     const handleSwiperInit = useCallback((swiper: SwiperType) => {
         setSwiperReady(true);
@@ -364,8 +490,17 @@ const Player: React.FC<PlayerProps> = ({
     }, []);
 
     const handleSlideChange = useCallback((swiper: SwiperType) => {
-        setActiveStoryIndex(swiper.activeIndex);
-    }, []);
+        const newIndex = swiper.activeIndex;
+        setActiveStoryIndex(newIndex);
+
+        // Notify parent to update URL for deep linking
+        if (stories[newIndex]) {
+            // We need a way to call `setActiveStoryId` in App. 
+            // Since we didn't add a prop for it, let's just update the URL directly here or add the prop?
+            // Adding the prop is cleaner. Let's assume I will add `onStoryChange` to PlayerProps.
+            if (onStoryChange) onStoryChange(stories[newIndex].id);
+        }
+    }, [stories, onStoryChange]);
 
     const handleHorizontalSwiperInit = useCallback((storyIndex: number) => (swiper: SwiperType) => {
         horizontalSwipersRef.current[storyIndex] = swiper;
@@ -407,6 +542,14 @@ const Player: React.FC<PlayerProps> = ({
 
     return (
         <div className="w-full h-full bg-black relative group/player">
+            {currentStory && (
+                <SEO
+                    title={currentStory.title}
+                    description={seoDescription}
+                    image={currentStory.coverImage}
+                    type="article"
+                />
+            )}
 
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 h-[54px]">

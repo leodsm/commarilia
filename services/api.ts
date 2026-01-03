@@ -103,6 +103,7 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
           content: post.content || '<p>Conteúdo indisponível</p>',
           coverImage: post.featuredImage?.node?.sourceUrl || 'https://picsum.photos/400/500',
           category: post.categories?.nodes[0]?.name || 'Geral',
+          subtitle: undefined, // Subtitle field not found in schema
           segments: slides.map((slide, sIdx) => {
             let mediaUrl = slide.media?.node?.mediaItemUrl || '';
             let mediaType = slide.media?.node?.mimeType || 'image/jpeg';
@@ -113,6 +114,9 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
             if (source === 'youtube' && slide.youtubeUrl) {
               mediaUrl = slide.youtubeUrl;
               mediaType = 'video/youtube';
+            } else if (source === 'vimeo' && slide.youtubeUrl) {
+              mediaUrl = slide.youtubeUrl;
+              mediaType = 'video/vimeo';
             }
 
             return {

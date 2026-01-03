@@ -1,6 +1,7 @@
 import React from 'react';
 import { TransformedStory } from '../types';
 import { CardSkeleton, CategorySkeleton } from './Loader';
+import SEO from './SEO';
 
 interface HomeProps {
   stories: TransformedStory[];
@@ -24,8 +25,9 @@ const Home: React.FC<HomeProps> = ({
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
+      <SEO title="Home" />
       {/* Header */}
-      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-40 shadow-sm transition-all">
+      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-[100] shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
           <div
             className="flex items-center gap-2 cursor-pointer select-none"
@@ -39,7 +41,7 @@ const Home: React.FC<HomeProps> = ({
       </header>
 
       {/* Categories Bar */}
-      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-30 shadow-sm">
+      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-[90] shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-start sm:justify-center gap-3 overflow-x-auto no-scrollbar pb-1">
             {isLoading ? (
@@ -54,8 +56,8 @@ const Home: React.FC<HomeProps> = ({
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
                   className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 active:scale-95 ${activeCategory === cat
-                      ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
-                      : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
+                    ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
+                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
                     }`}
                 >
                   {cat}
@@ -83,39 +85,18 @@ const Home: React.FC<HomeProps> = ({
                   src={story.coverImage}
                   alt={story.title}
                   loading="lazy"
-                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                  className="absolute inset-0 w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
 
-                {/* Modern Gradient Overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-black/40 to-transparent opacity-80 group-hover:opacity-90 transition-all duration-500"></div>
-
-                {/* Hover Overlay Light Effect */}
-                <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/0 via-white/0 to-white/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-
-                {/* Card Content */}
-                <div className="absolute inset-x-0 bottom-0 p-6 flex flex-col justify-end h-full">
-
-                  {/* Category Tag - Glassmorphism */}
-                  <div className="mb-auto transform -translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-500 delay-100 self-start">
-                    <span className="inline-block bg-white/10 backdrop-blur-md text-white text-[10px] uppercase tracking-[0.2em] font-bold px-3 py-1 rounded-full border border-white/20 shadow-lg">
-                      {story.category}
-                    </span>
-                  </div>
-
-                  <div className="flex flex-col gap-2">
-                    <h3 className="text-white text-xl font-bold font-poppins leading-tight line-clamp-3 group-hover:text-orange-50 transition-colors drop-shadow-md">
-                      {story.title}
-                    </h3>
-
-                    {/* "Read" Indicator/Icon that appears on hover */}
-                    <div className="h-0 overflow-hidden group-hover:h-6 transition-all duration-300 ease-out opacity-0 group-hover:opacity-100 flex items-center gap-2 mt-2">
-                      <span className="text-orange-400 text-xs font-bold uppercase tracking-wider">Ver Storie</span>
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
-                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clipRule="evenodd" />
-                      </svg>
-                    </div>
-                  </div>
+                {/* Category Tag moved to top-left */}
+                <div className="absolute top-4 left-4 z-20">
+                  <span className="inline-block bg-black/50 backdrop-blur-md border border-white/30 text-white text-[10px] uppercase tracking-wider font-bold px-3 py-1 rounded-full shadow-sm">
+                    {story.category}
+                  </span>
                 </div>
+
+                {/* Title and Subtitle */}
+                {/* Title and Subtitle removed as per request */}
               </div>
             ))
           ) : (
