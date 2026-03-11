@@ -1,0 +1,1061 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Storie: Marília - Capital do Alimento</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes Cinemáticas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
+    <style>
+        /* --- PALETA WEB STORIE: CORES VIBRANTES E VARIADAS --- */
+        :root {
+            --theme-brand: #FF5A26;
+            /* Laranja ComMarília */
+            --theme-blue: #2563EB;
+            /* Azul Safira */
+            --theme-red: #DC2626;
+            /* Vermelho Carmesim */
+            --theme-green: #059669;
+            /* Verde Esmeralda */
+            --theme-purple: #7C3AED;
+            /* Roxo Vibrante */
+            --theme-yellow: #D97706;
+            /* Amarelo Âmbar */
+            --theme-teal: #0D9488;
+            /* Verde Água */
+
+            --theme-dark: #0F172A;
+            /* Fundo Escuro */
+            --theme-light: #FFFFFF;
+            /* Branco Puro */
+
+            --font-main: 'Montserrat', sans-serif;
+            --font-display: 'Bebas Neue', sans-serif;
+
+            /* Formato Padrão Inicial (Story 9:16) */
+            --card-width: 1080px;
+            --card-height: 1920px;
+            --card-aspect: 9 / 16;
+
+            /* Áreas Seguras */
+            --safe-area-bottom: 240px;
+            /* Respiro EXATO na base, protegido da UI do Player */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #1E293B;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+        }
+
+        /* --- TOOLBAR UI --- */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background-color: #0F172A;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            border-bottom: 2px solid var(--theme-brand);
+        }
+
+        .toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .format-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #1E293B;
+            border: 1px solid #334155;
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .format-selector select {
+            background: transparent;
+            color: var(--theme-brand);
+            outline: none;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background-color: var(--theme-brand);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download:hover {
+            background-color: #e04b1c;
+            transform: scale(1.02);
+        }
+
+        /* --- PREVIEW GRID --- */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+            gap: 40px;
+            width: 100%;
+            max-width: 1600px;
+            padding: 40px 15px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .storie-wrapper {
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: var(--card-aspect);
+            position: relative;
+            background-color: var(--theme-dark);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #334155;
+            transition: aspect-ratio 0.3s ease;
+        }
+
+        /* --- CARD BASE --- */
+        .storie-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--theme-dark);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--theme-light);
+        }
+
+        /* --- SISTEMA DE IMAGEM FULL BLEED E ZOOM ROBUSTO --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .upload-zone {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: #1E293B;
+            overflow: hidden;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-zone:active {
+            cursor: grabbing;
+        }
+
+        .upload-prompt {
+            pointer-events: none;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+        }
+
+        .upload-prompt i {
+            font-size: 80px;
+        }
+
+        .upload-prompt span {
+            font-size: 30px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .draggable-img {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            filter: contrast(1.05) saturate(1.05);
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 120px;
+            right: 40px;
+            z-index: 100;
+            display: none;
+            gap: 15px;
+        }
+
+        .zoom-panel {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px 30px;
+            border-radius: 50px;
+            backdrop-filter: blur(10px);
+            align-items: center;
+            gap: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .upload-zone.has-image .image-controls,
+        .upload-zone.has-image .zoom-panel {
+            display: flex;
+        }
+
+        .upload-zone.has-image .upload-prompt {
+            display: none;
+        }
+
+        .control-btn {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(10px);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            width: 250px;
+            height: 8px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--theme-brand);
+            cursor: pointer;
+            border: 4px solid white;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+        }
+
+        /* --- UI OVERLAYS E ÁREAS SEGURAS (CORRIGIDO PARA EXPORTAÇÃO PERFEITA) --- */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            padding: 0 80px var(--safe-area-bottom) 80px;
+            /* Padding global rígido */
+        }
+
+        .gradient-bottom {
+            background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.8) 30%, rgba(15, 23, 42, 0.3) 60%, transparent 100%);
+        }
+
+        .gradient-full {
+            background: rgba(15, 23, 42, 0.9);
+        }
+
+        /* Controlos de Layout Rígidos */
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .align-start {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .align-end {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .align-center {
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Tipografia Otimizada */
+        .storie-title {
+            font-family: var(--font-display);
+            font-size: 130px;
+            line-height: 1.05;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--theme-light);
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+            width: 100%;
+            margin-bottom: 25px;
+        }
+
+        .storie-text {
+            font-family: var(--font-main);
+            font-size: 40px;
+            line-height: 1.45;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.95);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.9);
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .storie-text:last-child {
+            margin-bottom: 0;
+        }
+
+        .storie-text strong {
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Wrappers de Texto (Para os cards centrais) */
+        .text-wrapper-center {
+            display: flex;
+            flex-direction: column;
+            align-self: center;
+            width: 100%;
+        }
+
+        /* Container de grupo com borda colorida global (Título + Textos) */
+        .content-group {
+            display: flex;
+            flex-direction: column;
+            width: 100%;
+        }
+
+        .content-group.left-border {
+            border-left: 10px solid var(--theme-brand);
+            padding-left: 30px;
+            text-align: left;
+            align-items: flex-start;
+        }
+
+        .content-group.right-border {
+            border-right: 10px solid var(--theme-brand);
+            padding-right: 30px;
+            text-align: right;
+            align-items: flex-end;
+        }
+
+        /* Elementos Especiais / Enquete */
+        .sticker-box {
+            background: rgba(30, 41, 59, 0.85);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--theme-light);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 30px;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .sticker-title {
+            font-family: var(--font-main);
+            font-size: 40px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .sticker-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sticker-btn {
+            padding: 24px 20px 28px 20px;
+            border-radius: 15px;
+            font-size: 35px;
+            font-weight: 800;
+            border: 3px solid transparent;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        /* Container de exportação oculto e seguro */
+        #export-container {
+            position: fixed;
+            top: 0;
+            left: -9999px;
+            width: 1080px;
+            z-index: -1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <input type="file" id="hidden-file-input" accept="image/*">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <i class="fa-solid fa-cookie-bite text-orange-500"></i> ComMarília | Post Builder
+        </div>
+
+        <div class="toolbar-controls">
+            <!-- Seletor de Formato -->
+            <div class="format-select-wrapper format-selector">
+                <i class="fa-solid fa-crop-simple"></i>
+                <label for="format-select">Formato:</label>
+                <select id="format-select" onchange="changeFormat(this.value)">
+                    <option value="story">Story (1080x1920)</option>
+                    <option value="feed">Feed (1080x1350)</option>
+                </select>
+            </div>
+
+            <button id="download-btn" class="btn-download" onclick="exportarImagens()">
+                <i class="fa-solid fa-download"></i> Exportar (7 PNGs)
+            </button>
+        </div>
+    </div>
+
+    <p class="text-center text-slate-400 mt-6 text-sm font-medium px-4">
+        As falhas de exportação foram resolvidas! Arraste ou use o scroll do rato nas imagens para fazer zoom.
+    </p>
+
+    <!-- ÁREA DOS CARDS -->
+    <div class="preview-container" id="posts-container">
+
+        <!-- CARD 1: CAPA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-camera"></i><span>Foto de Capa</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <h1 class="storie-title text-[180px] leading-[0.85] text-white text-center">A Capital<br><span
+                            style="color: var(--theme-brand);">do Alimento</span></h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">O império dos sabores que nasceu no interior de São Paulo e
+                            conquistou o mundo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: CONTEXTO -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-seedling"></i><span>Foto de Lavouras</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="content-group left-border" style="border-color: var(--theme-blue);">
+                        <h1 class="storie-title">Do Campo<br>para a Indústria</h1>
+                        <p class="storie-text">Nas décadas de 20 e 30, o <strong>café e o algodão</strong> ditavam as
+                            regras da nossa economia local.</p>
+                        <p class="storie-text">Foi o espírito empreendedor que transformou as lavouras nas maiores
+                            esteiras de produção do país.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: EMPRESAS -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-industry"></i><span>Fábricas / Produtos</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end">
+                    <div class="content-group right-border" style="border-color: var(--theme-green);">
+                        <h1 class="storie-title text-right">O Berço<br>das Gigantes</h1>
+                        <p class="storie-text text-right">Marcas icônicas como <strong>Marilan, Dori e Bel
+                                Chocolates</strong> nasceram aqui.</p>
+                        <p class="storie-text text-right">O que era produção familiar virou um complexo que marca a
+                            infância dos brasileiros.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: NÚMEROS -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-chart-line"></i><span>Linha de Produção</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-full justify-center align-center">
+                    <h1 class="storie-title text-[220px] leading-[0.85] text-center"
+                        style="color: var(--theme-yellow); text-shadow: 0 10px 30px rgba(0,0,0,0.8); margin-bottom: 0;">
+                        32 MIL</h1>
+                    <h2 class="font-display text-[80px] font-normal leading-tight text-white mb-8 text-center">Toneladas
+                        ao Mês</h2>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center"><strong>Mais de 1.100 empresas</strong> do setor alimentício
+                            estão ativas na cidade.</p>
+                        <p class="storie-text text-center">Um volume colossal que movimenta e emprega milhares de
+                            pessoas.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 5: INTERNACIONAL (Fundo alinhado) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-earth-americas"></i><span>Exportação / Mapa</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="content-group left-border" style="border-color: var(--theme-purple);">
+                        <h1 class="storie-title">Para os 5<br>Continentes</h1>
+                        <p class="storie-text">As fronteiras do Brasil ficaram pequenas para a capacidade das nossas
+                            indústrias.</p>
+                        <p class="storie-text">A qualidade superior leva o selo <strong>"Made in Marília"</strong> aos
+                            supermercados do mundo inteiro.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 6: RECONHECIMENTO -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-landmark"></i><span>Fachada / Senado</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <h1 class="storie-title text-center">Reconhecimento<br>Oficial</h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">Não se trata apenas de um apelido carinhoso. O impacto
+                            económico da nossa cidade exigiu uma chancela imponente.</p>
+                        <p class="storie-text text-center">O título de Capital Nacional do Alimento foi
+                            <strong>reconhecido por lei no Senado Federal</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 7: INTERAÇÃO -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt">
+                            <i class="fa-solid fa-cookie"></i><span>Doces / Salgados</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()">
+                            <i class="fa-solid fa-minus text-white text-xl"></i>
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider"
+                                oninput="updateZoom(event, this)">
+                            <i class="fa-solid fa-plus text-white text-xl"></i>
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer justify-end align-center"
+                    style="background: linear-gradient(to top, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.9) 45%, transparent 100%);">
+                    <h1 class="storie-title text-center">E o seu<br>favorito?</h1>
+
+                    <div class="sticker-box">
+                        <div class="sticker-title">Qual delícia de Marília não pode faltar na sua casa?</div>
+                        <div class="sticker-btn-group">
+                            <div class="sticker-btn" style="background-color: var(--theme-blue);">Biscoitos / Salgados
+                            </div>
+                            <div class="sticker-btn" style="background-color: var(--theme-brand);">Chocolates / Doces
+                            </div>
+                            <div class="sticker-btn" style="background-color: var(--theme-red);">Amendoins</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Container Fixo e Visível para a Exportação Perfeita -->
+    <div id="export-container"></div>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÕES GLOBAIS DE FORMATO
+        // ==========================================
+        let currentExportHeight = 1920;
+
+        function changeFormat(format) {
+            if (format === 'story') {
+                document.documentElement.style.setProperty('--card-height', '1920px');
+                document.documentElement.style.setProperty('--card-aspect', '9 / 16');
+                currentExportHeight = 1920;
+            } else {
+                document.documentElement.style.setProperty('--card-height', '1350px');
+                document.documentElement.style.setProperty('--card-aspect', '4 / 5');
+                currentExportHeight = 1350;
+            }
+
+            document.querySelectorAll('.draggable-img').forEach(img => {
+                if (!img.src) return;
+                const container = img.closest('.upload-zone');
+                const cw = 1080;
+                const ch = currentExportHeight;
+                const iw = parseFloat(img.style.width);
+                const ih = parseFloat(img.style.height);
+
+                if (iw && ih) {
+                    const newBaseScale = Math.max(cw / iw, ch / ih);
+                    img.dataset.baseScale = newBaseScale;
+
+                    if (parseFloat(img.dataset.scale) < newBaseScale) {
+                        img.dataset.scale = newBaseScale;
+                        img.dataset.tx = 0;
+                        img.dataset.ty = 0;
+                        const slider = container.querySelector('.zoom-slider');
+                        if (slider) slider.value = 1;
+                    }
+                    updateImgTransform(img);
+                }
+            });
+
+            setTimeout(resizeStories, 50);
+        }
+
+        // ==========================================
+        // ESCALA RESPONSIVA PARA O BROWSER (PREVIEW)
+        // ==========================================
+        function resizeStories() {
+            const wrappers = document.querySelectorAll('.storie-wrapper');
+            wrappers.forEach(wrapper => {
+                const card = wrapper.querySelector('.storie-card');
+                const scale = wrapper.clientWidth / 1080;
+                card.style.transform = `scale(${scale})`;
+            });
+        }
+        window.addEventListener('resize', resizeStories);
+        window.addEventListener('DOMContentLoaded', resizeStories);
+
+        // ==========================================
+        // SISTEMA DE UPLOAD E IMAGENS INTACTAS
+        // ==========================================
+        const fileInput = document.getElementById('hidden-file-input');
+        let currentTargetZone = null;
+
+        let isDraggingImage = false;
+        let activeImage = null;
+        let startX, startY, startTx, startTy;
+
+        function triggerUpload(zoneElement) {
+            if (!zoneElement.classList.contains('has-image')) {
+                currentTargetZone = zoneElement;
+                fileInput.click();
+            }
+        }
+
+        function triggerUploadBtn(e, btn) {
+            e.stopPropagation();
+            currentTargetZone = btn.closest('.upload-zone');
+            fileInput.click();
+        }
+
+        fileInput.addEventListener('change', function (e) {
+            if (this.files && this.files.length > 0 && currentTargetZone) {
+                const file = this.files[0];
+                if (!file.type.startsWith('image/')) return;
+
+                const imgURL = URL.createObjectURL(file);
+                const oldImg = currentTargetZone.querySelector('.draggable-img');
+                if (oldImg) {
+                    URL.revokeObjectURL(oldImg.src); // Limpa a memória anterior
+                    oldImg.remove();
+                }
+
+                const img = document.createElement('img');
+                img.src = imgURL;
+                img.classList.add('draggable-img');
+
+                img.onload = function () {
+                    const cw = 1080;
+                    const ch = currentExportHeight;
+                    const iw = img.naturalWidth;
+                    const ih = img.naturalHeight;
+
+                    img.style.width = iw + 'px';
+                    img.style.height = ih + 'px';
+
+                    const coverScale = Math.max(cw / iw, ch / ih);
+
+                    img.dataset.baseScale = coverScale;
+                    img.dataset.scale = coverScale;
+                    img.dataset.tx = 0;
+                    img.dataset.ty = 0;
+
+                    updateImgTransform(img);
+
+                    const slider = currentTargetZone.querySelector('.zoom-slider');
+                    if (slider) slider.value = 1;
+                };
+
+                currentTargetZone.appendChild(img);
+                currentTargetZone.classList.add('has-image');
+            }
+            this.value = '';
+        });
+
+        function updateImgTransform(img) {
+            const tx = parseFloat(img.dataset.tx) || 0;
+            const ty = parseFloat(img.dataset.ty) || 0;
+            const scale = parseFloat(img.dataset.scale) || 1;
+            const iw = parseFloat(img.style.width) || 0;
+            const ih = parseFloat(img.style.height) || 0;
+
+            img.style.transform = `translate(${tx - (iw / 2)}px, ${ty - (ih / 2)}px) scale(${scale})`;
+        }
+
+        // ==========================================
+        // MOTOR DE ZOOM E ARRASTO
+        // ==========================================
+        document.querySelectorAll('.upload-zone').forEach(zone => {
+            zone.addEventListener('mousedown', startPan);
+            zone.addEventListener('touchstart', startPan, { passive: false });
+
+            zone.addEventListener('wheel', (e) => {
+                if (!zone.classList.contains('has-image')) return;
+                e.preventDefault();
+
+                const img = zone.querySelector('.draggable-img');
+                if (!img) return;
+
+                const zoomSensitivity = 0.002;
+                const delta = -e.deltaY * zoomSensitivity;
+
+                let currentScale = parseFloat(img.dataset.scale);
+                const baseScale = parseFloat(img.dataset.baseScale);
+
+                let newScale = currentScale + (baseScale * delta);
+                newScale = Math.max(baseScale, Math.min(newScale, baseScale * 4));
+
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+
+                const slider = zone.querySelector('.zoom-slider');
+                if (slider) slider.value = newScale / baseScale;
+            });
+        });
+
+        function startPan(e) {
+            if (e.target.closest('.zoom-panel') || e.target.closest('.image-controls')) return;
+            const zone = e.target.closest('.upload-zone');
+            if (!zone || !zone.classList.contains('has-image')) return;
+
+            isDraggingImage = true;
+            activeImage = zone.querySelector('.draggable-img');
+
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+
+            startTx = parseFloat(activeImage.dataset.tx) || 0;
+            startTy = parseFloat(activeImage.dataset.ty) || 0;
+
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function doPan(e) {
+            if (!isDraggingImage || !activeImage) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+
+            const wrapper = activeImage.closest('.storie-wrapper');
+            const previewScale = wrapper.clientWidth / 1080;
+
+            activeImage.dataset.tx = startTx + (dx / previewScale);
+            activeImage.dataset.ty = startTy + (dy / previewScale);
+
+            updateImgTransform(activeImage);
+        }
+
+        function endPan() {
+            isDraggingImage = false;
+            activeImage = null;
+        }
+
+        window.addEventListener('mousemove', doPan);
+        window.addEventListener('touchmove', doPan, { passive: false });
+        window.addEventListener('mouseup', endPan);
+        window.addEventListener('touchend', endPan);
+
+        function updateZoom(e, input) {
+            e.stopPropagation();
+            const zone = input.closest('.upload-zone');
+            const img = zone.querySelector('.draggable-img');
+            if (img) {
+                const baseScale = parseFloat(img.dataset.baseScale);
+                const newScale = baseScale * parseFloat(input.value);
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+            }
+        }
+
+        // ==========================================
+        // EXPORTAÇÃO PERFEITA (HTML2CANVAS)
+        // ==========================================
+        async function exportarImagens() {
+            const btn = document.getElementById('download-btn');
+            const exportContainer = document.getElementById('export-container');
+            const cards = document.querySelectorAll('.storie-card[data-export="true"]');
+
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+            btn.disabled = true;
+
+            exportContainer.style.width = '1080px';
+            exportContainer.style.height = currentExportHeight + 'px';
+
+            for (let i = 0; i < cards.length; i++) {
+                try {
+                    const clone = cards[i].cloneNode(true);
+
+                    // Remover elementos não exportáveis do CLONE para não piscarem na UI do usuário
+                    clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt').forEach(el => el.remove());
+
+                    clone.style.transform = 'none';
+                    clone.style.width = '1080px';
+                    clone.style.height = currentExportHeight + 'px';
+                    clone.style.position = 'relative';
+                    clone.style.left = '0';
+                    clone.style.top = '0';
+                    clone.style.aspectRatio = 'auto';
+
+                    exportContainer.innerHTML = '';
+                    exportContainer.appendChild(clone);
+
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    const dataUrl = await htmlToImage.toPng(clone, {
+                        pixelRatio: 1, // Impede borrões de Retina Display
+                        height: currentExportHeight,
+                        width: 1080,
+                        backgroundColor: '#0F172A',
+                        style: {
+                            transform: 'none'
+                        }
+                    });
+
+                    const formatName = currentExportHeight === 1920 ? 'Story' : 'Feed';
+                    const link = document.createElement('a');
+                    link.download = `ComMarilia_Alimentos_${formatName}_0${i + 1}.png`;
+                    link.href = dataUrl;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                } catch (error) {
+                    console.error("Erro ao gerar card " + (i + 1), error);
+                }
+            }
+
+            exportContainer.innerHTML = '';
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    </script>
+</body>
+
+</html>
