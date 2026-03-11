@@ -358,7 +358,7 @@ const StorySegment = React.memo(({
             )}
 
             {/* Content Layer (Only for the Button Now) */}
-            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-[60px] flex flex-col justify-end text-left pointer-events-none`}>
+            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-[10px] flex flex-col justify-end text-left pointer-events-none`}>
                 <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
                     {segment?.showButton && (
                         <div
