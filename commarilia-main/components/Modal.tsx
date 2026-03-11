@@ -67,7 +67,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           {/* Content Body */}
           <div className="p-6 md:p-8">
             <div
-              className="prose prose-lg max-w-none text-gray-800 font-inter leading-relaxed whitespace-pre-line
+              className="prose prose-lg max-w-none text-gray-800 font-inter leading-relaxed
                          prose-headings:font-poppins prose-headings:font-bold prose-headings:text-gray-900
                          prose-p:mb-4 prose-strong:text-gray-900 prose-ul:list-disc prose-ul:pl-5
                          prose-a:text-[#fd572b] prose-a:font-medium hover:prose-a:underline"
