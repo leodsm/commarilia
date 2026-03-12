@@ -1,5 +1,5 @@
 @import "tailwindcss";
-@plugin "@tailwindcss/typography";
+
 @font-face {
   font-family: 'Gotham';
   src: local('Gotham Bold'), local('Gotham-Bold');
@@ -197,4 +197,44 @@ body {
   color: white;
   font-weight: 700;
   box-shadow: 0 0 15px rgba(253, 87, 43, 0.5);
+}
+
+/* --- Override Absoluto de Tipografia (WordPress/Prose Content) --- */
+.custom-prose-content h1 {
+  font-size: 22px !important;
+  font-weight: bold !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: #111827 !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+  line-height: 1.2 !important;
+}
+
+.custom-prose-content h2 {
+  font-size: 20px !important;
+  font-weight: bold !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: #111827 !important;
+  margin-top: 1.5em !important;
+  margin-bottom: 0.5em !important;
+  line-height: 1.3 !important;
+}
+
+.custom-prose-content h3 {
+  font-size: 18px !important;
+  font-weight: bold !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: #111827 !important;
+  margin-top: 1.2em !important;
+  margin-bottom: 0.5em !important;
+  line-height: 1.4 !important;
+}
+
+.custom-prose-content h4 {
+  font-size: 14px !important;
+  font-weight: bold !important;
+  font-family: 'Poppins', sans-serif !important;
+  color: #111827 !important;
+  margin-top: 1em !important;
+  margin-bottom: 0.5em !important;
 }
