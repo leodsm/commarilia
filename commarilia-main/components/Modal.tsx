@@ -67,8 +67,10 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           {/* Content Body */}
           <div className="p-6 md:p-8">
             <div
-              className="prose prose-lg max-w-none text-gray-800 font-inter leading-relaxed
+              className="prose prose-lg max-w-none text-gray-800 font-inter leading-relaxed whitespace-pre-line
                          prose-headings:font-poppins prose-headings:font-bold prose-headings:text-gray-900
+                         prose-h2:block prose-h2:text-2xl prose-h2:mt-8 prose-h2:mb-4
+                         prose-h3:block prose-h3:text-xl prose-h3:mt-6 prose-h3:mb-3
                          prose-p:mb-4 prose-strong:text-gray-900 prose-ul:list-disc prose-ul:pl-5
                          prose-a:text-[#fd572b] prose-a:font-medium hover:prose-a:underline"
               dangerouslySetInnerHTML={{ __html: story.content }}
