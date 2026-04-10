@@ -69,7 +69,7 @@ const StorySegment = React.memo(({
     const [showButtonText, setShowButtonText] = useState(false);
 
     useEffect(() => {
-        if (isActive) {
+        if (isActive && isFirstCard) {
             setShowButtonText(true);
             const timer = setTimeout(() => {
                 setShowButtonText(false);
@@ -78,7 +78,7 @@ const StorySegment = React.memo(({
         } else {
             setShowButtonText(false);
         }
-    }, [isActive]);
+    }, [isActive, isFirstCard]);
 
     // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
@@ -622,7 +622,7 @@ const Player: React.FC<PlayerProps> = ({
                                                 isActive={isSegmentActive}
                                                 shouldLoad={shouldLoad}
                                                 onOpenModal={onOpenModal}
-                                                isFirstCard={storyIndex === 0 && segIndex === 0}
+                                                isFirstCard={segIndex === 0}
                                             />
                                         </SwiperSlide>
                                     );
