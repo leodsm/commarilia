@@ -357,9 +357,9 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
-            {/* CTA Button Layer */}
-            <div className={`absolute bottom-3 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)]`}>
-                <div className="flex flex-col gap-3 w-full items-center">
+            {/* Content Layer (Only for the Button Now) */}
+            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-[10px] flex flex-col justify-end text-left pointer-events-none`}>
+                <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
                     {segment?.showButton && (
                         <div
                             onClick={(e) => {
@@ -380,17 +380,22 @@ const StorySegment = React.memo(({
                                     onOpenModal(storyId);
                                 }
                             }}
-                            className={`group/btn pointer-events-auto flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-black/50 hover:bg-black/70 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden`}
+                            className={`group/btn flex flex-col items-center justify-center gap-2 cursor-pointer animate-slide-up transition-all duration-300 hover:scale-105 self-center pointer-events-auto`}
                             role="button"
                             aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
                         >
-                            <span className="text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-none drop-shadow-md">
-                                {segment.slideLink ? 'Acessar' : 'Leia Mais'}
-                            </span>
-                            <div className="flex items-center justify-center animate-bounce -mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                            {/* Circle Icon Container */}
+                            <div className={`w-10 h-10 rounded-full border-[1.5px] border-white flex items-center justify-center transition-all duration-500 bg-black/10 backdrop-blur-[2px] shadow-sm group-hover/btn:bg-white/20 group-hover/btn:border-white ${!showButtonText ? 'opacity-80 hover:opacity-100 scale-90 hover:scale-100' : ''}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white translate-y-[1px] group-hover/btn:-translate-y-0.5 transition-transform duration-300">
+                                    <path fillRule="evenodd" d="M11.47 7.72a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 01-1.06-1.06l7.5-7.5z" clipRule="evenodd" />
                                 </svg>
+                            </div>
+
+                            {/* Text with fade out transition */}
+                            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showButtonText ? 'max-h-10 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                <span className="text-white text-[13px] font-gotham font-medium tracking-wide drop-shadow-md whitespace-nowrap" style={{ textShadow: "0px 2px 4px rgba(0,0,0,0.8)" }}>
+                                    {segment.slideLink ? 'Acessar' : 'Leia Mais'}
+                                </span>
                             </div>
                         </div>
                     )}

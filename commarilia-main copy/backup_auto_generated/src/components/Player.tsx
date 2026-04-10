@@ -1,11 +1,13 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Pagination, Mousewheel, FreeMode } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
+import 'swiper/css/free-mode';
 import { TransformedStory } from '../types';
 import { Spinner } from './Loader';
 // Import Swiper type for instance typing
 import type { Swiper as SwiperType } from 'swiper';
-import SEO from './SEO';
 
 interface PlayerProps {
     stories: TransformedStory[];
@@ -24,14 +26,14 @@ const getYouTubeId = (url: string) => {
     if (!url) return null;
     const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|shorts\/)([^#&?]*).*/;
     const match = url.match(regExp);
-    return (match && match[2].length === 11) ? match[2] : null;
+    return (match && match[2]) ? match[2] : null;
 };
 
 // Helper to extract Vimeo ID
 const getVimeoId = (url: string) => {
     if (!url) return null;
-    // Regex to capture numeric ID from various Vimeo URL formats including /manage/videos/
-    const regExp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|manage\/videos\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
+    // Regex to capture numeric ID from various Vimeo URL formats
+    const regExp = /(?:www\.|player\.)?vimeo.com\/(?:channels\/(?:\w+\/)?|groups\/(?:[^\/]*)\/videos\/|album\/(?:\d+)\/video\/|video\/|)(\d+)(?:[a-zA-Z0-9_\-]+)?/i;
     const match = url.match(regExp);
 
     // Also try simple numeric check if the URL is just an ID (unlikely but possible)
@@ -46,15 +48,13 @@ const StorySegment = React.memo(({
     storyId,
     isActive,
     shouldLoad,
-    onOpenModal,
-    isFirstCard
+    onOpenModal
 }: {
     segment: any,
     storyId: string,
     isActive: boolean,
     shouldLoad: boolean,
-    onOpenModal: (id: string) => void,
-    isFirstCard?: boolean
+    onOpenModal: (id: string) => void
 }) => {
     const iframeRef = useRef<HTMLIFrameElement>(null);
     const videoRef = useRef<HTMLVideoElement>(null);
@@ -66,19 +66,19 @@ const StorySegment = React.memo(({
     const [isPlaying, setIsPlaying] = useState(true);
     // Loading state for buffering feedback
     const [isLoading, setIsLoading] = useState(true);
-    const [showButtonText, setShowButtonText] = useState(false);
+    const [showButtonText, setShowButtonText] = useState(true);
 
     useEffect(() => {
-        if (isActive && isFirstCard) {
+        if (isActive) {
             setShowButtonText(true);
             const timer = setTimeout(() => {
                 setShowButtonText(false);
-            }, 2000);
+            }, 3000);
             return () => clearTimeout(timer);
         } else {
-            setShowButtonText(false);
+            setShowButtonText(true);
         }
-    }, [isActive, isFirstCard]);
+    }, [isActive]);
 
     // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
@@ -205,6 +205,25 @@ const StorySegment = React.memo(({
     const handleVideoLoad = useCallback(() => setIsLoading(false), []);
     const handleVideoWaiting = useCallback(() => setIsLoading(true), []);
 
+    // Position classes matching the reference logic
+    const posClasses = {
+        top: 'justify-start',
+        center: 'justify-center',
+        bottom: 'justify-end'
+    };
+
+    const textSizes = {
+        small: 'text-xl lg:text-2xl',
+        medium: 'text-2xl lg:text-3xl',
+        large: 'text-3xl lg:text-4xl'
+    };
+
+    const descSizes = {
+        small: 'text-xs lg:text-sm',
+        medium: 'text-sm lg:text-base',
+        large: 'text-base lg:text-lg'
+    };
+
     const youTubeId = isYouTube ? getYouTubeId(segment.mediaUrl) : null;
     const vimeoId = isVimeo ? getVimeoId(segment.mediaUrl) : null;
     const showControls = isVideo || (isYouTube && youTubeId) || (isVimeo && vimeoId);
@@ -256,7 +275,7 @@ const StorySegment = React.memo(({
                         <iframe
                             ref={iframeRef}
                             className="w-full h-full absolute inset-0 pointer-events-auto z-10"
-                            src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${youTubeId}&playsinline=1&rel=0`}
+                            src={`https://www.youtube.com/embed/${youTubeId}?enablejsapi=1&autoplay=1&mute=1&controls=0&loop=1&playlist=${youTubeId}&playsinline=1&rel=0&origin=${window.location.origin}`}
                             title="YouTube video player"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             referrerPolicy="strict-origin-when-cross-origin"
@@ -303,15 +322,25 @@ const StorySegment = React.memo(({
                 </div>
             ) : segment?.mediaUrl ? (
                 <>
-                    {/* Foreground Image Layer - Full Canvas Setup (No more safe areas from top) */}
-                    <div className="absolute inset-0 z-0">
+                    {/* Background Blur Layer */}
+                    <div
+                        className="absolute inset-0 w-full h-full bg-cover bg-center blur-md scale-110 opacity-70"
+                        style={{ backgroundImage: `url('${segment.mediaUrl}')` }}
+                    ></div>
+
+                    {/* Foreground Image Layer - Respects Header Space (top-[54px]) */}
+                    <div className="absolute left-0 right-0 bottom-0 top-[54px] z-0">
                         <img
                             src={segment.mediaUrl}
-                            alt="Story Image"
-                            className="w-full h-full object-cover"
+                            alt={segment?.title}
+                            className="w-full h-full object-contain"
                             loading="lazy"
                         />
                     </div>
+                    {/* Optional Overlay from reference logic */}
+                    {segment?.showOverlay && (
+                        <div className="absolute left-0 right-0 bottom-0 top-[54px] bg-black/40 z-0"></div>
+                    )}
                 </>
             ) : (
                 <div className="absolute inset-0 flex items-center justify-center text-white/50">
@@ -357,40 +386,46 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
-            {/* CTA Button Layer */}
-            <div className={`absolute bottom-3 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)]`}>
-                <div className="flex flex-col gap-3 w-full items-center">
+            {/* Content Layer */}
+            <div className={`absolute inset-0 z-20 px-6 pt-[70px] pb-6 flex flex-col ${posClasses[segment?.contentPosition as keyof typeof posClasses] || posClasses.bottom} ${segment?.contentPosition === 'bottom' ? 'pb-12' : ''} text-left pointer-events-none`}>
+                <div className="flex flex-col gap-3 max-w-2xl mx-auto w-full">
+                    <div className="flex flex-col gap-2">
+                        {segment?.title && (
+                            <h2 className="font-gotham font-bold text-white text-shadow leading-[32px] tracking-[-0.05em] text-[28px]">
+                                {segment.title.charAt(0).toUpperCase() + segment.title.slice(1).toLowerCase()}
+                            </h2>
+                        )}
+
+                        {segment?.description && (
+                            <div
+                                className="text-shadow text-white/90 font-gotham font-normal leading-normal tracking-[-0.05em] text-[15px]"
+                                dangerouslySetInnerHTML={{ __html: segment.description }}
+                            />
+                        )}
+                    </div>
+
                     {segment?.showButton && (
                         <div
                             onClick={(e) => {
                                 e.stopPropagation();
-                                // Pause video logic
-                                if (isYouTube && iframeRef.current) {
-                                    iframeRef.current.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
-                                } else if (isVimeo && iframeRef.current) {
-                                    iframeRef.current.contentWindow?.postMessage('{"method":"pause"}', '*');
-                                } else if (videoRef.current) {
-                                    videoRef.current.pause();
-                                }
-                                setIsPlaying(false);
-
-                                if (segment.slideLink) {
-                                    window.open(segment.slideLink, '_blank');
-                                } else {
-                                    onOpenModal(storyId);
-                                }
+                                onOpenModal(storyId);
                             }}
-                            className={`group/btn pointer-events-auto flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-black/50 hover:bg-black/70 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden`}
+                            className={`group/btn flex flex-col items-center justify-center gap-2 cursor-pointer animate-slide-up transition-all duration-300 hover:scale-105 self-center pointer-events-auto ${segment?.contentPosition === 'bottom' ? 'mb-12' : ''}`}
                             role="button"
-                            aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
+                            aria-label="Leia Mais"
                         >
-                            <span className="text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-none drop-shadow-md">
-                                {segment.slideLink ? 'Acessar' : 'Leia Mais'}
-                            </span>
-                            <div className="flex items-center justify-center animate-bounce -mt-0.5">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
+                            {/* Circle Icon Container */}
+                            <div className={`w-10 h-10 rounded-full border-[1.5px] border-white flex items-center justify-center transition-all duration-500 bg-black/10 backdrop-blur-[2px] shadow-sm group-hover/btn:bg-white/20 group-hover/btn:border-white ${!showButtonText ? 'opacity-80 hover:opacity-100 scale-90 hover:scale-100' : ''}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5 text-white translate-y-[1px] group-hover/btn:-translate-y-0.5 transition-transform duration-300">
+                                    <path fillRule="evenodd" d="M11.47 7.72a.75.75 0 011.06 0l7.5 7.5a.75.75 0 11-1.06 1.06L12 9.31l-6.97 6.97a.75.75 0 01-1.06-1.06l7.5-7.5z" clipRule="evenodd" />
                                 </svg>
+                            </div>
+
+                            {/* Text with fade out transition */}
+                            <div className={`overflow-hidden transition-all duration-500 ease-in-out ${showButtonText ? 'max-h-10 opacity-100' : 'max-h-0 opacity-0'}`}>
+                                <span className="text-white text-[13px] font-gotham font-medium tracking-wide drop-shadow-md whitespace-nowrap">
+                                    Leia Mais
+                                </span>
                             </div>
                         </div>
                     )}
@@ -422,23 +457,6 @@ const Player: React.FC<PlayerProps> = ({
 
     const [activeStoryIndex, setActiveStoryIndex] = useState(safeInitialIndex);
     const [activeSegmentIndices, setActiveSegmentIndices] = useState<{ [key: number]: number }>({});
-
-    // Derive current story and segment
-    const currentStory = stories[activeStoryIndex];
-    // const currentSegmentIndex = activeSegmentIndices[activeStoryIndex] || 0;
-
-    // Sync activeStoryId state with activeIndex
-    useEffect(() => {
-        if (currentStory && onStoryChange) {
-            onStoryChange(currentStory.id);
-        }
-    }, [currentStory, onStoryChange]);
-
-    // -- SEO --
-    // Use currentStory.content (HTML) to extract a snippet? Or just use "Assista agora no ComMarília".
-    const seoDescription = currentStory?.title
-        ? `Assista "${currentStory.title}" e outras notícias em vídeo no ComMarília.`
-        : undefined;
 
     // Optimized Handlers
     const handleSwiperInit = useCallback((swiper: SwiperType) => {
@@ -499,14 +517,6 @@ const Player: React.FC<PlayerProps> = ({
 
     return (
         <div className="w-full h-full bg-black relative group/player">
-            {currentStory && (
-                <SEO
-                    title={currentStory.title}
-                    description={seoDescription}
-                    image={currentStory.coverImage}
-                    type="article"
-                />
-            )}
 
             {/* Header */}
             <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 h-[54px]">
@@ -620,7 +630,6 @@ const Player: React.FC<PlayerProps> = ({
                                                 isActive={isSegmentActive}
                                                 shouldLoad={shouldLoad}
                                                 onOpenModal={onOpenModal}
-                                                isFirstCard={storyIndex === 0 && segIndex === 0}
                                             />
                                         </SwiperSlide>
                                     );

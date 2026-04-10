@@ -1,0 +1,1676 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComMarília - Gerador de Web Stories IA</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes Cinemáticas (Com crossorigin obrigatório para exportação) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" crossorigin="anonymous">
+
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Exportação com HTML-TO-IMAGE -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
+    <!-- Banco de Dados de Temas -->
+    <script src="./presets.js"></script>
+
+    <!-- SortableJS para Drag & Drop (Ordenação) -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.2/Sortable.min.js"></script>
+
+    <style>
+        /* --- PALETA WEB STORIE DEFAULT --- */
+        :root {
+            --theme-brand: #FF5A26;
+            --theme-dark: #0F172A;
+            --theme-light: #F8FAFC;
+            --theme-blue: #1D4ED8;
+            --theme-green: #10B981;
+            --theme-red: #E11D48;
+            --theme-yellow: #F59E0B;
+            --theme-purple: #8B5CF6;
+            --font-main: 'Montserrat', sans-serif;
+            --font-display: 'Bebas Neue', sans-serif;
+            --card-width: 1080px;
+            --card-height: 1920px;
+            --card-aspect: 9 / 16;
+            --safe-area-bottom: 110px;
+            --safe-area-top: 150px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; text-rendering: geometricPrecision; -webkit-font-smoothing: antialiased; }
+
+        body {
+            background-color: #060918;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+            background-image:
+                radial-gradient(ellipse at 20% 50%, rgba(255, 90, 38, 0.04) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 30%, rgba(29, 78, 216, 0.04) 0%, transparent 50%),
+                repeating-linear-gradient(45deg, rgba(255, 255, 255, 0.015) 0px, rgba(255, 255, 255, 0.015) 1px, transparent 1px, transparent 8px);
+        }
+
+        /* --- TOOLBAR PREMIUM --- */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background: linear-gradient(180deg, #0a0a0a 0%, #111827 100%);
+            padding: 18px 28px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 8px 40px rgba(0, 0, 0, 0.6), 0 1px 0 rgba(255, 90, 38, 0.3);
+            z-index: 1000;
+            border-bottom: 2px solid rgba(255, 90, 38, 0.5);
+        }
+
+        .toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .format-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            padding: 8px 16px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+            backdrop-filter: blur(10px);
+            transition: border-color 0.2s;
+        }
+
+        .format-selector:hover { border-color: rgba(255, 90, 38, 0.4); }
+
+        .format-selector select {
+            background: transparent;
+            color: var(--theme-brand);
+            outline: none;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .format-selector select option { background: #111827; color: white; }
+
+        .btn-action {
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 13px;
+            font-weight: 800;
+            border-radius: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-action::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 60%);
+            pointer-events: none;
+        }
+
+        .btn-action:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(0,0,0,0.3); filter: brightness(1.1); }
+        .btn-action:active { transform: translateY(0px); }
+        .btn-action:disabled { opacity: 0.5; cursor: not-allowed; transform: none !important; }
+
+        .btn-generate { background: linear-gradient(135deg, #10B981, #059669); }
+        .btn-export { background: linear-gradient(135deg, var(--theme-brand), #e04d1a); }
+        .btn-clear { background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); font-size: 12px; padding: 10px 16px; }
+        .btn-clear:hover { background: rgba(239, 68, 68, 0.3); border-color: #EF4444; }
+
+        /* --- TOAST NOTIFICATIONS --- */
+        .toast-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 12px;
+        }
+
+        .toast {
+            padding: 14px 22px;
+            border-radius: 12px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+            animation: toastIn 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255,255,255,0.1);
+            max-width: 400px;
+        }
+
+        .toast-success { background: rgba(16, 185, 129, 0.9); }
+        .toast-error { background: rgba(239, 68, 68, 0.9); }
+        .toast-info { background: rgba(59, 130, 246, 0.9); }
+        .toast-undo { background: rgba(30, 30, 30, 0.95); border: 1px solid rgba(255,255,255,0.2); }
+        .toast-undo button { background: var(--theme-brand); color: white; border: none; padding: 6px 16px; border-radius: 6px; font-weight: 800; cursor: pointer; font-size: 12px; }
+
+        @keyframes toastIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+        @keyframes toastOut { from { transform: translateX(0); opacity: 1; } to { transform: translateX(100%); opacity: 0; } }
+
+        /* --- EXPORT PROGRESS BAR --- */
+        .export-progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            z-index: 10000;
+            background: rgba(0,0,0,0.3);
+            display: none;
+        }
+
+        .export-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--theme-brand), #10B981, var(--theme-brand));
+            background-size: 200% 100%;
+            animation: progressShimmer 1.5s infinite;
+            transition: width 0.3s ease;
+            border-radius: 0 4px 4px 0;
+        }
+
+        @keyframes progressShimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* --- PREVIEW GRID --- */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+            gap: 40px;
+            width: 100%;
+            max-width: 1600px;
+            padding: 40px 15px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .storie-wrapper {
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: var(--card-aspect);
+            position: relative;
+            background-color: var(--theme-dark);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255,255,255,0.05);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: aspect-ratio 0.3s ease, transform 0.3s ease;
+            animation: cardFadeIn 0.5s cubic-bezier(0.4, 0, 0.2, 1) both;
+        }
+
+        .storie-wrapper:hover { transform: translateY(-4px); }
+
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* --- CARD BASE --- */
+        .storie-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--theme-dark);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--theme-light);
+            background-image: radial-gradient(rgba(255, 255, 255, 0.08) 2px, transparent 2px);
+            background-size: 40px 40px;
+        }
+
+        /* --- SISTEMA DE IMAGEM FULL BLEED E ZOOM ROBUSTO --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .upload-zone {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            overflow: hidden;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-zone:active {
+            cursor: grabbing;
+        }
+
+        .upload-prompt {
+            pointer-events: none;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.6);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px dashed rgba(255, 255, 255, 0.4);
+        }
+
+        .upload-prompt i {
+            font-size: 80px;
+            color: var(--theme-brand);
+        }
+
+        .upload-prompt span {
+            font-size: 26px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .draggable-img {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            filter: contrast(1.05) saturate(1.05);
+            max-width: none !important;
+            max-height: none !important;
+            opacity: 0.95;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 40px;
+            right: 40px;
+            z-index: 100;
+            display: flex;
+            gap: 20px;
+            flex-direction: column;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            background: rgba(15, 23, 42, 0.4);
+            padding: 8px;
+            border-radius: 50px;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .floating-popup {
+            position: absolute;
+            z-index: 1000;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 10px 20px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            border: 1px solid var(--theme-brand);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            transform: translate(-50%, -120%);
+            transition: opacity 0.2s;
+            pointer-events: auto;
+        }
+
+        .zoom-panel {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--theme-brand);
+        }
+
+        .upload-zone.has-image .zoom-panel {
+            display: flex;
+        }
+
+        .upload-zone.has-image .upload-prompt {
+            display: none;
+        }
+
+        .control-btn {
+            background-color: rgba(15, 23, 42, 0.9);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            border: 2px solid var(--theme-brand);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .control-btn:hover {
+            background-color: var(--theme-brand);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 250px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--theme-brand);
+            cursor: pointer;
+            border: 3px solid var(--theme-light);
+        }
+
+        /* --- UI OVERLAYS E ÁREAS SEGURAS --- */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            padding: var(--safe-area-top) 80px var(--safe-area-bottom) 80px;
+        }
+
+        .gradient-bottom {
+            background: linear-gradient(to top, rgba(15, 23, 42, var(--bg-opacity, 1)) 0%, rgba(15, 23, 42, calc(var(--bg-opacity, 1) * 0.85)) 35%, rgba(15, 23, 42, calc(var(--bg-opacity, 1) * 0.2)) 75%, transparent 100%);
+        }
+
+        .gradient-full {
+            background: rgba(15, 23, 42, var(--bg-opacity, 0.90));
+        }
+
+        .justify-end { justify-content: flex-end; }
+        .justify-center { justify-content: center; }
+        .justify-start { justify-content: flex-start; }
+
+        .align-start { align-items: flex-start; text-align: left; }
+        .align-end { align-items: flex-end; text-align: right; }
+        .align-center { align-items: center; text-align: center; }
+
+        .storie-title {
+            font-family: var(--font-display);
+            font-size: 135px;
+            line-height: 1em;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: var(--theme-light);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .storie-text {
+            font-family: var(--font-main);
+            font-size: 38px;
+            line-height: 1.45;
+            font-weight: 500;
+            color: rgba(248, 250, 252, 0.95);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.95), 0 0 10px rgba(0, 0, 0, 0.6);
+            margin: 0;
+            width: 100%;
+        }
+
+        .storie-text strong {
+            font-weight: 800;
+            color: white;
+        }
+
+        .text-wrapper-left {
+            border-left: 8px solid;
+            padding-left: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-start;
+            width: 100%;
+            padding: 20px 20px 20px 35px;
+        }
+
+        .text-wrapper-right {
+            border-right: 8px solid;
+            padding-right: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-end;
+            width: 100%;
+            padding: 20px 35px 20px 20px;
+        }
+
+        .text-wrapper-center {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            width: 100%;
+            padding: 20px;
+        }
+
+        /* --- CARD NUMBER BADGE --- */
+        .card-number-badge {
+            position: absolute;
+            bottom: 25px;
+            left: 30px;
+            background: rgba(0,0,0,0.5);
+            color: rgba(255,255,255,0.6);
+            font-size: 22px;
+            font-weight: 800;
+            padding: 8px 18px;
+            border-radius: 8px;
+            z-index: 20;
+            font-family: var(--font-main);
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .tag-pill {
+            color: white;
+            padding: 14px 35px 16px 38px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 800;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: var(--font-main);
+            margin-bottom: 30px;
+            line-height: 1;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+        
+        .tag-pill:hover, .tag-pill:focus {
+            transform: scale(1.02);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255, 90, 38, 0.4);
+        }
+
+        .sponsor-badge {
+            position: absolute;
+            top: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #000000;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 12px 35px 14px 35px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-family: var(--font-main);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            z-index: 20;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+        }
+
+        .sponsor-badge i {
+            color: var(--theme-brand);
+            font-size: 28px;
+        }
+
+        /* --- MELHORIAS EXTRAS UTEIS --- */
+        [contenteditable="true"] {
+            outline: none;
+            transition: all 0.2s;
+            cursor: text;
+            pointer-events: auto;
+        }
+        [contenteditable="true"]:hover {
+            box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+        }
+        [contenteditable="true"]:focus {
+            box-shadow: 0 0 0 3px rgba(255, 90, 38, 0.4);
+            background: rgba(0,0,0,0.3);
+            border-radius: 6px;
+        }
+
+        /* --- EMPTY STATE --- */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 40px;
+            text-align: center;
+            gap: 20px;
+        }
+        .empty-state-icon {
+            font-size: 80px;
+            color: rgba(255, 90, 38, 0.3);
+            animation: emptyPulse 3s ease-in-out infinite;
+        }
+        @keyframes emptyPulse {
+            0%, 100% { opacity: 0.3; transform: scale(1); }
+            50% { opacity: 0.6; transform: scale(1.05); }
+        }
+        .empty-state h3 { color: rgba(255,255,255,0.6); font-size: 20px; font-weight: 700; }
+        .empty-state p { color: rgba(255,255,255,0.3); font-size: 14px; max-width: 400px; line-height: 1.6; }
+
+        .kbd { background: rgba(255,255,255,0.1); padding: 2px 8px; border-radius: 4px; font-size: 11px; font-family: monospace; color: rgba(255,255,255,0.5); border: 1px solid rgba(255,255,255,0.15); }
+    </style>
+    <!-- CSS Dinâmico Injetado via JSON -->
+    <style id="dynamic-css"></style>
+    <link id="dynamic-fonts" rel="stylesheet" href="" crossorigin="anonymous">
+</head>
+<body>
+
+    <input type="file" id="hidden-file-input" accept="image/*" style="display: none;">
+
+    <!-- PROGRESS BAR -->
+    <div class="export-progress" id="export-progress">
+        <div class="export-progress-bar" id="export-progress-bar" style="width: 0%"></div>
+    </div>
+
+    <!-- TOAST CONTAINER -->
+    <div class="toast-container" id="toast-container"></div>
+
+    <!-- ÁREA DE INPUT DO JSON -->
+    <div class="toolbar" style="margin-bottom: 20px; flex-direction: column; align-items: flex-start; padding: 25px 28px;">
+        <div class="w-full flex justify-between items-center mb-3">
+            <h3 class="text-white font-bold text-xl flex items-center gap-3">
+                <i class="fa-solid fa-robot text-orange-500"></i> 
+                Cole o JSON gerado pelo Gemini aqui:
+                <span class="kbd">Ctrl+Enter</span>
+            </h3>
+            <div class="format-selector" style="background: rgba(255,100,0,0.08); border-color: rgba(255,90,38,0.3);">
+                <i class="fa-solid fa-palette text-orange-500"></i>
+                <label for="preset-select">Temas Prontos:</label>
+                <select id="preset-select" onchange="carregarPreset(this.value)">
+                    <option value="">-- Escolha um Tema --</option>
+                    <option value="default">ComMarília Padrão</option>
+                    <option value="anos2000">Retrô Anos 2000</option>
+                    <option value="historico">Histórico / Sépia Clássico</option>
+                    <option value="financas">Finanças / Investimentos</option>
+                    <option value="tech_cyber">Tecnologia / Cyberpunk</option>
+                    <option value="moda_editorial">Moda / Editorial</option>
+                    <option value="infantil_ludico">Infantil / Kids</option>
+                    <option value="gastro_gourmet">Gastronomia / Restaurante</option>
+                    <option value="esportes_hardcore">Esportes / Fitness</option>
+                    <option value="minimalista_clean">Minimalista / Clean</option>
+                    <option value="saude_bemestar">Saúde / Bem-Estar</option>
+                    <option value="eco_natureza">Eco / Natureza</option>
+                    <option value="educacao_academico">Educação / Acadêmico</option>
+                    <option value="gamer_neon">Gamer / E-Sports</option>
+                    <option value="noticias_breaking">Notícias / Breaking News</option>
+                    <option value="pets_vet">Pets / Veterinário</option>
+                    <option value="imobiliario">Imobiliário / Real Estate</option>
+                    <option value="musica_festival">Música / Festival</option>
+                </select>
+            </div>
+        </div>
+        
+        <textarea id="json-input" oninput="salvarRascunho()" placeholder='{  "tema": { "theme_dark": "#0F172A", ... },  "cards": [ ... ] }' style="width: 100%; height: 120px; background: rgba(15, 23, 42, 0.8); color: #38BDF8; font-family: 'Fira Code', monospace; padding: 15px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); resize: vertical; margin-bottom: 15px; font-size: 13px; line-height: 1.5; transition: border-color 0.2s;" onfocus="this.style.borderColor='rgba(255,90,38,0.4)'" onblur="this.style.borderColor='rgba(255,255,255,0.1)'"></textarea>
+        
+        <div class="w-full flex justify-between items-center">
+            <div class="flex gap-3 items-center">
+                <div class="format-select-wrapper format-selector">
+                    <i class="fa-solid fa-crop-simple"></i>
+                    <label for="format-select">Formato:</label>
+                    <select id="format-select" onchange="changeFormat(this.value)">
+                        <option value="story">Story (1080x1920)</option>
+                        <option value="feed">Feed (1080x1350)</option>
+                    </select>
+                </div>
+                <span id="autosave-badge" class="text-slate-400 text-sm bg-slate-800/60 px-3 py-1 rounded-full opacity-0 transition-opacity flex items-center gap-2"><i class="fa-solid fa-cloud-arrow-up"></i> Salvo</span>
+            </div>
+            
+            <div class="flex gap-3">
+                <button onclick="limparTudo()" class="btn-action btn-clear" title="Limpar todos os cards">
+                    <i class="fa-solid fa-eraser"></i> Limpar
+                </button>
+                <button onclick="gerarCardsDoJSON()" class="btn-action btn-generate">
+                    <i class="fa-solid fa-wand-magic-sparkles"></i> Gerar Cards 
+                </button>
+                <button id="download-btn" class="btn-action btn-export" onclick="exportarImagens()">
+                    <i class="fa-solid fa-download"></i> Baixar Todos
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ÁREA DOS CARDS -->
+    <div class="preview-container" id="posts-container">
+        <div class="w-full col-span-full empty-state">
+            <i class="fa-solid fa-wand-magic-sparkles empty-state-icon"></i>
+            <h3>Aguardando seu JSON mágico...</h3>
+            <p>Cole o JSON gerado pela IA no campo acima e clique em <strong>"Gerar Cards"</strong> para criar seus stories. Ou escolha um tema pronto para começar!</p>
+        </div>
+    </div>
+
+    <!-- Container de Exportação -->
+    <div id="export-container" style="position: fixed; top: 0; left: -9999px; display: none;"></div>
+
+    <script>
+        // ==========================================
+        // TOAST NOTIFICATION SYSTEM
+        // ==========================================
+        function showToast(message, type = 'info', duration = 3500) {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            toast.className = `toast toast-${type}`;
+            const icons = { success: 'fa-circle-check', error: 'fa-circle-xmark', info: 'fa-circle-info' };
+            toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i> ${message}`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.animation = 'toastOut 0.3s ease forwards';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // ==========================================
+        // UNDO SYSTEM
+        // ==========================================
+        let lastDeletedCard = null;
+
+        function limparTudo() {
+            const container = document.getElementById('posts-container');
+            const cards = container.querySelectorAll('.storie-wrapper');
+            if (cards.length === 0) { showToast('Nenhum card para limpar.', 'info'); return; }
+            lastDeletedCard = container.innerHTML;
+            container.innerHTML = `<div class="w-full col-span-full empty-state">
+                <i class="fa-solid fa-wand-magic-sparkles empty-state-icon"></i>
+                <h3>Aguardando seu JSON mágico...</h3>
+                <p>Cole o JSON gerado pela IA no campo acima e clique em <strong>"Gerar Cards"</strong>.</p>
+            </div>`;
+            // Undo toast
+            const undoToast = document.createElement('div');
+            undoToast.className = 'toast toast-undo';
+            undoToast.innerHTML = `<i class="fa-solid fa-trash-can"></i> Cards removidos. <button onclick="desfazerLimpeza()">Desfazer</button>`;
+            document.getElementById('toast-container').appendChild(undoToast);
+            setTimeout(() => { undoToast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => undoToast.remove(), 300); }, 6000);
+            atualizarContadorCards();
+        }
+
+        function desfazerLimpeza() {
+            if (!lastDeletedCard) return;
+            const container = document.getElementById('posts-container');
+            container.innerHTML = lastDeletedCard;
+            lastDeletedCard = null;
+            reativarEventosDeZoom();
+            setupAllDragAndDrop();
+            resizeStories();
+            iniciarSortable();
+            atualizarContadorCards();
+            showToast('Cards restaurados!', 'success');
+            document.querySelectorAll('.toast-undo').forEach(t => t.remove());
+        }
+
+        // ==========================================
+        // KEYBOARD SHORTCUTS
+        // ==========================================
+        document.addEventListener('keydown', (e) => {
+            if (e.ctrlKey && e.key === 'Enter') { e.preventDefault(); gerarCardsDoJSON(); }
+            if (e.ctrlKey && e.shiftKey && e.key === 'E') { e.preventDefault(); exportarImagens(); }
+            if (e.ctrlKey && e.key === 's') { e.preventDefault(); salvarRascunho(); showToast('Rascunho salvo!', 'success', 2000); }
+        });
+
+        // ==========================================
+        // LÓGICA DE GERAÇÃO VIA JSON
+        // ==========================================
+        function gerarCardsDoJSON() {
+            const jsonText = document.getElementById('json-input').value;
+            if(!jsonText.trim()) {
+                showToast('Por favor, cole o JSON gerado pelo Gemini.', 'error');
+                return;
+            }
+
+            try {
+                // Tenta fazer o parse. Remove possíveis formatações markdown do gemini
+                let cleanJson = jsonText.replace(/```json/g, '').replace(/```/g, '').trim();
+                const dados = JSON.parse(cleanJson);
+                
+                // 1. Aplicar as Cores do Tema (Variáveis CSS no :root)
+                const root = document.documentElement;
+                if(dados.tema.theme_dark) root.style.setProperty('--theme-dark', dados.tema.theme_dark);
+                if(dados.tema.theme_light) root.style.setProperty('--theme-light', dados.tema.theme_light);
+                if(dados.tema.theme_brand) root.style.setProperty('--theme-brand', dados.tema.theme_brand);
+                
+                // Variáveis dinâmicas de highlight
+                if(dados.tema.highlight_1_name && dados.tema.highlight_1_color) root.style.setProperty(dados.tema.highlight_1_name, dados.tema.highlight_1_color);
+                if(dados.tema.highlight_2_name && dados.tema.highlight_2_color) root.style.setProperty(dados.tema.highlight_2_name, dados.tema.highlight_2_color);
+                if(dados.tema.highlight_3_name && dados.tema.highlight_3_color) root.style.setProperty(dados.tema.highlight_3_name, dados.tema.highlight_3_color);
+
+                // --- INJEÇÃO DINÂMICA DE FONTES ---
+                const fontLink = document.getElementById('dynamic-fonts');
+                if (dados.tema.font_url) {
+                    fontLink.href = dados.tema.font_url;
+                } else {
+                    fontLink.href = ''; // Reseta se não houver
+                }
+
+                if (dados.tema.font_main) root.style.setProperty('--font-main', dados.tema.font_main);
+                else root.style.setProperty('--font-main', "'Montserrat', sans-serif"); // Fallback
+
+                if (dados.tema.font_display) root.style.setProperty('--font-display', dados.tema.font_display);
+                else root.style.setProperty('--font-display', "'Bebas Neue', sans-serif"); // Fallback
+
+                // --- INJEÇÃO DINÂMICA DE CSS CUSTOMIZADO ---
+                const customCssTag = document.getElementById('dynamic-css');
+                if (dados.tema.custom_css) {
+                    customCssTag.innerHTML = dados.tema.custom_css;
+                } else {
+                    customCssTag.innerHTML = ''; // Reseta para o padrão
+                }
+
+                // 2. Gerar o HTML dos Cards Dinamicamente
+                const container = document.getElementById('posts-container');
+                container.innerHTML = ''; // Limpa os cards antigos ou mensagem de espera
+
+                if(!dados.cards || !Array.isArray(dados.cards)) {
+                     throw new Error("O JSON não contém um array 'cards' válido.");
+                }
+
+                dados.cards.forEach((card, index) => {
+                    // Garantir propriedades padrão caso o JSON venha incompleto
+                    const layout = card.layout || { align_horizontal: 'center', align_vertical: 'center', text_wrapper: 'center' };
+                    const titulos = card.titulo_linhas || ['Título'];
+                    const textos = card.textos || ['Texto do card'];
+                    const bgColor = card.tag_pill_color_var || '--theme-brand';
+
+                    // Processamento de Estilos Opcionais Extra
+                    const gradientClass = layout.background_gradient === 'full' ? 'gradient-full' : (layout.background_gradient === 'none' || layout.background_gradient === 'transparent' ? '' : 'gradient-bottom');
+                    
+                    let titleStyle = '';
+                    if (layout.title_size) titleStyle += `font-size: ${layout.title_size}; `;
+                    if (layout.title_line_height) titleStyle += `line-height: ${layout.title_line_height}; `;
+                    
+                    const showBadge = index === 0 && card.hide_sponsor_badge !== true;
+
+                    // Constrói os parágrafos de texto (com suporte a Negrito via Markdown **)
+                    const paragraphs = textos.map(txt => {
+                        // Converte **texto** para <strong>texto</strong>
+                        const formattedTxt = txt.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+                        return `<p class="storie-text text-${layout.text_wrapper === 'left' ? 'left' : layout.text_wrapper === 'right' ? 'right' : 'center'}">${formattedTxt}</p>`;
+                    }).join('');
+                    
+                    // Constrói o título com o destaque colorido
+                    // Se o usuário mandar título com os asteriscos do markdown também na prop titulo_destaque, nós limpamos para evitar <strong> dentro do <span>
+                    const safeDestaque = (card.titulo_destaque || '').replace(/\*\*/g, '');
+                    const titleHtml = `${titulos.join('<br>')}<br><span style="color: var(${bgColor});">${safeDestaque}</span>`;
+
+                    // Verifica padding inferior se passado customizado, senao default 110px
+                    const paddingBottom = layout.padding_bottom ? layout.padding_bottom : '110px';
+
+                    // HTML Master do Card
+                    const totalCards = dados.cards.length;
+                    const cardHTML = `
+                    <div class="storie-wrapper" style="animation-delay: ${index * 0.08}s">
+                        <div class="storie-card" data-export="true">
+                            
+                            ${showBadge ? '<div class="sponsor-badge"><i class="fa-solid fa-star"></i> Oferecimento: ComMarília</div>' : ''}
+                            
+                            <div class="card-number-badge">${index + 1}/${totalCards}</div>
+                            
+                            <div class="bg-layer">
+                                <div class="upload-zone" onclick="triggerUpload(this)">
+                                    <div class="upload-prompt">
+                                        <i class="fa-solid fa-${card.icone || 'image'}"></i>
+                                        <span>${card.sugestao_foto || 'Faça Upload'}</span>
+                                    </div>
+                                    <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                                        <i class="fa-solid fa-minus text-white text-xl"></i>
+                                        <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                                        <i class="fa-solid fa-plus text-white text-xl"></i>
+                                    </div>
+                                    <div class="image-controls">
+                                        <!-- GRUPO 1: ESTILO DA IMAGEM E FUNDO -->
+                                        <div class="control-group">
+                                            <div class="control-btn" title="Trocar Imagem" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-pen"></i></div>
+                                            <div class="control-btn" title="Mudar Cor Principal" onclick="acionarColorPicker(event, this)">
+                                                <i class="fa-solid fa-palette text-orange-400"></i>
+                                                <input type="color" class="hidden-color-picker" style="width: 0; height: 0; visibility: hidden;" onchange="alterarCorDestaque(event, this, '${bgColor}')">
+                                            </div>
+                                            <div class="control-btn" title="Opacidade do Gradiente Fundo" onclick="abrirSliderOpacidade(event, this)"><i class="fa-solid fa-circle-half-stroke"></i></div>
+                                        </div>
+
+                                        <!-- GRUPO 2: POSIÇÃO E LAYOUT -->
+                                        <div class="control-group">
+                                            <div class="control-btn" title="Alinhamento Vertical" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                                            <div class="control-btn" title="Alinhamento Horizontal" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                                            <div class="control-btn" title="${showBadge ? 'Ocultar Oferecimento' : 'Mostrar Oferecimento'}" onclick="toggleBadge(event, this)"><i class="fa-solid fa-star"></i></div>
+                                        </div>
+
+                                        <!-- GRUPO 3: AÇÕES DE CARD -->
+                                        <div class="control-group">
+                                            <div class="control-btn handle" title="Reordenar (Segure e Arraste)"><i class="fa-solid fa-arrows-up-down-left-right text-slate-400"></i></div>
+                                            <div class="control-btn" title="Duplicar Card" onclick="duplicarCard(event, this)"><i class="fa-solid fa-copy"></i></div>
+                                            <div class="control-btn" title="Excluir Card" onclick="excluirCard(event, this)"><i class="fa-solid fa-trash-can"></i></div>
+                                            <div class="control-btn" title="Baixar Apenas Este" onclick="exportarCardIndividual(event, this)" style="background-color: var(--theme-brand); border-color: var(--theme-brand);"><i class="fa-solid fa-download"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ui-layer ${gradientClass} justify-${layout.align_vertical || 'center'} align-${layout.align_horizontal || 'center'}" style="padding-bottom: ${paddingBottom};">
+                                ${card.tag_pill_text ? `<div class="tag-pill" contenteditable="true" spellcheck="false" title="Clique para editar o texto ou o tamanho" style="background-color: var(${bgColor});">${card.tag_pill_text}</div>` : ''}
+                                
+                                <h1 class="storie-title text-${layout.align_horizontal === 'start' ? 'left' : layout.align_horizontal === 'end' ? 'right' : 'center'}" style="${titleStyle}" contenteditable="true" spellcheck="false" title="Clique para editar">${titleHtml}</h1>
+                                
+                                <div class="text-wrapper-${layout.text_wrapper || 'center'}" style="border-color: var(${bgColor});">
+                                    ${paragraphs.replace(/<p class="/g, '<p contenteditable="true" spellcheck="false" title="Clique para editar" class="')}
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                    `;
+                    
+                    container.insertAdjacentHTML('beforeend', cardHTML);
+                });
+
+                // Retrai a caixa de texto para não atrapalhar a visão
+                document.getElementById('json-input').style.height = '60px';
+                
+                // Religa os eventos para os novos cards existirem
+                reativarEventosDeZoom();
+                setupAllDragAndDrop();
+                resizeStories(); // Ajusta a escala visual
+                salvarRascunho(); // Salva estado atual
+
+                // Ativar drag-and-drop global nos itens
+                iniciarSortable();
+
+                showToast(`${dados.cards.length} cards gerados com sucesso!`, 'success');
+
+            } catch (error) {
+                showToast('Erro ao ler JSON: ' + error.message, 'error', 5000);
+                console.error("Erro JSON:", error);
+            }
+        }
+
+        // ==========================================
+        // FUNCIONALIDADES EXTRAS (PRESETS, AUTOSAVE, CLONE/DEL)
+        // ==========================================
+        
+        // --- 1. PRESETS ---
+        function carregarPreset(id) {
+            if(!id || !presets[id]) return;
+            
+            const presetTema = JSON.parse(presets[id].json).tema;
+            const inputField = document.getElementById('json-input');
+            const currentText = inputField.value;
+            
+            let currentJSON = null;
+            try {
+                if(currentText.trim()) {
+                    let cleanJson = currentText.replace(/```json/g, '').replace(/```/g, '').trim();
+                    currentJSON = JSON.parse(cleanJson);
+                }
+            } catch(e) {}
+            
+            if (currentJSON && currentJSON.cards && currentJSON.cards.length > 0) {
+                // Mantém os cards atuais intactos, atualiza apenas estilo e tema
+                currentJSON.tema = presetTema;
+                inputField.value = JSON.stringify(currentJSON, null, 2);
+            } else {
+                // Se nao tiver cards válidos, carrega o preset demonstrativo completo
+                inputField.value = presets[id].json;
+            }
+            gerarCardsDoJSON();
+        }
+
+        // --- 2. AUTO SAVE ---
+        function salvarRascunho() {
+            const currentJson = document.getElementById('json-input').value;
+            if (currentJson.trim()) {
+                localStorage.setItem('commarilia_cards_json', currentJson);
+                // Mostrar badge de confirmação visual
+                const badge = document.getElementById('autosave-badge');
+                if(badge) {
+                    badge.style.opacity = '1';
+                    setTimeout(() => badge.style.opacity = '0', 2000);
+                }
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            const savedJson = localStorage.getItem('commarilia_cards_json');
+            if (savedJson) {
+                document.getElementById('json-input').value = savedJson;
+                gerarCardsDoJSON();
+            }
+        });
+
+        // --- 3. EXCLUIR E DUPLICAR CARDS ---
+        function excluirCard(e, btn) {
+            if(e) e.stopPropagation();
+            const wrapper = btn.closest('.storie-wrapper');
+            lastDeletedCard = wrapper.outerHTML;
+            wrapper.remove();
+            atualizarContadorCards();
+            // Undo toast
+            const undoToast = document.createElement('div');
+            undoToast.className = 'toast toast-undo';
+            undoToast.innerHTML = `<i class="fa-solid fa-trash-can"></i> Card removido. <button onclick="desfazerExclusaoCard()">Desfazer</button>`;
+            document.getElementById('toast-container').appendChild(undoToast);
+            setTimeout(() => { undoToast.style.animation = 'toastOut 0.3s ease forwards'; setTimeout(() => undoToast.remove(), 300); }, 5000);
+        }
+
+        function desfazerExclusaoCard() {
+            if (!lastDeletedCard) return;
+            const container = document.getElementById('posts-container');
+            container.insertAdjacentHTML('beforeend', lastDeletedCard);
+            lastDeletedCard = null;
+            reativarEventosDeZoom();
+            setupAllDragAndDrop();
+            resizeStories();
+            atualizarContadorCards();
+            showToast('Card restaurado!', 'success');
+            document.querySelectorAll('.toast-undo').forEach(t => t.remove());
+        }
+
+        function duplicarCard(e, btn) {
+            if(e) e.stopPropagation();
+            const wrapperOriginal = btn.closest('.storie-wrapper');
+            const clone = wrapperOriginal.cloneNode(true);
+            
+            // Inserir ao lado do original
+            wrapperOriginal.parentNode.insertBefore(clone, wrapperOriginal.nextSibling);
+            
+            // Religar eventos de Zoom e D&D pro clone isoladamente
+            reativarEventosDeZoom();
+            setupAllDragAndDrop();
+            atualizarContadorCards();
+        }
+
+        function atualizarContadorCards() {
+            const cardsInfo = document.querySelectorAll('.storie-card[data-export="true"]');
+            const downBtn = document.getElementById('download-btn');
+            if(downBtn) downBtn.innerHTML = `<i class="fa-solid fa-download"></i> 2. Baixar Todos (${cardsInfo.length} Cards)`;
+        }
+
+        // ==========================================
+        // LÓGICA DO MOTOR ORIGINAL (Pan, Zoom, Export)
+        // ==========================================
+        let currentExportHeight = 1920;
+
+        // 1. FORMATO
+        function changeFormat(format) {
+            if (format === 'story') {
+                document.documentElement.style.setProperty('--card-height', '1920px');
+                document.documentElement.style.setProperty('--card-aspect', '9 / 16');
+                currentExportHeight = 1920;
+            } else {
+                document.documentElement.style.setProperty('--card-height', '1350px');
+                document.documentElement.style.setProperty('--card-aspect', '4 / 5');
+                currentExportHeight = 1350;
+            }
+            document.querySelectorAll('.draggable-img').forEach(img => {
+                if (!img.src) return;
+                const cw = 1080; const ch = currentExportHeight;
+                const iw = parseFloat(img.style.width); const ih = parseFloat(img.style.height);
+                if (iw && ih) {
+                    const newBaseScale = Math.max(cw / iw, ch / ih);
+                    img.dataset.baseScale = newBaseScale;
+                    if (parseFloat(img.dataset.scale) < newBaseScale) img.dataset.scale = newBaseScale;
+                    updateImgTransform(img);
+                }
+            });
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+        }
+
+        // 2. ALINHAMENTO VERTICAL
+        function mudarVertical(e, btn) {
+            e.stopPropagation();
+            const uiLayer = btn.closest('.storie-card').querySelector('.ui-layer');
+            if (uiLayer.classList.contains('justify-end')) {
+                uiLayer.classList.replace('justify-end', 'justify-center');
+            } else if (uiLayer.classList.contains('justify-center')) {
+                uiLayer.classList.replace('justify-center', 'justify-start');
+            } else {
+                uiLayer.classList.replace('justify-start', 'justify-end');
+            }
+        }
+
+        // 3. ALINHAMENTO HORIZONTAL
+        function mudarHorizontal(e, btn) {
+            e.stopPropagation();
+            const uiLayer = btn.closest('.storie-card').querySelector('.ui-layer');
+            const wrapper = uiLayer.querySelector('[class^="text-wrapper-"]');
+            const title = uiLayer.querySelector('.storie-title');
+            const texts = uiLayer.querySelectorAll('.storie-text');
+
+            if (uiLayer.classList.contains('align-start')) {
+                uiLayer.classList.replace('align-start', 'align-center');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-left', 'text-wrapper-center');
+                if(title) { title.classList.remove('text-left', 'text-right'); title.classList.add('text-center'); }
+                texts.forEach(t => { t.classList.remove('text-left', 'text-right'); t.classList.add('text-center'); });
+            } else if (uiLayer.classList.contains('align-center')) {
+                uiLayer.classList.replace('align-center', 'align-end');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-center', 'text-wrapper-right');
+                if(title) { title.classList.remove('text-left', 'text-center'); title.classList.add('text-right'); }
+                texts.forEach(t => { t.classList.remove('text-left', 'text-center'); t.classList.add('text-right'); });
+            } else {
+                uiLayer.classList.replace('align-end', 'align-start');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-right', 'text-wrapper-left');
+                if(title) { title.classList.remove('text-center', 'text-right'); title.classList.add('text-left'); }
+                texts.forEach(t => { t.classList.remove('text-center', 'text-right'); t.classList.add('text-left'); });
+            }
+        }
+
+        // --- NOVAS FUNCIONALIDADES (DRAG, CORES, GRADIENTE, BADGES, FONTS) ---
+        
+        // PAINEL FLUTUANTE DE TEXTO E OPACIDADE
+        let activeTextElement = null;
+        let activeUiLayer = null;
+
+        // Limpa os popups da tela ao clicar fora
+        document.addEventListener('mousedown', (e) => {
+            if (!e.target.closest('.floating-popup') && !e.target.closest('.storie-card') && !e.target.closest('.control-btn')) {
+                fecharPopups();
+            }
+        });
+
+        function fecharPopups() {
+            document.querySelectorAll('.floating-popup').forEach(p => p.remove());
+            activeTextElement = null;
+            activeUiLayer = null;
+        }
+
+        // Delegação de eventos para pegar os cliques no contenteditable dos cards dinâmicos
+        document.addEventListener('focusin', (e) => {
+            if (e.target.hasAttribute('contenteditable') || e.target.classList.contains('tag-pill')) {
+                abrirControleFonte(e.target);
+            }
+        });
+
+        function abrirControleFonte(el) {
+            fecharPopups();
+            activeTextElement = el;
+            
+            // Pega o font-size atual base pra carregar o slider
+            let currentSize = window.getComputedStyle(el).fontSize;
+            let sizeVal = parseFloat(currentSize);
+
+            const popup = document.createElement('div');
+            popup.className = 'floating-popup font-popup';
+            
+            // Se for titulo precisa aceitar tamanhos maiores no max
+            const maxRange = el.classList.contains('storie-title') ? 250 : 100;
+            
+            popup.innerHTML = `
+                <i class="fa-solid fa-font text-white text-xl"></i>
+                <input type="range" min="10" max="${maxRange}" step="1" value="${sizeVal}" class="zoom-slider" oninput="ajustarFonteSlider(this.value)">
+                <span id="font-size-display" style="color:white; font-weight:bold; min-width:40px">${sizeVal}px</span>
+            `;
+            
+            document.body.appendChild(popup);
+            posicionarPopup(el, popup);
+        }
+
+        function ajustarFonteSlider(val) {
+            if (activeTextElement) {
+                activeTextElement.style.fontSize = val + 'px';
+                const display = document.querySelector('.font-popup #font-size-display');
+                if(display) display.innerText = val + 'px';
+            }
+        }
+
+        function abrirSliderOpacidade(e, btn) {
+            e.stopPropagation();
+            fecharPopups();
+            
+            const card = btn.closest('.storie-card');
+            activeUiLayer = card.querySelector('.ui-layer');
+            
+            // Garante que tenha alguma classe de gradiente ativada
+            if(!activeUiLayer.classList.contains('gradient-bottom') && !activeUiLayer.classList.contains('gradient-full')) {
+                activeUiLayer.classList.add('gradient-bottom');
+            }
+            
+            // Pega valor atual
+            let currentVal = activeUiLayer.style.getPropertyValue('--bg-opacity') || '1';
+            
+            const popup = document.createElement('div');
+            popup.className = 'floating-popup opacity-popup';
+            
+            popup.innerHTML = `
+                <i class="fa-solid fa-circle-half-stroke text-white text-xl"></i>
+                <input type="range" min="0" max="1" step="0.05" value="${currentVal}" class="zoom-slider" oninput="ajustarOpacidadeSlider(this.value)">
+                <button onclick="activeUiLayer.classList.toggle('gradient-full'); activeUiLayer.classList.toggle('gradient-bottom');" title="Alternar Meio Gradiente / Gradiente Cheio" class="ml-2 bg-slate-700 text-white p-2 rounded hover:bg-slate-600"><i class="fa-solid fa-fill-drip"></i></button>
+            `;
+            
+            document.body.appendChild(popup);
+            posicionarPopup(btn, popup);
+        }
+
+        function ajustarOpacidadeSlider(val) {
+            if(activeUiLayer) {
+                activeUiLayer.style.setProperty('--bg-opacity', val);
+            }
+        }
+
+        function posicionarPopup(targetEl, popup) {
+            const rect = targetEl.getBoundingClientRect();
+            popup.style.top = (rect.top + window.scrollY - 10) + 'px';
+            popup.style.left = (rect.left + window.scrollX + (rect.width/2)) + 'px';
+        }
+
+        let sortableInstance = null;
+        function iniciarSortable() {
+            const container = document.getElementById('posts-container');
+            if (sortableInstance) sortableInstance.destroy(); // Limpa instâncias anteriores se gerar json de novo
+            
+            sortableInstance = new Sortable(container, {
+                animation: 200,
+                handle: '.handle', // Usa apenas o botão com ícone de mover
+                ghostClass: 'opacity-50', // Classe enquanto arrasta
+                onEnd: function (evt) {
+                    atualizarContadorCards(); // Apenas atualiza estado, se precisar
+                }
+            });
+        }
+
+        // Tenta acionar clique se não conseguir em mobile via z-index
+        function acionarColorPicker(e, btn) {
+            e.stopPropagation();
+            const input = btn.querySelector('input[type="color"]');
+            if(input) input.click();
+        }
+
+        function alterarCorDestaque(e, inputColor, varName) {
+            e.stopPropagation();
+            const hexColorString = inputColor.value; // ex: #ff0000
+            const cardRoot = inputColor.closest('.storie-card');
+            
+            // Queremos aplicar essa cor no lugar da variavel original apenas neste componente.
+            // Para não quebrar quem tem estilos definidos por 'var(--nome-var)',
+            // podemos substituir 'var(--theme-brand)' na stye inline do card pelo Hex específico
+            
+            const elements = cardRoot.querySelectorAll('[style*="var("]');
+            
+            elements.forEach(el => {
+                 let currStyle = el.getAttribute('style');
+                 // Localizar onde ele usava a cor antes (ex: color: var(--theme-brand))
+                 // Se o varName = '--theme-brand', regex abaixo o encontrará
+                 const regex = new RegExp(`var\\(${varName}\\)`, 'g');
+                 if(currStyle.match(regex)) {
+                     el.setAttribute('data-original-color-var', varName); // Salvar qual era pra trocar futuramente
+                     currStyle = currStyle.replace(regex, hexColorString);
+                     el.setAttribute('style', currStyle);
+                 } else if (el.hasAttribute('data-original-color-var') && el.getAttribute('data-original-color-var') === varName) {
+                     // Caso ele ja tenha trocado a string pra HEX, nao damos regex facil. 
+                     // Teremos que alterar os atributos com base na classe.
+                     if(el.classList.contains('tag-pill')) {
+                         el.style.backgroundColor = hexColorString;
+                         el.style.borderColor = hexColorString;
+                     }
+                     if(el.tagName === 'SPAN' && el.parentElement.classList.contains('storie-title')) {
+                         el.style.color = hexColorString;
+                     }
+                     if(el.className.includes('text-wrapper')) {
+                         el.style.borderColor = hexColorString;
+                     }
+                 }
+            });
+            
+            // Garantia (seta as cores dinamicamente via style nativo pra sobrepor)
+            const pill = cardRoot.querySelector('.tag-pill');
+            if(pill) { pill.style.backgroundColor = hexColorString; pill.style.borderColor = hexColorString; }
+            const spanTitle = cardRoot.querySelector('.storie-title span');
+            if(spanTitle) spanTitle.style.color = hexColorString;
+            const textWrapper = cardRoot.querySelector('[class^="text-wrapper-"]');
+            if(textWrapper) textWrapper.style.borderColor = hexColorString;
+            
+        }
+
+        // Removido mudarGradiente legado
+
+        function toggleBadge(e, btn) {
+            e.stopPropagation();
+            const card = btn.closest('.storie-card');
+            let badge = card.querySelector('.sponsor-badge');
+            
+            if (badge) {
+                // Se existe, remover/esconder (removo p ñ gastar memoria)
+                badge.style.display = 'none';
+                badge.classList.remove('sponsor-badge'); // Prevenir contagem errada se precisarmos
+                btn.title = "Mostrar Oferecimento";
+            } else {
+                // Precisamos criar de volta
+                badge = document.createElement('div');
+                badge.className = 'sponsor-badge';
+                badge.innerHTML = '<i class="fa-solid fa-star"></i> Oferecimento: ComMarília';
+                card.insertBefore(badge, card.firstChild);
+                btn.title = "Ocultar Oferecimento";
+            }
+        }
+
+        // 4. DOWNLOAD INDIVIDUAL OTIMIZADO
+        async function exportarCardIndividual(e, btn) {
+            e.stopPropagation();
+            const cardOriginal = btn.closest('.storie-card');
+            
+            const exportContainer = document.getElementById('export-container');
+            exportContainer.style.width = '1080px';
+            exportContainer.style.height = currentExportHeight + 'px';
+            exportContainer.style.position = 'fixed';
+            exportContainer.style.top = '0';
+            exportContainer.style.left = '-9999px';
+            exportContainer.style.display = 'block';
+            
+            const clone = cardOriginal.cloneNode(true);
+            clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt, .card-number-badge').forEach(el => el.remove());
+            clone.style.transform = 'none';
+            clone.style.width = '1080px';
+            clone.style.height = currentExportHeight + 'px';
+            clone.style.position = 'relative';
+            clone.style.left = '0';
+            clone.style.top = '0';
+            clone.style.margin = '0';
+            clone.style.aspectRatio = 'auto';
+
+            exportContainer.innerHTML = '';
+            exportContainer.appendChild(clone);
+
+            const icone = btn.querySelector('i');
+            const classeOriginal = icone.className;
+            icone.className = 'fa-solid fa-spinner fa-spin';
+
+            await document.fonts.ready;
+            await new Promise(resolve => setTimeout(resolve, 300));
+
+            try {
+                const dataUrl = await htmlToImage.toPng(clone, {
+                    pixelRatio: 1,
+                    width: 1080,
+                    height: currentExportHeight,
+                    backgroundColor: getComputedStyle(cardOriginal).backgroundColor,
+                    style: { transform: 'none' },
+                    useCORS: true,
+                    allowTaint: true
+                });
+                
+                const titleEl = cardOriginal.querySelector('.storie-title');
+                let titleText = titleEl ? titleEl.innerText.replace(/[^a-zA-Z0-9]/g, '_').substring(0, 15) : 'Card';
+                const formatName = currentExportHeight === 1920 ? 'Story' : 'Feed';
+                
+                const link = document.createElement('a');
+                link.download = `ComMarilia_${titleText}_${formatName}.png`;
+                link.href = dataUrl;
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            } catch(error) {
+                console.error('Erro na exportação:', error);
+                showToast('Erro ao exportar a imagem.', 'error');
+            }
+            
+            icone.className = classeOriginal;
+            exportContainer.innerHTML = '';
+            exportContainer.style.display = 'none';
+        }
+
+        // 5. DOWNLOAD GLOBAL DE TODOS OS CARDS
+        async function exportarImagens() {
+            const btn = document.getElementById('download-btn');
+            if(!btn) return;
+            const cards = document.querySelectorAll('.storie-card[data-export="true"]');
+            if(cards.length === 0) {
+                showToast('Gere os cards primeiro antes de exportar!', 'error');
+                return;
+            }
+            
+            const textoOriginal = btn.innerHTML;
+            btn.disabled = true;
+
+            // Show progress bar
+            const progressEl = document.getElementById('export-progress');
+            const progressBar = document.getElementById('export-progress-bar');
+            progressEl.style.display = 'block';
+            progressBar.style.width = '0%';
+
+            const exportContainer = document.getElementById('export-container');
+            exportContainer.style.width = '1080px';
+            exportContainer.style.height = currentExportHeight + 'px';
+            exportContainer.style.position = 'fixed';
+            exportContainer.style.top = '0';
+            exportContainer.style.left = '-9999px';
+            exportContainer.style.display = 'block';
+
+            await document.fonts.ready;
+
+            for (let i = 0; i < cards.length; i++) {
+                try {
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Exportando (${i + 1}/${cards.length})...`;
+                    progressBar.style.width = `${((i + 1) / cards.length) * 100}%`;
+                    
+                    const clone = cards[i].cloneNode(true);
+                    clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt, .card-number-badge').forEach(el => el.remove());
+                    
+                    clone.style.transform = 'none';
+                    clone.style.width = '1080px';
+                    clone.style.height = currentExportHeight + 'px';
+                    clone.style.position = 'relative';
+                    clone.style.left = '0';
+                    clone.style.top = '0';
+                    clone.style.margin = '0';
+                    clone.style.aspectRatio = 'auto';
+
+                    exportContainer.innerHTML = '';
+                    exportContainer.appendChild(clone);
+
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    const dataUrl = await htmlToImage.toPng(clone, {
+                        pixelRatio: 1,
+                        width: 1080,
+                        height: currentExportHeight,
+                        backgroundColor: getComputedStyle(cards[i]).backgroundColor,
+                        style: { transform: 'none' },
+                        useCORS: true,
+                        allowTaint: true
+                    });
+
+                    const formatName = currentExportHeight === 1920 ? 'Story' : 'Feed';
+                    const link = document.createElement('a');
+                    link.download = `ComMarilia_Lote_${formatName}_0${i + 1}.png`;
+                    link.href = dataUrl;
+                    
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                } catch (error) {
+                    console.error("Erro ao gerar card " + (i + 1), error);
+                    showToast(`Erro no card ${i + 1}`, 'error', 3000);
+                }
+            }
+            
+            exportContainer.innerHTML = '';
+            exportContainer.style.display = 'none';
+            progressEl.style.display = 'none';
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+            showToast(`${cards.length} imagens exportadas com sucesso!`, 'success');
+        }
+
+        // ==========================================
+        // SISTEMA DE UPLOAD DE IMAGENS E PAN/ZOOM
+        // ==========================================
+        const fileInput = document.getElementById('hidden-file-input');
+        let currentTargetZone = null;
+        let isDraggingImage = false, activeImage = null;
+        let startX, startY, startTx, startTy;
+
+        // DRAG AND DROP NATIVO PARA AS ZONAS
+        function setupAllDragAndDrop() {
+            document.querySelectorAll('.upload-zone').forEach(zone => {
+                if(zone.dataset.dndSetup === 'true') return; // Evita setup duplo
+                zone.dataset.dndSetup = 'true';
+                
+                zone.addEventListener('dragover', e => {
+                    e.preventDefault();
+                    zone.style.opacity = '0.7';
+                    zone.style.border = '4px dashed var(--theme-brand)';
+                });
+                zone.addEventListener('dragleave', e => {
+                    e.preventDefault();
+                    zone.style.opacity = '1';
+                    zone.style.border = 'none';
+                });
+                zone.addEventListener('drop', e => {
+                    e.preventDefault();
+                    zone.style.opacity = '1';
+                    zone.style.border = 'none';
+                    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+                        const file = e.dataTransfer.files[0];
+                        if (file.type.startsWith('image/')) {
+                            processImageFile(file, zone);
+                        }
+                    }
+                });
+            });
+        }
+
+        // Previne comportamento padrão de abrir imagem no navegador se errar a mira
+        window.addEventListener("dragover", function(e){ e.preventDefault(); }, false);
+        window.addEventListener("drop", function(e){ e.preventDefault(); }, false);
+
+        // FUNÇÃO COMPARTILHADA PARA LER ARQUIVO DE IMAGEM
+        function processImageFile(file, targetZone) {
+            const imgURL = URL.createObjectURL(file);
+            const oldImg = targetZone.querySelector('.draggable-img');
+            if (oldImg) { URL.revokeObjectURL(oldImg.src); oldImg.remove(); }
+
+            const img = document.createElement('img');
+            img.src = imgURL;
+            img.classList.add('draggable-img');
+            img.onload = function () {
+                const cw = 1080, ch = currentExportHeight;
+                const iw = img.naturalWidth, ih = img.naturalHeight;
+                img.style.width = iw + 'px';
+                img.style.height = ih + 'px';
+
+                const coverScale = Math.max(cw / iw, ch / ih);
+                img.dataset.baseScale = coverScale;
+                img.dataset.scale = coverScale;
+                img.dataset.tx = 0;
+                img.dataset.ty = 0;
+                updateImgTransform(img);
+                const slider = targetZone.querySelector('.zoom-slider');
+                if (slider) slider.value = 1;
+            };
+            targetZone.appendChild(img);
+            targetZone.classList.add('has-image');
+        }
+
+        if(fileInput) {
+            function triggerUpload(zoneElement) {
+                if (!zoneElement.classList.contains('has-image')) {
+                    currentTargetZone = zoneElement;
+                    fileInput.click();
+                }
+            }
+            function triggerUploadBtn(e, btn) {
+                e.stopPropagation();
+                currentTargetZone = btn.closest('.upload-zone');
+                fileInput.click();
+            }
+            fileInput.addEventListener('change', function (e) {
+                if (this.files && this.files.length > 0 && currentTargetZone) {
+                    processImageFile(this.files[0], currentTargetZone);
+                }
+                this.value = '';
+            });
+        }
+
+        function updateImgTransform(img) {
+            const tx = parseFloat(img.dataset.tx) || 0;
+            const ty = parseFloat(img.dataset.ty) || 0;
+            const scale = parseFloat(img.dataset.scale) || 1;
+            const iw = parseFloat(img.style.width) || 0;
+            const ih = parseFloat(img.style.height) || 0;
+            img.style.transform = `translate(${tx - (iw / 2)}px, ${ty - (ih / 2)}px) scale(${scale})`;
+        }
+
+        function startPan(e) {
+            if (e.target.closest('.zoom-panel') || e.target.closest('.image-controls')) return;
+            const zone = e.target.closest('.upload-zone');
+            if (!zone || !zone.classList.contains('has-image')) return;
+
+            isDraggingImage = true;
+            activeImage = zone.querySelector('.draggable-img');
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            startTx = parseFloat(activeImage.dataset.tx) || 0;
+            startTy = parseFloat(activeImage.dataset.ty) || 0;
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function doPan(e) {
+            if (!isDraggingImage || !activeImage) return;
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+
+            const wrapper = activeImage.closest('.storie-wrapper');
+            const previewScale = wrapper.clientWidth / 1080;
+
+            activeImage.dataset.tx = startTx + (dx / previewScale);
+            activeImage.dataset.ty = startTy + (dy / previewScale);
+            updateImgTransform(activeImage);
+        }
+
+        function endPan() {
+            isDraggingImage = false;
+            activeImage = null;
+        }
+
+        window.addEventListener('mousemove', doPan);
+        window.addEventListener('touchmove', doPan, { passive: false });
+        window.addEventListener('mouseup', endPan);
+        window.addEventListener('touchend', endPan);
+
+        function updateZoom(e, input) {
+            e.stopPropagation();
+            const zone = input.closest('.upload-zone');
+            const img = zone.querySelector('.draggable-img');
+            if (img) {
+                const baseScale = parseFloat(img.dataset.baseScale);
+                const newScale = baseScale * parseFloat(input.value);
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+            }
+        }
+
+        // Função para ligar/religar eventos de roda do mouse (zoom) nos cards dinâmicos
+        function handleWheelZoom(e) {
+            const zone = e.currentTarget;
+            if (!zone.classList.contains('has-image')) return;
+            e.preventDefault();
+            const img = zone.querySelector('.draggable-img');
+            if (!img) return;
+
+            const zoomSensitivity = 0.002;
+            const delta = -e.deltaY * zoomSensitivity;
+            let currentScale = parseFloat(img.dataset.scale);
+            const baseScale = parseFloat(img.dataset.baseScale);
+            let newScale = currentScale + (baseScale * delta);
+            newScale = Math.max(baseScale, Math.min(newScale, baseScale * 4));
+
+            img.dataset.scale = newScale;
+            updateImgTransform(img);
+            const slider = zone.querySelector('.zoom-slider');
+            if (slider) slider.value = newScale / baseScale;
+        }
+
+        function reativarEventosDeZoom() {
+            document.querySelectorAll('.upload-zone').forEach(zone => {
+                // Remove listeners antigos se houver
+                zone.removeEventListener('mousedown', startPan);
+                zone.removeEventListener('touchstart', startPan);
+                zone.removeEventListener('wheel', handleWheelZoom);
+                
+                // Adiciona os listeners na nova zone
+                zone.addEventListener('mousedown', startPan);
+                zone.addEventListener('touchstart', startPan, { passive: false });
+                zone.addEventListener('wheel', handleWheelZoom, { passive: false });
+            });
+        }
+
+        // ==========================================
+        // ESCALA RESPONSIVA PARA O BROWSER
+        // ==========================================
+        function resizeStories() {
+            const wrappers = document.querySelectorAll('.storie-wrapper');
+            wrappers.forEach(wrapper => {
+                const card = wrapper.querySelector('.storie-card');
+                const scale = wrapper.clientWidth / 1080;
+                card.style.transform = `scale(${scale})`;
+            });
+        }
+        window.addEventListener('resize', resizeStories);
+        window.addEventListener('DOMContentLoaded', resizeStories);
+
+        // Inicializar os eventos na tag upload-zone inicial que não existe mais por default
+        // reativarEventosDeZoom();
+    </script>
+</body>
+</html>

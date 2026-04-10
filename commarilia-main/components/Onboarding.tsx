@@ -24,6 +24,13 @@ const Onboarding: React.FC<OnboardingProps> = ({ onDismiss }) => {
       
       <div className="relative z-10 flex flex-col items-center w-full max-w-sm gap-10">
         
+        {/* Brand Logo */}
+        <div className="absolute -top-20">
+            <h1 className="text-white text-3xl font-poppins font-bold drop-shadow-md">
+                Com<span className="text-[#fd572b]">Marília</span>
+            </h1>
+        </div>
+
         {/* Header */}
         <div className="flex flex-col items-center">
             <h2 className="text-4xl font-poppins font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-white to-gray-300 mb-2 drop-shadow-lg scale-105">

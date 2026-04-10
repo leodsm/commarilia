@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Storie: Personalidades de Marília</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes Cinemáticas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
+    <style>
+        /* --- PALETA WEB STORIE: PRESTÍGIO E HISTÓRIA --- */
+        :root {
+            --theme-brand: #FF5A26;
+            /* Laranja ComMarília */
+
+            /* Cores de Prestígio */
+            --theme-gold: #F59E0B;
+            /* Ouro / Medalha */
+            --theme-silver: #94A3B8;
+            /* Prata / Platina */
+            --theme-bronze: #B45309;
+            /* Bronze Clássico */
+            --theme-royal: #1D4ED8;
+            /* Azul Royal */
+
+            --theme-dark: #0F172A;
+            /* Azul Escuro Noturno */
+            --theme-light: #F8FAFC;
+            /* Branco Papel */
+
+            --font-main: 'Montserrat', sans-serif;
+            --font-display: 'Bebas Neue', sans-serif;
+
+            /* Formatos */
+            --card-width: 1080px;
+            --card-height: 1920px;
+            --card-aspect: 9 / 16;
+
+            /* Áreas Seguras - NADA NO TOPO */
+            --safe-area-bottom: 110px;
+            --safe-area-top: 150px;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #0F172A;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+            /* Fundo da área de trabalho elegante */
+            background-image: repeating-linear-gradient(45deg, #1E293B 25%, transparent 25%, transparent 75%, #1E293B 75%, #1E293B), repeating-linear-gradient(45deg, #1E293B 25%, #0F172A 25%, #0F172A 75%, #1E293B 75%, #1E293B);
+            background-position: 0 0, 10px 10px;
+            background-size: 20px 20px;
+        }
+
+        /* --- TOOLBAR UI --- */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background-color: #020617;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            border-bottom: 2px solid var(--theme-gold);
+        }
+
+        .toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .format-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #0F172A;
+            border: 1px solid #1E293B;
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .format-selector select {
+            background: transparent;
+            color: var(--theme-gold);
+            outline: none;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background-color: var(--theme-brand);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* --- PREVIEW GRID --- */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+            gap: 40px;
+            width: 100%;
+            max-width: 1600px;
+            padding: 40px 15px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .storie-wrapper {
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: var(--card-aspect);
+            position: relative;
+            background-color: var(--theme-dark);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #1E293B;
+            transition: aspect-ratio 0.3s ease;
+        }
+
+        /* --- CARD BASE --- */
+        .storie-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--theme-dark);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--theme-light);
+        }
+
+        /* --- SISTEMA DE IMAGEM FULL BLEED E ZOOM ROBUSTO --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .upload-zone {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            overflow: hidden;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-zone:active {
+            cursor: grabbing;
+        }
+
+        .upload-prompt {
+            pointer-events: none;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+            background: rgba(15, 23, 42, 0.85);
+            padding: 40px;
+            border-radius: 20px;
+            border: 2px dashed rgba(245, 158, 11, 0.4);
+        }
+
+        .upload-prompt i {
+            font-size: 80px;
+            color: var(--theme-gold);
+        }
+
+        .upload-prompt span {
+            font-size: 26px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .draggable-img {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            filter: contrast(1.05) saturate(1.05);
+            max-width: none !important;
+            max-height: none !important;
+            opacity: 0.9;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 120px;
+            right: 40px;
+            z-index: 100;
+            display: none;
+            gap: 15px;
+        }
+
+        .zoom-panel {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            background: rgba(15, 23, 42, 0.95);
+            padding: 15px 30px;
+            border-radius: 50px;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--theme-gold);
+        }
+
+        .upload-zone.has-image .image-controls,
+        .upload-zone.has-image .zoom-panel {
+            display: flex;
+        }
+
+        .upload-zone.has-image .upload-prompt {
+            display: none;
+        }
+
+        .control-btn {
+            background-color: rgba(15, 23, 42, 0.9);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            border: 2px solid var(--theme-gold);
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background-color: var(--theme-gold);
+            border-color: var(--theme-gold);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            width: 250px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--theme-gold);
+            cursor: pointer;
+            border: 3px solid var(--theme-light);
+        }
+
+        /* --- UI OVERLAYS E ÁREAS SEGURAS (NADA NO TOPO) --- */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            padding: var(--safe-area-top) 80px var(--safe-area-bottom) 80px;
+        }
+
+        /* Gradientes que favorecem a legibilidade */
+        .gradient-bottom {
+            background: linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.85) 35%, rgba(15, 23, 42, 0.2) 70%, transparent 100%);
+        }
+
+        .gradient-full {
+            background: rgba(15, 23, 42, 0.85);
+        }
+
+        /* Controlos de Layout Rígidos - Tudo na base ou centro */
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .align-start {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .align-end {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .align-center {
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Tipografia Informativa */
+        .storie-title {
+            font-family: var(--font-display);
+            font-size: 135px;
+            line-height: 0.95;
+            font-weight: 400;
+            letter-spacing: 1px;
+            color: var(--theme-light);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+            margin-bottom: 25px;
+            width: 100%;
+        }
+
+        .storie-text {
+            font-family: var(--font-main);
+            font-size: 38px;
+            line-height: 1.45;
+            font-weight: 500;
+            color: rgba(248, 250, 252, 0.95);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.9);
+            margin: 0;
+            width: 100%;
+        }
+
+        .storie-text strong {
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Wrappers de Texto (Bordas limpas) */
+        .text-wrapper-left {
+            border-left: 8px solid;
+            padding-left: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-start;
+            width: 100%;
+        }
+
+        .text-wrapper-right {
+            border-right: 8px solid;
+            padding-right: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-end;
+            width: 100%;
+        }
+
+        .text-wrapper-center {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            width: 100%;
+        }
+
+        /* FIX: Tag Pill Otimizada para HTML2CANVAS (Sem Box Shadow) */
+        .tag-pill {
+            color: white;
+            padding: 14px 35px 16px 38px;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 800;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: var(--font-main);
+            margin-bottom: 30px;
+            line-height: 1;
+        }
+
+        /* FIX: Elementos Especiais / Enquete (Fundo sólido) */
+        .sticker-box {
+            background: rgba(15, 23, 42, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            color: var(--theme-light);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .sticker-title {
+            font-family: var(--font-main);
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .sticker-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sticker-btn {
+            padding: 24px 20px 28px 20px;
+            border-radius: 8px;
+            font-size: 32px;
+            font-weight: 800;
+            border: 2px solid transparent;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+        }
+
+        #export-container {
+            position: fixed;
+            top: 0;
+            left: -9999px;
+            width: 1080px;
+            z-index: -1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <input type="file" id="hidden-file-input" accept="image/*">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <i class="fa-solid fa-star text-yellow-500"></i> ComMarília | Personalidades
+        </div>
+
+        <div class="toolbar-controls">
+            <div class="format-select-wrapper format-selector">
+                <i class="fa-solid fa-crop-simple"></i>
+                <label for="format-select">Formato:</label>
+                <select id="format-select" onchange="changeFormat(this.value)">
+                    <option value="story">Story (1080x1920)</option>
+                    <option value="feed">Feed (1080x1350)</option>
+                </select>
+            </div>
+
+            <button id="download-btn" class="btn-download" onclick="exportarImagens()">
+                <i class="fa-solid fa-download"></i> Exportar 8 Cards
+            </button>
+        </div>
+    </div>
+
+    <p class="text-center text-slate-400 mt-6 text-sm font-medium px-4">
+        Tema: Nascidos em Marília. Textos informativos, diretos e sempre alinhados na base para evitar conflitos no Web
+        Player.
+    </p>
+
+    <!-- ÁREA DOS CARDS -->
+    <div class="preview-container" id="posts-container">
+
+        <!-- CARD 1: CAPA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-camera"></i><span>Foto de Capa</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <div class="tag-pill" style="background-color: var(--theme-gold); color: var(--theme-dark);">
+                        História Local</div>
+                    <h1 class="storie-title text-center text-[150px] leading-[0.9]">Nascidos em Marília<br><span
+                            style="color: var(--theme-gold);">Para o Mundo</span></h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">Conheça as personalidades que saíram da nossa cidade e
+                            marcaram a história do Brasil no desporto, na ciência e na comunicação.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: THIAGO BRAZ (Ouro Olímpico) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-medal"></i><span>Foto Thiago Braz</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="tag-pill" style="background-color: var(--theme-gold); color: var(--theme-dark);">Thiago
+                        Braz (Atletismo)</div>
+                    <h1 class="storie-title">Ouro<br>Histórico</h1>
+                    <div class="text-wrapper-left" style="border-color: var(--theme-gold);">
+                        <p class="storie-text">Nascido em Marília em 1993, Thiago chocou o mundo nas <strong>Olimpíadas
+                                do Rio em 2016</strong>.</p>
+                        <p class="storie-text">Conquistou a medalha de ouro no salto com vara, estabelecendo um recorde
+                            olímpico impressionante de 6,03 metros.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: TETSUO OKAMOTO (Bronze Olímpico) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-person-swimming"></i><span>Foto Tetsuo</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end">
+                    <div class="tag-pill" style="background-color: var(--theme-bronze);">Tetsuo Okamoto (Natação)</div>
+                    <h1 class="storie-title text-right">Pioneiro nas<br>Águas</h1>
+                    <div class="text-wrapper-right" style="border-color: var(--theme-bronze);">
+                        <p class="storie-text text-right">O mariliense Tetsuo Okamoto (1932-2007) fez história nos
+                            <strong>Jogos Olímpicos de Helsínquia, em 1952</strong>.</p>
+                        <p class="storie-text text-right">Ao ganhar o bronze nos 1.500m livres, tornou-se o primeiro
+                            brasileiro a conquistar uma medalha olímpica na natação.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: JURANDIR DE FREITAS (Futebol) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-regular fa-futbol"></i><span>Foto
+                                Jurandir/Futebol</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="tag-pill" style="background-color: var(--theme-royal);">Jurandir de Freitas (Futebol)
+                    </div>
+                    <h1 class="storie-title text-[140px] leading-[0.9]">Campeão<br>do Mundo</h1>
+                    <div class="text-wrapper-left" style="border-color: var(--theme-royal);">
+                        <p class="storie-text">Nascido na nossa cidade em 1940, o talentoso zagueiro
+                            Jurandir tornou-se ídolo do São Paulo FC.</p>
+                        <p class="storie-text">Defendendo a Seleção Brasileira, ergueu a taça de
+                            <strong>Campeão do Mundo na Copa de 1962</strong>, no Chile.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 5: OSMAR SANTOS (Locução Esportiva) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-microphone-lines"></i><span>Foto Osmar
+                                Santos</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="tag-pill" style="background-color: var(--theme-brand);">Osmar Santos (Rádio)</div>
+                    <h1 class="storie-title">A Voz do<br>Esporte</h1>
+                    <div class="text-wrapper-left" style="border-color: var(--theme-brand);">
+                        <p class="storie-text">Embora tenha nascido numa cidade vizinha, Osmar cresceu e <strong>iniciou
+                                a sua lendária carreira na Rádio Clube de Marília</strong>.</p>
+                        <p class="storie-text">Conhecido como "O Pai da Matéria", ele inovou e revolucionou para sempre
+                            a narração esportiva no Brasil.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 6: WILLIAM NAVA (Paleontologia) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-bone"></i><span>Foto William Nava/Fóssil</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end">
+                    <div class="tag-pill" style="background-color: var(--theme-silver); color: var(--theme-dark);">
+                        William Nava (Ciência)</div>
+                    <h1 class="storie-title text-right">O Caçador<br>de Fósseis</h1>
+                    <div class="text-wrapper-right" style="border-color: var(--theme-silver);">
+                        <p class="storie-text text-right">O paleontólogo mariliense dedica a sua vida, desde 1992, à
+                            descoberta de tesouros arqueológicos.</p>
+                        <p class="storie-text text-right">Foi o responsável por descobrir <strong>espécies inéditas de
+                                titanossauros e crocodilos</strong> pré-históricos em Marília, mudando a ciência
+                            brasileira.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 7: EMPREENDEDORES (Economia) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-industry"></i><span>Foto Antiga
+                                Fábrica/Fundadores</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <div class="tag-pill" style="background-color: var(--theme-brand);">Empreendedorismo</div>
+                    <h1 class="storie-title text-center text-[130px]">Visão e<br>Potência</h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">A força da nossa cidade também foi construída por
+                            <strong>famílias pioneiras</strong>.</p>
+                        <p class="storie-text text-center">Os fundadores de gigantes como Marilan e Dori transformaram
+                            produções caseiras num império que alimenta milhões de pessoas e emprega a nossa população
+                            até hoje.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 8: INTERAÇÃO -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-star"></i><span>Sua Foto Aqui</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer justify-end align-center"
+                    style="background: linear-gradient(to top, rgba(15, 23, 42, 1) 0%, rgba(15, 23, 42, 0.95) 45%, transparent 100%);">
+                    <h1 class="storie-title text-center mb-4 text-[130px]">O Nosso Maior<br>Orgulho</h1>
+                    <p class="storie-text text-center mb-4">Muitos outros marilienses fazem a diferença todos os dias na
+                        sua profissão.</p>
+
+                    <div class="sticker-box">
+                        <div class="sticker-title">Qual destas áreas de atuação mais te inspira?</div>
+                        <div class="sticker-btn-group">
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-gold); color: var(--theme-dark);">Esporte Campeão
+                                🏅</div>
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-royal); border-color: rgba(255,255,255,0.1);">
+                                Ciência e Saúde 🔬</div>
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-brand); border-color: rgba(255,255,255,0.1);">
+                                Comunicação 🎙️</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Container Fixo e Visível para a Exportação Perfeita -->
+    <div id="export-container"></div>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÕES GLOBAIS DE FORMATO
+        // ==========================================
+        let currentExportHeight = 1920;
+
+        function changeFormat(format) {
+            if (format === 'story') {
+                document.documentElement.style.setProperty('--card-height', '1920px');
+                document.documentElement.style.setProperty('--card-aspect', '9 / 16');
+                currentExportHeight = 1920;
+            } else {
+                document.documentElement.style.setProperty('--card-height', '1350px');
+                document.documentElement.style.setProperty('--card-aspect', '4 / 5');
+                currentExportHeight = 1350;
+            }
+
+            document.querySelectorAll('.draggable-img').forEach(img => {
+                if (!img.src) return;
+                const container = img.closest('.upload-zone');
+                const cw = 1080;
+                const ch = currentExportHeight;
+                const iw = parseFloat(img.style.width);
+                const ih = parseFloat(img.style.height);
+
+                if (iw && ih) {
+                    const newBaseScale = Math.max(cw / iw, ch / ih);
+                    img.dataset.baseScale = newBaseScale;
+
+                    if (parseFloat(img.dataset.scale) < newBaseScale) {
+                        img.dataset.scale = newBaseScale;
+                        img.dataset.tx = 0;
+                        img.dataset.ty = 0;
+                        const slider = container.querySelector('.zoom-slider');
+                        if (slider) slider.value = 1;
+                    }
+                    updateImgTransform(img);
+                }
+            });
+
+            setTimeout(resizeStories, 50);
+        }
+
+        // ==========================================
+        // ESCALA RESPONSIVA PARA O BROWSER (PREVIEW)
+        // ==========================================
+        function resizeStories() {
+            const wrappers = document.querySelectorAll('.storie-wrapper');
+            wrappers.forEach(wrapper => {
+                const card = wrapper.querySelector('.storie-card');
+                const scale = wrapper.clientWidth / 1080;
+                card.style.transform = `scale(${scale})`;
+            });
+        }
+        window.addEventListener('resize', resizeStories);
+        window.addEventListener('DOMContentLoaded', resizeStories);
+
+        // ==========================================
+        // SISTEMA DE UPLOAD E IMAGENS INTACTAS 
+        // ==========================================
+        const fileInput = document.getElementById('hidden-file-input');
+        let currentTargetZone = null;
+
+        let isDraggingImage = false;
+        let activeImage = null;
+        let startX, startY, startTx, startTy;
+
+        function triggerUpload(zoneElement) {
+            if (!zoneElement.classList.contains('has-image')) {
+                currentTargetZone = zoneElement;
+                fileInput.click();
+            }
+        }
+
+        function triggerUploadBtn(e, btn) {
+            e.stopPropagation();
+            currentTargetZone = btn.closest('.upload-zone');
+            fileInput.click();
+        }
+
+        fileInput.addEventListener('change', function (e) {
+            if (this.files && this.files.length > 0 && currentTargetZone) {
+                const file = this.files[0];
+                if (!file.type.startsWith('image/')) return;
+
+                const imgURL = URL.createObjectURL(file);
+                const oldImg = currentTargetZone.querySelector('.draggable-img');
+                if (oldImg) {
+                    URL.revokeObjectURL(oldImg.src); // Limpa a memória anterior
+                    oldImg.remove();
+                }
+
+                const img = document.createElement('img');
+                img.src = imgURL;
+                img.classList.add('draggable-img');
+
+                img.onload = function () {
+                    const cw = 1080;
+                    const ch = currentExportHeight;
+                    const iw = img.naturalWidth;
+                    const ih = img.naturalHeight;
+
+                    img.style.width = iw + 'px';
+                    img.style.height = ih + 'px';
+
+                    const coverScale = Math.max(cw / iw, ch / ih);
+
+                    img.dataset.baseScale = coverScale;
+                    img.dataset.scale = coverScale;
+                    img.dataset.tx = 0;
+                    img.dataset.ty = 0;
+
+                    updateImgTransform(img);
+
+                    const slider = currentTargetZone.querySelector('.zoom-slider');
+                    if (slider) slider.value = 1;
+                };
+
+                currentTargetZone.appendChild(img);
+                currentTargetZone.classList.add('has-image');
+            }
+            this.value = '';
+        });
+
+        function updateImgTransform(img) {
+            const tx = parseFloat(img.dataset.tx) || 0;
+            const ty = parseFloat(img.dataset.ty) || 0;
+            const scale = parseFloat(img.dataset.scale) || 1;
+            const iw = parseFloat(img.style.width) || 0;
+            const ih = parseFloat(img.style.height) || 0;
+
+            img.style.transform = `translate(${tx - (iw / 2)}px, ${ty - (ih / 2)}px) scale(${scale})`;
+        }
+
+        // ==========================================
+        // MOTOR DE ZOOM E ARRASTO
+        // ==========================================
+        document.querySelectorAll('.upload-zone').forEach(zone => {
+            zone.addEventListener('mousedown', startPan);
+            zone.addEventListener('touchstart', startPan, { passive: false });
+
+            zone.addEventListener('wheel', (e) => {
+                if (!zone.classList.contains('has-image')) return;
+                e.preventDefault();
+
+                const img = zone.querySelector('.draggable-img');
+                if (!img) return;
+
+                const zoomSensitivity = 0.002;
+                const delta = -e.deltaY * zoomSensitivity;
+
+                let currentScale = parseFloat(img.dataset.scale);
+                const baseScale = parseFloat(img.dataset.baseScale);
+
+                let newScale = currentScale + (baseScale * delta);
+                newScale = Math.max(baseScale, Math.min(newScale, baseScale * 4));
+
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+
+                const slider = zone.querySelector('.zoom-slider');
+                if (slider) slider.value = newScale / baseScale;
+            });
+        });
+
+        function startPan(e) {
+            if (e.target.closest('.zoom-panel') || e.target.closest('.image-controls')) return;
+            const zone = e.target.closest('.upload-zone');
+            if (!zone || !zone.classList.contains('has-image')) return;
+
+            isDraggingImage = true;
+            activeImage = zone.querySelector('.draggable-img');
+
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+
+            startTx = parseFloat(activeImage.dataset.tx) || 0;
+            startTy = parseFloat(activeImage.dataset.ty) || 0;
+
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function doPan(e) {
+            if (!isDraggingImage || !activeImage) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+
+            const wrapper = activeImage.closest('.storie-wrapper');
+            const previewScale = wrapper.clientWidth / 1080;
+
+            activeImage.dataset.tx = startTx + (dx / previewScale);
+            activeImage.dataset.ty = startTy + (dy / previewScale);
+
+            updateImgTransform(activeImage);
+        }
+
+        function endPan() {
+            isDraggingImage = false;
+            activeImage = null;
+        }
+
+        window.addEventListener('mousemove', doPan);
+        window.addEventListener('touchmove', doPan, { passive: false });
+        window.addEventListener('mouseup', endPan);
+        window.addEventListener('touchend', endPan);
+
+        function updateZoom(e, input) {
+            e.stopPropagation();
+            const zone = input.closest('.upload-zone');
+            const img = zone.querySelector('.draggable-img');
+            if (img) {
+                const baseScale = parseFloat(img.dataset.baseScale);
+                const newScale = baseScale * parseFloat(input.value);
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+            }
+        }
+
+        // ==========================================
+        // EXPORTAÇÃO PERFEITA (HTML2CANVAS)
+        // ==========================================
+        async function exportarImagens() {
+            const btn = document.getElementById('download-btn');
+            const exportContainer = document.getElementById('export-container');
+            const cards = document.querySelectorAll('.storie-card[data-export="true"]');
+
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+            btn.disabled = true;
+
+            exportContainer.style.width = '1080px';
+            exportContainer.style.height = currentExportHeight + 'px';
+
+            for (let i = 0; i < cards.length; i++) {
+                try {
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Exportando (${i + 1}/8)...`;
+
+                    const clone = cards[i].cloneNode(true);
+
+                    // Remover elementos não exportáveis do CLONE para não piscarem na UI do usuário
+                    clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt').forEach(el => el.remove());
+
+                    clone.style.transform = 'none';
+                    clone.style.width = '1080px';
+                    clone.style.height = currentExportHeight + 'px';
+                    clone.style.position = 'relative';
+                    clone.style.left = '0';
+                    clone.style.top = '0';
+                    clone.style.aspectRatio = 'auto';
+
+                    exportContainer.innerHTML = '';
+                    exportContainer.appendChild(clone);
+
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    const dataUrl = await htmlToImage.toPng(clone, {
+                        pixelRatio: 1, // Impede borrões de Retina Display
+                        height: currentExportHeight,
+                        width: 1080,
+                        backgroundColor: '#0F172A',
+                        style: {
+                            transform: 'none'
+                        }
+                    });
+
+                    const formatName = currentExportHeight === 1920 ? 'Story' : 'Feed';
+                    const link = document.createElement('a');
+                    link.download = `ComMarilia_Personalidades_${formatName}_0${i + 1}.png`;
+                    link.href = dataUrl;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    
+
+                } catch (error) {
+                    console.error("Erro ao gerar card " + (i + 1), error);
+                }
+            }
+
+            exportContainer.innerHTML = '';
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

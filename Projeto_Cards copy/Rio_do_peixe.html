@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Storie: O Renascimento do Rio do Peixe</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes Cinemáticas -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Montserrat:wght@400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+
+    <!-- Ícones -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
+    <style>
+        /* --- PALETA WEB STORIE: NATUREZA & ECOTURISMO --- */
+        :root {
+            --theme-brand: #FF5A26;
+            /* Laranja ComMarília (Destaque) */
+
+            /* Cores Orgânicas */
+            --theme-water: #0284C7;
+            /* Azul Água Fresca */
+            --theme-leaf: #16A34A;
+            /* Verde Natureza Vivo */
+            --theme-earth: #D97706;
+            /* Terra / Trilha */
+            --theme-forest: #064E3B;
+            /* Verde Floresta Profundo */
+
+            --theme-dark: #022C22;
+            /* Fundo Verde Muito Escuro (Substitui o Preto) */
+            --theme-light: #F0FDF4;
+            /* Branco Levemente Esverdeado */
+
+            --font-main: 'Montserrat', sans-serif;
+            --font-display: 'Bebas Neue', sans-serif;
+
+            /* Formatos */
+            --card-width: 1080px;
+            --card-height: 1920px;
+            --card-aspect: 9 / 16;
+
+            /* Áreas Seguras */
+            --safe-area-bottom: 110px;
+            /* Respiro na base RIGOROSO */
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #064E3B;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+            /* Fundo da área de trabalho: pontilhado orgânico */
+            background-image: radial-gradient(rgba(255, 255, 255, 0.05) 2px, transparent 2px);
+            background-size: 40px 40px;
+        }
+
+        /* --- TOOLBAR UI --- */
+        .toolbar {
+            position: sticky;
+            top: 0;
+            width: 100%;
+            background-color: #022C22;
+            padding: 15px 20px;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            border-bottom: 2px solid var(--theme-leaf);
+        }
+
+        .toolbar-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .toolbar-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .format-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            background: #064E3B;
+            border: 1px solid #16A34A;
+            border-radius: 8px;
+            padding: 8px 15px;
+            color: white;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .format-selector select {
+            background: transparent;
+            color: var(--theme-light);
+            outline: none;
+            border: none;
+            font-weight: 800;
+            cursor: pointer;
+        }
+
+        .btn-download {
+            background-color: var(--theme-brand);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 14px;
+            font-weight: 800;
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.2s;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .btn-download:hover {
+            transform: scale(1.02);
+            filter: brightness(1.1);
+        }
+
+        /* --- PREVIEW GRID --- */
+        .preview-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+            gap: 40px;
+            width: 100%;
+            max-width: 1600px;
+            padding: 40px 15px;
+            margin: 0 auto;
+            justify-items: center;
+        }
+
+        .storie-wrapper {
+            width: 100%;
+            max-width: 450px;
+            aspect-ratio: var(--card-aspect);
+            position: relative;
+            background-color: var(--theme-dark);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
+            border-radius: 12px;
+            overflow: hidden;
+            border: 1px solid #16A34A;
+            transition: aspect-ratio 0.3s ease;
+        }
+
+        /* --- CARD BASE --- */
+        .storie-card {
+            width: var(--card-width);
+            height: var(--card-height);
+            background-color: var(--theme-dark);
+            position: absolute;
+            top: 0;
+            left: 0;
+            transform-origin: top left;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            color: var(--theme-light);
+        }
+
+        /* --- SISTEMA DE IMAGEM FULL BLEED E ZOOM ROBUSTO --- */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 1;
+        }
+
+        .upload-zone {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background-color: transparent;
+            overflow: hidden;
+            cursor: grab;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .upload-zone:active {
+            cursor: grabbing;
+        }
+
+        .upload-prompt {
+            pointer-events: none;
+            text-align: center;
+            color: rgba(255, 255, 255, 0.5);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 20px;
+            z-index: 2;
+            background: rgba(2, 44, 34, 0.8);
+            padding: 40px;
+            border-radius: 20px;
+            border: 1px dashed rgba(22, 163, 74, 0.5);
+        }
+
+        .upload-prompt i {
+            font-size: 80px;
+            color: var(--theme-leaf);
+        }
+
+        .upload-prompt span {
+            font-size: 26px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .draggable-img {
+            position: absolute;
+            pointer-events: none;
+            z-index: 1;
+            top: 50%;
+            left: 50%;
+            transform-origin: center;
+            filter: contrast(1.05) saturate(1.15);
+            /* Saturação leve para realçar os verdes/azuis */
+            max-width: none !important;
+            max-height: none !important;
+        }
+
+        .image-controls {
+            position: absolute;
+            top: 120px;
+            right: 40px;
+            z-index: 100;
+            display: none;
+            gap: 15px;
+        }
+
+        .zoom-panel {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 100;
+            display: none;
+            background: rgba(2, 44, 34, 0.9);
+            padding: 15px 30px;
+            border-radius: 50px;
+            align-items: center;
+            gap: 20px;
+            border: 1px solid var(--theme-leaf);
+        }
+
+        .upload-zone.has-image .image-controls,
+        .upload-zone.has-image .zoom-panel {
+            display: flex;
+        }
+
+        .upload-zone.has-image .upload-prompt {
+            display: none;
+        }
+
+        .control-btn {
+            background-color: rgba(2, 44, 34, 0.8);
+            color: white;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 28px;
+            border: 2px solid var(--theme-leaf);
+            cursor: pointer;
+        }
+
+        .control-btn:hover {
+            background-color: var(--theme-leaf);
+            border-color: var(--theme-leaf);
+        }
+
+        .zoom-slider {
+            -webkit-appearance: none;
+            width: 250px;
+            height: 6px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 5px;
+            outline: none;
+        }
+
+        .zoom-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: var(--theme-leaf);
+            cursor: pointer;
+            border: 3px solid var(--theme-light);
+        }
+
+        /* --- UI OVERLAYS E ÁREAS SEGURAS (NADA NO TOPO) --- */
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10;
+            pointer-events: none;
+            display: flex;
+            flex-direction: column;
+            padding: 0 80px var(--safe-area-bottom) 80px;
+        }
+
+        /* Gradientes Orgânicos - Sempre a proteger o fundo */
+        .gradient-bottom {
+            background: linear-gradient(to top, rgba(2, 44, 34, 1) 0%, rgba(2, 44, 34, 0.85) 35%, transparent 100%);
+        }
+
+        .gradient-full {
+            background: rgba(2, 44, 34, 0.85);
+        }
+
+        /* Controlos de Layout Rígidos - SEMPRE FUNDO OU CENTRO */
+        .justify-end {
+            justify-content: flex-end;
+        }
+
+        .justify-center {
+            justify-content: center;
+        }
+
+        .align-start {
+            align-items: flex-start;
+            text-align: left;
+        }
+
+        .align-end {
+            align-items: flex-end;
+            text-align: right;
+        }
+
+        .align-center {
+            align-items: center;
+            text-align: center;
+        }
+
+        /* Tipografia Informativa e Densa */
+        .storie-title {
+            font-family: var(--font-display);
+            font-size: 130px;
+            line-height: 0.95;
+            font-weight: 400;
+            letter-spacing: 2px;
+            color: var(--theme-light);
+            text-shadow: 0 5px 20px rgba(0, 0, 0, 0.8);
+            text-transform: uppercase;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .storie-text {
+            font-family: var(--font-main);
+            font-size: 38px;
+            line-height: 1.45;
+            font-weight: 500;
+            color: rgba(240, 253, 244, 0.95);
+            text-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+            margin: 0;
+            width: 100%;
+        }
+
+        .storie-text strong {
+            font-weight: 800;
+            color: white;
+        }
+
+        /* Wrappers de Texto (Bordas laterais coloridas) */
+        .text-wrapper-left {
+            border-left: 8px solid;
+            padding-left: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-start;
+            width: 100%;
+        }
+
+        .text-wrapper-right {
+            border-right: 8px solid;
+            padding-right: 35px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: flex-end;
+            width: 100%;
+        }
+
+        .text-wrapper-center {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            align-self: center;
+            width: 100%;
+        }
+
+        /* Tag Pill - Otimizada */
+        .tag-pill {
+            color: white;
+            padding: 14px 35px 16px 38px;
+            border-radius: 50px;
+            font-size: 24px;
+            font-weight: 800;
+            display: inline-block;
+            text-align: center;
+            white-space: nowrap;
+            text-transform: uppercase;
+            letter-spacing: 3px;
+            font-family: var(--font-main);
+            margin-bottom: 35px;
+            line-height: 1;
+        }
+
+        /* Elementos Especiais / Enquete */
+        .sticker-box {
+            background: rgba(2, 44, 34, 0.95);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            color: var(--theme-light);
+            border-radius: 16px;
+            padding: 40px;
+            text-align: center;
+            margin-top: 40px;
+            pointer-events: auto;
+            width: 100%;
+        }
+
+        .sticker-title {
+            font-family: var(--font-main);
+            font-size: 38px;
+            font-weight: 800;
+            margin-bottom: 30px;
+            line-height: 1.3;
+        }
+
+        .sticker-btn-group {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sticker-btn {
+            padding: 24px 20px 28px 20px;
+            border-radius: 8px;
+            font-size: 32px;
+            font-weight: 800;
+            border: 2px solid transparent;
+            color: white;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: block;
+            text-align: center;
+            line-height: 1;
+            white-space: nowrap;
+            transition: all 0.2s;
+        }
+
+        /* Container de exportação oculto e seguro */
+        #export-container {
+            position: fixed;
+            top: 0;
+            left: -9999px;
+            width: 1080px;
+            z-index: -1000;
+            pointer-events: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <input type="file" id="hidden-file-input" accept="image/*">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <i class="fa-solid fa-leaf text-green-500"></i> ComMarília | Nature & Eco Tourism
+        </div>
+
+        <div class="toolbar-controls">
+            <div class="format-select-wrapper format-selector">
+                <i class="fa-solid fa-crop-simple"></i>
+                <label for="format-select">Formato:</label>
+                <select id="format-select" onchange="changeFormat(this.value)">
+                    <option value="story">Story (1080x1920)</option>
+                    <option value="feed">Feed (1080x1350)</option>
+                </select>
+            </div>
+
+            <button id="download-btn" class="btn-download" onclick="exportarImagens()">
+                <i class="fa-solid fa-download"></i> Exportar 8 Cards (PNG)
+            </button>
+        </div>
+    </div>
+
+    <p class="text-center text-green-100 mt-6 text-sm font-medium px-4">
+        Tema: Natureza e Ecoturismo. Todos os blocos estão alinhados ao centro ou à base para respeitar a área segura do
+        seu Web Player.
+    </p>
+
+    <!-- ÁREA DOS CARDS -->
+    <div class="preview-container" id="posts-container">
+
+        <!-- CARD 1: CAPA (Alinhamento Fundo/Centro) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-water"></i><span>Capa Rio/Cachoeira</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <div class="tag-pill" style="background-color: var(--theme-water);">Especial Natureza</div>
+                    <h1 class="storie-title text-center text-[160px] leading-[0.9]">O Renascimento do<br><span
+                            style="color: var(--theme-water);">Rio do Peixe</span></h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">A saga da artéria vital de Marília: da poluição severa ao
+                            resgate ambiental histórico.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: ORIGEM E GEOGRAFIA (Alinhamento Fundo/Esquerda) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-map-location-dot"></i><span>Vale /
+                                Paisagem</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="tag-pill" style="background-color: var(--theme-leaf);">Geografia</div>
+                    <h1 class="storie-title">Berço<br>Cristalino</h1>
+                    <div class="text-wrapper-left" style="border-color: var(--theme-leaf);">
+                        <p class="storie-text">O rio nasce puro na vizinha Garça, percorrendo e esculpindo vales, matas
+                            e escarpas exuberantes.</p>
+                        <p class="storie-text">Mas, durante décadas, o seu encontro com o perímetro urbano de Marília
+                            representava um destino sombrio.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: O PASSADO (Alinhamento Fundo/Direita) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-droplet-slash"></i><span>Água/Poluição
+                                Antiga</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end">
+                    <div class="tag-pill" style="background-color: var(--theme-earth);">O Passado</div>
+                    <h1 class="storie-title text-right">Um Ferimento<br>Exposto</h1>
+                    <div class="text-wrapper-right" style="border-color: var(--theme-earth);">
+                        <p class="storie-text text-right">No passado recente, o Rio do Peixe chegava a receber toneladas
+                            de esgoto in natura diariamente.</p>
+                        <p class="storie-text text-right">A veia de água que guiou os pioneiros da região havia-se
+                            tornado um símbolo de degradação ambiental.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: A SOLUÇÃO (Centro Absoluto) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-recycle"></i><span>Estação de Tratamento</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-full justify-center align-center">
+                    <div class="tag-pill" style="background-color: var(--theme-water); color: white;">A Virada Histórica
+                    </div>
+                    <h1 class="storie-title text-center text-[220px] leading-[0.8] mb-2"
+                        style="color: var(--theme-water);">+70%</h1>
+                    <h2 class="font-display text-[80px] font-normal leading-tight text-white mb-8 text-center">De Esgoto
+                        Tratado</h2>
+
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">Com a construção das novas bacias de tratamento, Marília
+                            começou a reverter o dano.</p>
+                        <p class="storie-text text-center">A água agora é filtrada e devolvida limpa ao leito do rio.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 5: ABASTECIMENTO (Alinhamento Fundo/Esquerda) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-faucet-drip"></i><span>Água Potável</span>
+                        </div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start">
+                    <div class="tag-pill" style="background-color: var(--theme-brand);">Vitalidade</div>
+                    <h1 class="storie-title">Fonte<br>de Vida</h1>
+                    <div class="text-wrapper-left" style="border-color: var(--theme-brand);">
+                        <p class="storie-text">A recuperação ecológica não é apenas estética; é uma questão de
+                            sobrevivência municipal.</p>
+                        <p class="storie-text">O rio é hoje a matriz hídrica que <strong>sacia a sede de quase 50% de
+                                toda a população</strong> mariliense.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 6: ECOTURISMO (Alinhamento Fundo/Direita) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i
+                                class="fa-solid fa-person-hiking"></i><span>Trilhos/Bicicleta</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end">
+                    <div class="tag-pill" style="background-color: var(--theme-leaf);">Turismo</div>
+                    <h1 class="storie-title text-right">Oásis<br>Escondidos</h1>
+                    <div class="text-wrapper-right" style="border-color: var(--theme-leaf);">
+                        <p class="storie-text text-right">As margens recuperadas abrigam hoje uma rica biodiversidade,
+                            com pássaros e matas fechadas.</p>
+                        <p class="storie-text text-right">Cachoeiras secretas e trilhos ecológicos atraem milhares de
+                            <strong>aventureiros e praticantes de cicloturismo</strong>.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 7: CONSCIENCIALIZAÇÃO (Alinhamento Fundo/Centro) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-tree"></i><span>Matas Ciliares</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center">
+                    <div class="tag-pill" style="background-color: var(--theme-earth);">Preservação</div>
+                    <h1 class="storie-title text-center text-[120px]">O Papel<br>de Todos Nós</h1>
+                    <div class="text-wrapper-center">
+                        <p class="storie-text text-center">A proteção das matas ciliares e o combate inflexível ao
+                            descarte irregular de lixo continuam.</p>
+                        <p class="storie-text text-center">Apenas assim garantimos que as <strong>próximas gerações
+                                herdem um rio vivo</strong> e cristalino.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 8: INTERAÇÃO (Alinhamento Fundo/Centro longo) -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-mountain-sun"></i><span>Pessoas na
+                                Natureza</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()"
+                            ontouchstart="event.stopPropagation()"><i
+                                class="fa-solid fa-minus text-white text-xl"></i><input type="range" min="0.2" max="4"
+                                step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)"><i
+                                class="fa-solid fa-plus text-white text-xl"></i></div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i
+                                    class="fa-solid fa-pen"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer justify-end align-center"
+                    style="background: linear-gradient(to top, rgba(2, 44, 34, 1) 0%, rgba(2, 44, 34, 0.95) 45%, transparent 100%);">
+                    <h1 class="storie-title text-center mb-4 text-[120px]">Viva a<br>Natureza!</h1>
+                    <p class="storie-text text-center mb-4">Compartilhe e ajude a preservar o nosso maior patrimônio
+                        natural.</p>
+
+                    <div class="sticker-box">
+                        <div class="sticker-title">Qual é a tua ligação com as belezas do nosso vale?</div>
+                        <div class="sticker-btn-group">
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-leaf); border-color: rgba(255,255,255,0.1);">
+                                Trilhas & Bike 🚴</div>
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-water); border-color: rgba(255,255,255,0.1);">
+                                Cachoeiras 💧</div>
+                            <div class="sticker-btn"
+                                style="background-color: var(--theme-earth); border-color: rgba(255,255,255,0.1);">
+                                Apenas Contemplar 🍃</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Container Fixo e Visível para a Exportação Perfeita -->
+    <div id="export-container"></div>
+
+    <script>
+        // ==========================================
+        // CONFIGURAÇÕES GLOBAIS DE FORMATO
+        // ==========================================
+        let currentExportHeight = 1920;
+
+        function changeFormat(format) {
+            if (format === 'story') {
+                document.documentElement.style.setProperty('--card-height', '1920px');
+                document.documentElement.style.setProperty('--card-aspect', '9 / 16');
+                currentExportHeight = 1920;
+            } else {
+                document.documentElement.style.setProperty('--card-height', '1350px');
+                document.documentElement.style.setProperty('--card-aspect', '4 / 5');
+                currentExportHeight = 1350;
+            }
+
+            document.querySelectorAll('.draggable-img').forEach(img => {
+                if (!img.src) return;
+                const container = img.closest('.upload-zone');
+                const cw = 1080;
+                const ch = currentExportHeight;
+                const iw = parseFloat(img.style.width);
+                const ih = parseFloat(img.style.height);
+
+                if (iw && ih) {
+                    const newBaseScale = Math.max(cw / iw, ch / ih);
+                    img.dataset.baseScale = newBaseScale;
+
+                    if (parseFloat(img.dataset.scale) < newBaseScale) {
+                        img.dataset.scale = newBaseScale;
+                        img.dataset.tx = 0;
+                        img.dataset.ty = 0;
+                        const slider = container.querySelector('.zoom-slider');
+                        if (slider) slider.value = 1;
+                    }
+                    updateImgTransform(img);
+                }
+            });
+
+            setTimeout(resizeStories, 50);
+        }
+
+        // ==========================================
+        // ESCALA RESPONSIVA PARA O BROWSER
+        // ==========================================
+        function resizeStories() {
+            const wrappers = document.querySelectorAll('.storie-wrapper');
+            wrappers.forEach(wrapper => {
+                const card = wrapper.querySelector('.storie-card');
+                const scale = wrapper.clientWidth / 1080;
+                card.style.transform = `scale(${scale})`;
+            });
+        }
+        window.addEventListener('resize', resizeStories);
+        window.addEventListener('DOMContentLoaded', resizeStories);
+
+        // ==========================================
+        // SISTEMA DE UPLOAD E IMAGENS INTACTAS 
+        // ==========================================
+        const fileInput = document.getElementById('hidden-file-input');
+        let currentTargetZone = null;
+
+        let isDraggingImage = false;
+        let activeImage = null;
+        let startX, startY, startTx, startTy;
+
+        function triggerUpload(zoneElement) {
+            if (!zoneElement.classList.contains('has-image')) {
+                currentTargetZone = zoneElement;
+                fileInput.click();
+            }
+        }
+
+        function triggerUploadBtn(e, btn) {
+            e.stopPropagation();
+            currentTargetZone = btn.closest('.upload-zone');
+            fileInput.click();
+        }
+
+        fileInput.addEventListener('change', function (e) {
+            if (this.files && this.files.length > 0 && currentTargetZone) {
+                const file = this.files[0];
+                if (!file.type.startsWith('image/')) return;
+
+                const imgURL = URL.createObjectURL(file);
+                const oldImg = currentTargetZone.querySelector('.draggable-img');
+                if (oldImg) {
+                    URL.revokeObjectURL(oldImg.src); // Limpa a memória anterior
+                    oldImg.remove();
+                }
+
+                const img = document.createElement('img');
+                img.src = imgURL;
+                img.classList.add('draggable-img');
+
+                img.onload = function () {
+                    const cw = 1080;
+                    const ch = currentExportHeight;
+                    const iw = img.naturalWidth;
+                    const ih = img.naturalHeight;
+
+                    img.style.width = iw + 'px';
+                    img.style.height = ih + 'px';
+
+                    const coverScale = Math.max(cw / iw, ch / ih);
+
+                    img.dataset.baseScale = coverScale;
+                    img.dataset.scale = coverScale;
+                    img.dataset.tx = 0;
+                    img.dataset.ty = 0;
+
+                    updateImgTransform(img);
+
+                    const slider = currentTargetZone.querySelector('.zoom-slider');
+                    if (slider) slider.value = 1;
+                };
+
+                currentTargetZone.appendChild(img);
+                currentTargetZone.classList.add('has-image');
+            }
+            this.value = '';
+        });
+
+        function updateImgTransform(img) {
+            const tx = parseFloat(img.dataset.tx) || 0;
+            const ty = parseFloat(img.dataset.ty) || 0;
+            const scale = parseFloat(img.dataset.scale) || 1;
+            const iw = parseFloat(img.style.width) || 0;
+            const ih = parseFloat(img.style.height) || 0;
+
+            img.style.transform = `translate(${tx - (iw / 2)}px, ${ty - (ih / 2)}px) scale(${scale})`;
+        }
+
+        // ==========================================
+        // MOTOR DE ZOOM E ARRASTO
+        // ==========================================
+        document.querySelectorAll('.upload-zone').forEach(zone => {
+            zone.addEventListener('mousedown', startPan);
+            zone.addEventListener('touchstart', startPan, { passive: false });
+
+            zone.addEventListener('wheel', (e) => {
+                if (!zone.classList.contains('has-image')) return;
+                e.preventDefault();
+
+                const img = zone.querySelector('.draggable-img');
+                if (!img) return;
+
+                const zoomSensitivity = 0.002;
+                const delta = -e.deltaY * zoomSensitivity;
+
+                let currentScale = parseFloat(img.dataset.scale);
+                const baseScale = parseFloat(img.dataset.baseScale);
+
+                let newScale = currentScale + (baseScale * delta);
+                newScale = Math.max(baseScale, Math.min(newScale, baseScale * 4));
+
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+
+                const slider = zone.querySelector('.zoom-slider');
+                if (slider) slider.value = newScale / baseScale;
+            });
+        });
+
+        function startPan(e) {
+            if (e.target.closest('.zoom-panel') || e.target.closest('.image-controls')) return;
+            const zone = e.target.closest('.upload-zone');
+            if (!zone || !zone.classList.contains('has-image')) return;
+
+            isDraggingImage = true;
+            activeImage = zone.querySelector('.draggable-img');
+
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+
+            startTx = parseFloat(activeImage.dataset.tx) || 0;
+            startTy = parseFloat(activeImage.dataset.ty) || 0;
+
+            if (e.cancelable) e.preventDefault();
+        }
+
+        function doPan(e) {
+            if (!isDraggingImage || !activeImage) return;
+
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+
+            const wrapper = activeImage.closest('.storie-wrapper');
+            const previewScale = wrapper.clientWidth / 1080;
+
+            activeImage.dataset.tx = startTx + (dx / previewScale);
+            activeImage.dataset.ty = startTy + (dy / previewScale);
+
+            updateImgTransform(activeImage);
+        }
+
+        function endPan() {
+            isDraggingImage = false;
+            activeImage = null;
+        }
+
+        window.addEventListener('mousemove', doPan);
+        window.addEventListener('touchmove', doPan, { passive: false });
+        window.addEventListener('mouseup', endPan);
+        window.addEventListener('touchend', endPan);
+
+        function updateZoom(e, input) {
+            e.stopPropagation();
+            const zone = input.closest('.upload-zone');
+            const img = zone.querySelector('.draggable-img');
+            if (img) {
+                const baseScale = parseFloat(img.dataset.baseScale);
+                const newScale = baseScale * parseFloat(input.value);
+                img.dataset.scale = newScale;
+                updateImgTransform(img);
+            }
+        }
+
+        // ==========================================
+        // EXPORTAÇÃO PERFEITA (HTML2CANVAS)
+        // ==========================================
+        async function exportarImagens() {
+            const btn = document.getElementById('download-btn');
+            const exportContainer = document.getElementById('export-container');
+            const cards = document.querySelectorAll('.storie-card[data-export="true"]');
+
+            const textoOriginal = btn.innerHTML;
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Processando...';
+            btn.disabled = true;
+
+            exportContainer.style.width = '1080px';
+            exportContainer.style.height = currentExportHeight + 'px';
+
+            for (let i = 0; i < cards.length; i++) {
+                try {
+                    btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Exportando (${i + 1}/8)...`;
+
+                    const clone = cards[i].cloneNode(true);
+
+                    // Remover elementos não exportáveis do CLONE para não piscarem na UI do usuário
+                    clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt').forEach(el => el.remove());
+
+                    clone.style.transform = 'none';
+                    clone.style.width = '1080px';
+                    clone.style.height = currentExportHeight + 'px';
+                    clone.style.position = 'relative';
+                    clone.style.left = '0';
+                    clone.style.top = '0';
+                    clone.style.aspectRatio = 'auto';
+
+                    exportContainer.innerHTML = '';
+                    exportContainer.appendChild(clone);
+
+                    await new Promise(resolve => setTimeout(resolve, 300));
+
+                    const dataUrl = await htmlToImage.toPng(clone, {
+                        pixelRatio: 1, // Impede borrões de Retina Display
+                        height: currentExportHeight,
+                        width: 1080,
+                        backgroundColor: '#022C22',
+                        style: {
+                            transform: 'none'
+                        }
+                    });
+
+                    const formatName = currentExportHeight === 1920 ? 'Story' : 'Feed';
+                    const link = document.createElement('a');
+                    link.download = `ComMarilia_Natureza_${formatName}_0${i + 1}.png`;
+                    link.href = dataUrl;
+
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+
+                    
+
+                } catch (error) {
+                    console.error("Erro ao gerar card " + (i + 1), error);
+                }
+            }
+
+            exportContainer.innerHTML = '';
+            btn.innerHTML = textoOriginal;
+            btn.disabled = false;
+        }
+    </script>
+</body>
+
+</html>

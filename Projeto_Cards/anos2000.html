@@ -1,0 +1,643 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Storie: Máquina do Tempo - Anos 2000</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Fontes Y2K - Righteous (Títulos Pop) & Space Mono (Texto Tech) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Righteous&family=Space+Mono:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+
+    <!-- Ícones FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+    <!-- Exportação -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html-to-image/1.11.11/html-to-image.min.js"></script>
+
+    <style>
+        /* --- PALETA WEB STORIE: Y2K / ANOS 2000 --- */
+        :root {
+            --theme-pink: #FF007F;   /* Rosa Choque */
+            --theme-cyan: #00F0FF;   /* Ciano Digital */
+            --theme-lime: #39FF14;   /* Verde Matrix */
+            --theme-yellow: #FFE600; /* Amarelo Pikachu */
+            --theme-purple: #B900FF; /* Roxo Orkut */
+            
+            --theme-dark: #121220;   /* Fundo escuro */
+            --theme-light: #FAFAFA;  /* Texto claro */
+            
+            --theme-brand: var(--theme-pink);
+
+            --font-main: 'Space Mono', monospace;
+            --font-display: 'Righteous', sans-serif;
+
+            /* Formatos */
+            --card-width: 1080px;
+            --card-height: 1920px;
+            --card-aspect: 9 / 16;
+
+            /* Áreas Seguras */
+            --safe-area-bottom: 110px;
+            --safe-area-top: 150px;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: #0b0b14;
+            font-family: var(--font-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            padding-bottom: 50px;
+            overflow-x: hidden;
+            /* Grid background estilo cyberspace/vaporwave */
+            background-image: 
+                linear-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+            background-size: 40px 40px;
+        }
+
+        /* --- TOOLBAR UI --- */
+        .toolbar {
+            position: sticky; top: 0; width: 100%;
+            background-color: #121220; padding: 15px 20px;
+            display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 15px;
+            box-shadow: 0 4px 0px var(--theme-pink); z-index: 1000;
+            border-bottom: 3px solid #000;
+        }
+
+        .toolbar-title { font-family: var(--font-display); font-size: 1.5rem; color: var(--theme-cyan); display: flex; align-items: center; gap: 10px; text-transform: uppercase; letter-spacing: 1px;}
+        .toolbar-controls { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+
+        .format-selector {
+            display: flex; align-items: center; gap: 10px;
+            background: #2a2a40; border: 2px solid #000; border-radius: 0px; padding: 8px 15px;
+            color: white; font-weight: 700; font-size: 14px; box-shadow: 3px 3px 0px #000;
+        }
+
+        .format-selector select { background: transparent; color: var(--theme-yellow); border: none; font-weight: 700; cursor: pointer; outline: none; font-family: var(--font-main); }
+
+        .btn-download-all {
+            background-color: var(--theme-lime); color: #000; border: 3px solid #000; padding: 10px 24px;
+            font-size: 14px; font-weight: 800; cursor: pointer;
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            box-shadow: 4px 4px 0px #000;
+            transition: all 0.1s; text-transform: uppercase; font-family: var(--font-main);
+        }
+
+        .btn-download-all:active { box-shadow: 0px 0px 0px #000; transform: translate(4px, 4px); }
+
+        /* --- PREVIEW GRID --- */
+        .preview-container {
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 360px));
+            gap: 50px; width: 100%; max-width: 1600px; padding: 60px 15px; margin: 0 auto; justify-items: center;
+        }
+
+        .storie-wrapper {
+            width: 100%; max-width: 450px; aspect-ratio: var(--card-aspect);
+            position: relative; background-color: var(--theme-dark);
+            /* Hard shadow Y2K style */
+            box-shadow: 12px 12px 0px rgba(0, 0, 0, 1); 
+            border: 4px solid #000; border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* --- CARD BASE --- */
+        .storie-card {
+            width: var(--card-width); height: var(--card-height);
+            background-color: var(--theme-dark); position: absolute; top: 0; left: 0;
+            transform-origin: top left; display: flex; flex-direction: column; overflow: hidden;
+            color: var(--theme-light);
+        }
+
+        .bg-layer { position: absolute; inset: 0; z-index: 1; }
+
+        .upload-zone {
+            position: relative; width: 100%; height: 100%; overflow: hidden;
+            cursor: grab; display: flex; align-items: center; justify-content: center;
+            background: repeating-linear-gradient(45deg, #1a1a2e, #1a1a2e 20px, #252542 20px, #252542 40px);
+        }
+
+        .upload-prompt {
+            text-align: center; color: var(--theme-cyan);
+            display: flex; flex-direction: column; align-items: center; gap: 20px; z-index: 2;
+            background: rgba(0,0,0,0.6); padding: 40px; border: 4px dashed var(--theme-cyan);
+            border-radius: 20px; text-shadow: 2px 2px 0 #000;
+        }
+        .upload-prompt i { font-size: 80px; }
+        .upload-prompt span { font-size: 30px; font-weight: 700; text-transform: uppercase; font-family: var(--font-main); }
+
+        .draggable-img {
+            position: absolute; pointer-events: none; z-index: 1;
+            top: 50%; left: 50%; transform-origin: center;
+        }
+
+        /* Halftone / scanline overlay effect for images */
+        .upload-zone.has-image::after {
+            content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.06), rgba(0, 255, 0, 0.02), rgba(0, 0, 255, 0.06));
+            background-size: 100% 4px, 6px 100%;
+        }
+
+        .zoom-panel {
+            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
+            z-index: 100; display: none; background: #000;
+            padding: 15px 30px; border-radius: 0; align-items: center; gap: 20px;
+            border: 3px solid var(--theme-cyan); box-shadow: 4px 4px 0px var(--theme-cyan);
+        }
+
+        .image-controls {
+            position: absolute; top: 120px; right: 40px; z-index: 100; display: none; flex-direction: column; gap: 15px;
+        }
+
+        .upload-zone.has-image .image-controls,
+        .upload-zone.has-image .zoom-panel { display: flex; }
+        .upload-zone.has-image .upload-prompt { display: none; }
+
+        .control-btn {
+            background-color: #000; color: white;
+            width: 70px; height: 70px; border-radius: 0;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 28px; border: 3px solid #fff; cursor: pointer; box-shadow: 4px 4px 0px rgba(255,255,255,0.3);
+        }
+        .control-btn:hover { background-color: var(--theme-pink); border-color: #000; color: #000; box-shadow: 4px 4px 0px #000; }
+
+        .zoom-slider { -webkit-appearance: none; width: 250px; height: 8px; background: #333; border-radius: 0; outline: none; }
+        .zoom-slider::-webkit-slider-thumb { -webkit-appearance: none; width: 30px; height: 40px; border-radius: 0; background: var(--theme-cyan); cursor: pointer; border: 3px solid #000; }
+
+        /* --- UI LAYERS --- */
+        .ui-layer {
+            position: absolute; inset: 0; z-index: 10; pointer-events: none;
+            display: flex; flex-direction: column; padding: var(--safe-area-top) 80px var(--safe-area-bottom) 80px;
+        }
+
+        .gradient-bottom { background: linear-gradient(to top, rgba(0, 0, 0, 0.95) 0%, rgba(0, 0, 0, 0.5) 50%, transparent 100%); }
+        .gradient-full { background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(2px); }
+
+        .storie-title {
+            font-family: var(--font-display); font-size: 130px; line-height: 0.9; font-weight: 400;
+            letter-spacing: 2px; color: #fff; 
+            text-shadow: 6px 6px 0px #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 2px 2px 0 #000;
+            text-transform: uppercase; margin-bottom: 30px; width: 100%;
+        }
+
+        .storie-text {
+            font-family: var(--font-main); font-size: 34px; line-height: 1.4; font-weight: 700;
+            color: #fff; text-shadow: 2px 2px 0px #000;
+        }
+
+        /* Caixas de texto retrô UI */
+        .text-wrapper-base {
+            background: rgba(18, 18, 32, 0.85); backdrop-filter: blur(5px);
+            padding: 30px; width: 100%; border: 4px solid; box-shadow: 10px 10px 0px #000;
+        }
+
+        .text-wrapper-left { @extend .text-wrapper-base; border-left-width: 15px; }
+        .text-wrapper-right { @extend .text-wrapper-base; border-right-width: 15px; }
+        .text-wrapper-center { @extend .text-wrapper-base; border-bottom-width: 15px; text-align: center; }
+
+        .tag-pill {
+            color: #000; padding: 12px 30px 10px 30px; border-radius: 0px; border: 4px solid #000;
+            font-size: 26px; font-weight: 800; display: inline-block; text-transform: uppercase;
+            letter-spacing: 2px; margin-bottom: 30px; line-height: 1; box-shadow: 6px 6px 0px #000;
+            font-family: var(--font-main);
+        }
+
+        /* --- EXPORT --- */
+        #export-container { position: fixed; top: 0; left: -9999px; width: 1080px; z-index: -1000; pointer-events: none; }
+
+        /* Helper Classes */
+        .justify-end { justify-content: flex-end; }
+        .justify-center { justify-content: center; }
+        .align-start { align-items: flex-start; }
+        .align-center { align-items: center; }
+        .align-end { align-items: flex-end; }
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+    </style>
+</head>
+
+<body>
+
+    <input type="file" id="hidden-file-input" accept="image/*" style="display:none;">
+
+    <!-- TOOLBAR -->
+    <div class="toolbar">
+        <div class="toolbar-title">
+            <i class="fa-solid fa-compact-disc text-pink-500"></i> Máquina do Tempo | Anos 2000
+        </div>
+        <div class="toolbar-controls">
+            <div class="format-selector">
+                <i class="fa-solid fa-crop-simple"></i>
+                <label>Formato:</label>
+                <select id="format-select" onchange="changeFormat(this.value)">
+                    <option value="story">Story (1080x1920)</option>
+                    <option value="feed">Feed (1080x1350)</option>
+                </select>
+            </div>
+            <button id="download-btn" class="btn-download-all" onclick="exportarTudo()">
+                <i class="fa-solid fa-floppy-disk"></i> Salvar Todos (8)
+            </button>
+        </div>
+    </div>
+
+    <!-- PREVIEW AREA -->
+    <div class="preview-container" id="posts-container">
+
+        <!-- CARD 1: CAPA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-compact-disc"></i><span>Capa</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-full justify-center align-center">
+                    <div class="tag-pill" style="background: var(--theme-pink);">Nostalgia Pura</div>
+                    <h1 class="storie-title text-center">De Volta Aos<br><span style="color: var(--theme-pink);">Anos 2000</span></h1>
+                    <div class="text-wrapper-center text-wrapper-base" style="border-color: var(--theme-pink);">
+                        <p class="storie-text text-center">Prepare-se para desbloquear memórias que estavam salvas em um disquete na sua mente.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 2: MSN / ORKUT -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-comments"></i><span>MSN / Orkut</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-cyan);">Redes Sociais</div>
+                    <h1 class="storie-title">Só Leio<br><span style="color: var(--theme-cyan);">Scraps</span></h1>
+                    <div class="text-wrapper-left text-wrapper-base" style="border-color: var(--theme-cyan);">
+                        <p class="storie-text">A ansiedade de chegar da escola, conectar no MSN, mandar um 'Chamar Atenção' e ver quem deixou depoimento.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 3: LAN HOUSE -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-network-wired"></i><span>Lan House</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-lime);">Corujão</div>
+                    <h1 class="storie-title text-right">Fim de Semana<br><span style="color: var(--theme-lime);">Na Lan</span></h1>
+                    <div class="text-wrapper-right text-wrapper-base" style="border-color: var(--theme-lime);">
+                        <p class="storie-text text-right">Juntar as moedas para pagar 1 hora de acesso, jogar CS 1.6 com a galera e baixar músicas no Ares.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 4: LOCADORA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-film"></i><span>Locadora</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-yellow);">Sexta-Feira</div>
+                    <h1 class="storie-title">Fita<br><span style="color: var(--theme-yellow);">Rebobinada</span></h1>
+                    <div class="text-wrapper-left text-wrapper-base" style="border-color: var(--theme-yellow);">
+                        <p class="storie-text">O ritual sagrado de alugar filmes e jogos na sexta para devolver só na segunda. E ai de quem não rebobinasse!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 5: TECNOLOGIA / MP3 -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-mobile-retro"></i><span>Celular / MP3</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-center" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-purple);">Gadgets</div>
+                    <h1 class="storie-title text-center">MP3 e<br><span style="color: var(--theme-purple);">Celular Flip</span></h1>
+                    <div class="text-wrapper-center text-wrapper-base" style="border-color: var(--theme-purple);">
+                        <p class="storie-text text-center">Ter um celular de abrir, mandar SMS e andar com um MP3 Player de 128MB pendurado no pescoço era o auge do estilo.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 6: INTERNET DISCADA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-phone-volume"></i><span>Internet Discada</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-end" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-pink);">Pulso Único</div>
+                    <h1 class="storie-title text-right">Aguardando a<br><span style="color: var(--theme-pink);">Meia-Noite</span></h1>
+                    <div class="text-wrapper-right text-wrapper-base" style="border-color: var(--theme-pink);">
+                        <p class="storie-text text-right">O barulho inesquecível do modem. A regra era clara: internet só depois da meia-noite ou no fim de semana!</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 7: DESENHOS / TV -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-tv"></i><span>TV de Tubo</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-bottom justify-end align-start" style="padding-bottom: 110px;">
+                    <div class="tag-pill" style="background: var(--theme-cyan);">Manhãs</div>
+                    <h1 class="storie-title">TV de<br><span style="color: var(--theme-cyan);">Tubo</span></h1>
+                    <div class="text-wrapper-left text-wrapper-base" style="border-color: var(--theme-cyan);">
+                        <p class="storie-text text-left">Acordar cedo, sentar no tapete da sala e passar a manhã inteira assistindo animes e desenhos clássicos.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CARD 8: INTERAÇÃO CTA -->
+        <div class="storie-wrapper">
+            <div class="storie-card" data-export="true">
+                <div class="bg-layer">
+                    <div class="upload-zone" onclick="triggerUpload(this)">
+                        <div class="upload-prompt"><i class="fa-solid fa-floppy-disk"></i><span>Fundo / Foto</span></div>
+                        <div class="zoom-panel" onmousedown="event.stopPropagation()" ontouchstart="event.stopPropagation()">
+                            <input type="range" min="0.2" max="4" step="0.05" value="1" class="zoom-slider" oninput="updateZoom(event, this)">
+                        </div>
+                        <div class="image-controls">
+                            <div class="control-btn" onclick="triggerUploadBtn(event, this)"><i class="fa-solid fa-folder-open"></i></div>
+                            <div class="control-btn" onclick="mudarVertical(event, this)"><i class="fa-solid fa-arrows-up-down"></i></div>
+                            <div class="control-btn" onclick="mudarHorizontal(event, this)"><i class="fa-solid fa-left-right"></i></div>
+                            <div class="control-btn" onclick="exportarCardIndividual(event, this)" style="background:var(--theme-cyan); color:#000;"><i class="fa-solid fa-download"></i></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="ui-layer gradient-full justify-center align-center">
+                    <h1 class="storie-title text-center" style="font-size: 110px;">Qual é a sua<br><span style="color: var(--theme-lime);">Favorita?</span></h1>
+                    <p class="storie-text text-center mb-8">Qual destas memórias te dá mais saudade hoje?</p>
+                    <div style="background:rgba(0,0,0,0.5); padding: 40px; border: 4px solid var(--theme-lime); box-shadow: 10px 10px 0px #000; width: 100%; pointer-events: auto; display: flex; flex-direction: column; gap: 20px;">
+                        <div style="background:var(--theme-cyan); padding: 25px; border: 3px solid #000; font-weight: 800; color: #000; text-align: center; font-size: 30px; box-shadow: 4px 4px 0px #000; font-family: var(--font-main);">Mandar Nudge no MSN</div>
+                        <div style="background:var(--theme-yellow); padding: 25px; border: 3px solid #000; font-weight: 800; color: #000; text-align: center; font-size: 30px; box-shadow: 4px 4px 0px #000; font-family: var(--font-main);">Alugar Fita VHS</div>
+                        <div style="background:var(--theme-pink); padding: 25px; border: 3px solid #000; font-weight: 800; color: #000; text-align: center; font-size: 30px; box-shadow: 4px 4px 0px #000; font-family: var(--font-main);">Sons de Modem Discado</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- EXPORT CONTAINER -->
+    <div id="export-container"></div>
+
+    <script>
+        // --- MOTOR DE FORMATO ---
+        let currentExportHeight = 1920;
+        function changeFormat(format) {
+            if (format === 'story') {
+                document.documentElement.style.setProperty('--card-height', '1920px');
+                document.documentElement.style.setProperty('--card-aspect', '9 / 16');
+                currentExportHeight = 1920;
+            } else {
+                document.documentElement.style.setProperty('--card-height', '1350px');
+                document.documentElement.style.setProperty('--card-aspect', '4 / 5');
+                currentExportHeight = 1350;
+            }
+            document.querySelectorAll('.draggable-img').forEach(img => {
+                if (!img.src) return;
+                const cw = 1080; const ch = currentExportHeight;
+                const iw = parseFloat(img.style.width); const ih = parseFloat(img.style.height);
+                if (iw && ih) {
+                    const newBaseScale = Math.max(cw / iw, ch / ih);
+                    img.dataset.baseScale = newBaseScale;
+                    if (parseFloat(img.dataset.scale) < newBaseScale) img.dataset.scale = newBaseScale;
+                    updateImgTransform(img);
+                }
+            });
+            setTimeout(() => window.dispatchEvent(new Event('resize')), 50);
+        }
+
+        // --- MOTOR DE ALINHAMENTO ---
+        function mudarVertical(e, btn) {
+            e.stopPropagation();
+            const uiLayer = btn.closest('.storie-card').querySelector('.ui-layer');
+            if (uiLayer.classList.contains('justify-end')) uiLayer.classList.replace('justify-end', 'justify-center');
+            else if (uiLayer.classList.contains('justify-center')) uiLayer.classList.replace('justify-center', 'justify-start');
+            else uiLayer.classList.replace('justify-start', 'justify-end');
+        }
+
+        function mudarHorizontal(e, btn) {
+            e.stopPropagation();
+            const uiLayer = btn.closest('.storie-card').querySelector('.ui-layer');
+            const wrapper = uiLayer.querySelector('[class^="text-wrapper-"]');
+            const title = uiLayer.querySelector('.storie-title');
+            const texts = uiLayer.querySelectorAll('.storie-text');
+
+            if (uiLayer.classList.contains('align-start')) {
+                uiLayer.classList.replace('align-start', 'align-center');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-left', 'text-wrapper-center');
+                if(title) { title.classList.remove('text-left', 'text-right'); title.classList.add('text-center'); }
+                texts.forEach(t => { t.classList.remove('text-left', 'text-right'); t.classList.add('text-center'); });
+            } else if (uiLayer.classList.contains('align-center')) {
+                uiLayer.classList.replace('align-center', 'align-end');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-center', 'text-wrapper-right');
+                if(title) { title.classList.remove('text-left', 'text-center'); title.classList.add('text-right'); }
+                texts.forEach(t => { t.classList.remove('text-left', 'text-center'); t.classList.add('text-right'); });
+            } else {
+                uiLayer.classList.replace('align-end', 'align-start');
+                if(wrapper) wrapper.className = wrapper.className.replace('text-wrapper-right', 'text-wrapper-left');
+                if(title) { title.classList.remove('text-center', 'text-right'); title.classList.add('text-left'); }
+                texts.forEach(t => { t.classList.remove('text-center', 'text-right'); t.classList.add('text-left'); });
+            }
+        }
+
+        // --- MOTOR DE IMAGEM (UPLOAD / PAN / ZOOM) ---
+        const fileInput = document.getElementById('hidden-file-input');
+        let currentTargetZone = null;
+        let isDragging = false; let activeImg = null;
+        let sX, sY, sTx, sTy;
+
+        function triggerUpload(zone) { if (!zone.classList.contains('has-image')) { currentTargetZone = zone; fileInput.click(); } }
+        function triggerUploadBtn(e, btn) { e.stopPropagation(); currentTargetZone = btn.closest('.upload-zone'); fileInput.click(); }
+
+        fileInput.addEventListener('change', function(e) {
+            if (this.files && this.files[0] && currentTargetZone) {
+                const url = URL.createObjectURL(this.files[0]);
+                let img = currentTargetZone.querySelector('.draggable-img');
+                if (img) { URL.revokeObjectURL(img.src); img.remove(); }
+                img = document.createElement('img'); img.src = url; img.className = 'draggable-img';
+                img.onload = () => {
+                    const cw = 1080; const ch = currentExportHeight;
+                    img.style.width = img.naturalWidth + 'px'; img.style.height = img.naturalHeight + 'px';
+                    const scale = Math.max(cw / img.naturalWidth, ch / img.naturalHeight);
+                    img.dataset.baseScale = scale; img.dataset.scale = scale; img.dataset.tx = 0; img.dataset.ty = 0;
+                    updateImgTransform(img);
+                };
+                currentTargetZone.appendChild(img); currentTargetZone.classList.add('has-image');
+            }
+            this.value = '';
+        });
+
+        function updateImgTransform(img) {
+            const tx = parseFloat(img.dataset.tx)||0; const ty = parseFloat(img.dataset.ty)||0;
+            const sc = parseFloat(img.dataset.scale)||1; const iw = parseFloat(img.style.width)||0; const ih = parseFloat(img.style.height)||0;
+            img.style.transform = `translate(${tx - (iw/2)}px, ${ty - (ih/2)}px) scale(${sc})`;
+        }
+
+        function updateZoom(e, input) {
+            e.stopPropagation(); const img = input.closest('.upload-zone').querySelector('.draggable-img');
+            if (img) { img.dataset.scale = parseFloat(img.dataset.baseScale) * parseFloat(input.value); updateImgTransform(img); }
+        }
+
+        // Dragging Logic
+        document.querySelectorAll('.upload-zone').forEach(z => {
+            z.addEventListener('mousedown', e => {
+                if (e.target.closest('.image-controls, .zoom-panel')) return;
+                activeImg = z.querySelector('.draggable-img'); if (!activeImg) return;
+                isDragging = true; sX = e.clientX; sY = e.clientY;
+                sTx = parseFloat(activeImg.dataset.tx)||0; sTy = parseFloat(activeImg.dataset.ty)||0;
+            });
+        });
+
+        window.addEventListener('mousemove', e => {
+            if (!isDragging || !activeImg) return;
+            const scale = activeImg.closest('.storie-wrapper').clientWidth / 1080;
+            activeImg.dataset.tx = sTx + (e.clientX - sX) / scale;
+            activeImg.dataset.ty = sTy + (e.clientY - sY) / scale;
+            updateImgTransform(activeImg);
+        });
+        window.addEventListener('mouseup', () => { isDragging = false; });
+
+        // --- EXPORTAÇÃO ---
+        async function exportarCardIndividual(e, btn) {
+            if(e) e.stopPropagation();
+            const card = btn.closest('.storie-card');
+            const container = document.getElementById('export-container');
+            container.style.display = 'block';
+            const clone = card.cloneNode(true);
+            clone.querySelectorAll('.image-controls, .zoom-panel, .upload-prompt').forEach(el => el.remove());
+            clone.style.transform = 'none'; clone.style.width = '1080px'; clone.style.height = currentExportHeight + 'px';
+            container.innerHTML = ''; container.appendChild(clone);
+            
+            const icon = btn.querySelector('i'); const oldClass = icon.className; icon.className = 'fa-solid fa-spinner fa-spin';
+            
+            await document.fonts.ready;
+            await new Promise(r => setTimeout(r, 400));
+
+            try {
+                const dataUrl = await htmlToImage.toPng(clone, { pixelRatio: 1, width: 1080, height: currentExportHeight });
+                const link = document.createElement('a'); link.download = `Anos2000_Card_${Date.now()}.png`; link.href = dataUrl;
+                link.click();
+            } catch (err) { console.error(err); }
+            
+            icon.className = oldClass; container.innerHTML = ''; container.style.display = 'none';
+        }
+
+        async function exportarTudo() {
+            const btn = document.getElementById('download-btn'); const original = btn.innerHTML;
+            btn.disabled = true;
+            const cards = document.querySelectorAll('.storie-card[data-export="true"]');
+            for (let i = 0; i < cards.length; i++) {
+                btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> (${i+1}/8)`;
+                const individualBtn = cards[i].querySelector('.control-btn[style*="background:var(--theme-cyan)"]');
+                await exportarCardIndividual(null, individualBtn);
+            }
+            btn.innerHTML = original; btn.disabled = false;
+        }
+
+        // Preview Scale Fix
+        function resize() {
+            document.querySelectorAll('.storie-wrapper').forEach(w => {
+                const card = w.querySelector('.storie-card');
+                card.style.transform = `scale(${w.clientWidth / 1080})`;
+            });
+        }
+        window.onresize = resize; window.onload = resize;
+    </script>
+</body>
+</html>

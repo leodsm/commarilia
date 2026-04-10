@@ -1,24 +1,22 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
-import Home from './Home';
-import Player from './Player';
-import Modal from './Modal';
-import Onboarding from './Onboarding';
+import Home from './components/Home';
+import Player from './components/Player';
+import Modal from './components/Modal';
+import Onboarding from './components/Onboarding';
 import { HelmetProvider } from 'react-helmet-async';
 import ReactGA from 'react-ga4';
-import { useParams } from 'react-router-dom';
 
 // Hooks
-import { useStories } from '../hooks/useStories';
-import { useOnboarding } from '../hooks/useOnboarding';
-import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
+import { useStories } from './hooks/useStories';
+import { useOnboarding } from './hooks/useOnboarding';
+import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 
-// Initialize GA4
-const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2';
+// Initialize GA4 - Replace 'G-XXXXXXXXXX' with actual ID or ENV
+const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2'; // Updated with user provided ID
 ReactGA.initialize(GA_MEASUREMENT_ID);
 
-export const PublicApp: React.FC = () => {
-  const { tenantSlug } = useParams();
-  const { stories, loading, error } = useStories(tenantSlug);
+const App: React.FC = () => {
+  const { stories, loading, error } = useStories();
   const { showOnboarding, markVisited, setShowOnboarding } = useOnboarding();
 
   const [view, setView] = useState<'home' | 'player'>('home');
@@ -76,6 +74,8 @@ export const PublicApp: React.FC = () => {
 
     // Initial check (Deep linking)
     if (!loading && stories.length > 0) {
+      // We can just rely on the existing logic or trigger popstate manually if needed, 
+      // but the initial load logic below is fine.
       const params = new URLSearchParams(window.location.search);
       const storySlug = params.get('story');
       if (storySlug) {
@@ -96,6 +96,7 @@ export const PublicApp: React.FC = () => {
   }, [loading, stories, setShowOnboarding]);
 
   // Update URL when active story changes
+  // We use a ref to track the last pushed state type to avoid infinite loops or replace issues
   useEffect(() => {
     if (loading) return;
 
@@ -107,6 +108,10 @@ export const PublicApp: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.set('story', activeStoryId);
 
+        // If we are already in player mode (switching stories), we replace.
+        // If we came from home (activeStoryId present but URL doesn't have it yet, or different), logic is tricky.
+        // Simple logic: If URL has NO story, we PUSH. If URL HAS story, we REPLACE.
+
         if (!currentStorySlug) {
           window.history.pushState({ view: 'player', storyId: activeStoryId }, '', url.toString());
         } else {
@@ -117,6 +122,12 @@ export const PublicApp: React.FC = () => {
       if (currentStorySlug) {
         const url = new URL(window.location.href);
         url.searchParams.delete('story');
+        // When going back to home via UI Code, we usually want to go back in history if possible?
+        // Or just replace state to clean URL?
+        // Ideally, if user clicked "Close", we might want to `history.back()` if the previous state was Home.
+        // But for simplicity and safety against exiting, let's just replace state to Home state.
+        // NOTE: The previous logic used replaceState.
+        // Ideally we should just use replaceState here to "reset" the URL to clean home.
         window.history.replaceState({ view: 'home' }, '', url.toString());
       }
     }
@@ -162,6 +173,7 @@ export const PublicApp: React.FC = () => {
 
   // -- Analytics Tracking --
   useEffect(() => {
+    // Send pageview with a custom path
     ReactGA.send({ hitType: "pageview", page: view === 'home' ? '/' : `/story/${activeStoryId || ''}` });
   }, [view, activeStoryId]);
 
@@ -221,4 +233,4 @@ export const PublicApp: React.FC = () => {
   );
 };
 
-export default PublicApp;
+export default App;
