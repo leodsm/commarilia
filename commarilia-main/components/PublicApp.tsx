@@ -32,10 +32,8 @@ export const PublicApp: React.FC = () => {
     setActiveStoryId(id);
     setView('player');
 
-    // If onboarding is pending, show it now when player opens
-    if (localStorage.getItem('hasVisitedComMarilia') === null) {
-      setShowOnboarding(true);
-    }
+    // Always show onboarding when player opens
+    setShowOnboarding(true);
   }, [setShowOnboarding]);
 
   const handleClosePlayer = useCallback(() => {
@@ -83,9 +81,7 @@ export const PublicApp: React.FC = () => {
         if (story) {
           setActiveStoryId(story.id);
           setView('player');
-          if (localStorage.getItem('hasVisitedComMarilia') === null) {
-            setShowOnboarding(true);
-          }
+          setShowOnboarding(true); // Always show onboarding on direct link
         }
       }
     }
