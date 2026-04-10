@@ -69,16 +69,16 @@ const StorySegment = React.memo(({
     const [showButtonText, setShowButtonText] = useState(false);
 
     useEffect(() => {
-        if (isActive && isFirstCard) {
+        if (isActive) {
             setShowButtonText(true);
             const timer = setTimeout(() => {
                 setShowButtonText(false);
-            }, 2000);
+            }, 3000);
             return () => clearTimeout(timer);
         } else {
             setShowButtonText(false);
         }
-    }, [isActive, isFirstCard]);
+    }, [isActive]);
 
     // Effect to handle Auto-Play, Auto-Pause and Preloading
     useEffect(() => {
@@ -358,8 +358,8 @@ const StorySegment = React.memo(({
             )}
 
             {/* CTA Button Layer */}
-            <div className={`absolute bottom-3 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)]`}>
-                <div className="flex flex-col gap-3 w-full items-center">
+            <div className={`absolute bottom-4 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)] transition-all duration-500`}>
+                <div className="flex flex-col w-full items-center">
                     {segment?.showButton && (
                         <div
                             onClick={(e) => {
@@ -380,14 +380,16 @@ const StorySegment = React.memo(({
                                     onOpenModal(storyId);
                                 }
                             }}
-                            className={`group/btn pointer-events-auto flex items-center justify-center gap-2 cursor-pointer transition-all duration-300 hover:scale-105 active:scale-95 bg-black/50 hover:bg-black/70 backdrop-blur-md px-6 py-2.5 rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden`}
+                            onMouseEnter={() => setShowButtonText(true)}
+                            onMouseLeave={() => setShowButtonText(false)}
+                            className={`group/btn pointer-events-auto flex items-center justify-center cursor-pointer transition-all duration-500 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden ${showButtonText ? 'px-6 py-2.5 gap-2 hover:scale-105 active:scale-95' : 'w-10 h-10 gap-0 opacity-80 hover:opacity-100 hover:scale-110 active:scale-95'}`}
                             role="button"
                             aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
                         >
-                            <span className="text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-none drop-shadow-md">
+                            <span className={`text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-[14px] drop-shadow-md transition-all duration-500 whitespace-nowrap overflow-hidden origin-left ${showButtonText ? 'max-w-[120px] opacity-100' : 'max-w-0 opacity-0'}`}>
                                 {segment.slideLink ? 'Acessar' : 'Leia Mais'}
                             </span>
-                            <div className="flex items-center justify-center animate-bounce -mt-0.5">
+                            <div className={`flex items-center justify-center animate-bounce transition-all duration-500 ${showButtonText ? '-mt-0.5' : 'mt-1'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
