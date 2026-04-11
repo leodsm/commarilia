@@ -40,6 +40,16 @@ export default {
             }),
             colors: {
                 primary: '#fd572b',
+            },
+            animation: {
+                'ping-once': 'ping-once 0.5s cubic-bezier(0, 0, 0.2, 1) forwards',
+            },
+            keyframes: {
+                'ping-once': {
+                    '0%': { transform: 'scale(1)', opacity: '1' },
+                    '50%': { transform: 'scale(1.2)', opacity: '0.8' },
+                    '100%': { transform: 'scale(1.5)', opacity: '0' },
+                }
             }
         },
     },

@@ -6,6 +6,13 @@ import { Spinner } from './Loader';
 // Import Swiper type for instance typing
 import type { Swiper as SwiperType } from 'swiper';
 import SEO from './SEO';
+import {
+    trackPlayerOpen,
+    trackPlayerClose,
+    trackCategoryFilter,
+    trackReadMore,
+    trackStorySlideChange,
+} from '../services/analytics';
 
 interface PlayerProps {
     stories: TransformedStory[];
@@ -370,22 +377,21 @@ const StorySegment = React.memo(({
                                 }
                                 setIsPlaying(false);
 
+                                trackReadMore(storyId, segment.title || '', !!segment.slideLink);
                                 if (segment.slideLink) {
                                     window.open(segment.slideLink, '_blank');
                                 } else {
                                     onOpenModal(storyId);
                                 }
                             }}
-                            onMouseEnter={() => setShowButtonText(true)}
-                            onMouseLeave={() => setShowButtonText(false)}
-                            className={`group/btn pointer-events-auto flex items-center justify-center cursor-pointer transition-all duration-500 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden ${showButtonText ? 'px-6 py-2.5 gap-2 hover:scale-105 active:scale-95' : 'w-10 h-10 gap-0 opacity-80 hover:opacity-100 hover:scale-110 active:scale-95'}`}
+                            className={`group/btn pointer-events-auto flex items-center justify-center cursor-pointer transition-[max-width,padding,gap,opacity] duration-500 ease-in-out bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden h-10 active:scale-95 ${showButtonText ? 'px-6 gap-2 max-w-[250px] opacity-100' : 'px-0 gap-0 max-w-[40px] opacity-80 hover:opacity-100 hover:max-w-[250px] hover:px-6 hover:gap-2'}`}
                             role="button"
                             aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
                         >
-                            <span className={`text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-[14px] drop-shadow-md transition-all duration-500 whitespace-nowrap overflow-hidden origin-left ${showButtonText ? 'max-w-[120px] opacity-100' : 'max-w-0 opacity-0'}`}>
+                            <span className={`text-white/90 group-hover/btn:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-[14px] drop-shadow-md transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden origin-left ${showButtonText ? 'max-w-[150px] opacity-100' : 'max-w-0 opacity-0 group-hover/btn:max-w-[150px] group-hover/btn:opacity-100'}`}>
                                 {segment.slideLink ? 'Acessar' : 'Leia Mais'}
                             </span>
-                            <div className={`flex items-center justify-center animate-bounce transition-all duration-500 ${showButtonText ? '-mt-0.5' : 'mt-1'}`}>
+                            <div className={`flex items-center justify-center min-w-[40px] animate-bounce transition-all duration-500 ease-in-out ${showButtonText ? '-mt-0.5' : 'mt-1 group-hover/btn:-mt-0.5'}`}>
                                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
@@ -434,6 +440,15 @@ const Player: React.FC<PlayerProps> = ({
         }
     }, [currentStory, onStoryChange]);
 
+    // Track player open on initial mount
+    useEffect(() => {
+        const story = stories[safeInitialIndex];
+        if (story) {
+            trackPlayerOpen(story.id, story.title, story.category);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
+
     // -- SEO --
     // Use currentStory.content (HTML) to extract a snippet? Or just use "Assista agora no ComMarília".
     const seoDescription = currentStory?.title
@@ -450,11 +465,7 @@ const Player: React.FC<PlayerProps> = ({
         const newIndex = swiper.activeIndex;
         setActiveStoryIndex(newIndex);
 
-        // Notify parent to update URL for deep linking
         if (stories[newIndex]) {
-            // We need a way to call `setActiveStoryId` in App. 
-            // Since we didn't add a prop for it, let's just update the URL directly here or add the prop?
-            // Adding the prop is cleaner. Let's assume I will add `onStoryChange` to PlayerProps.
             if (onStoryChange) onStoryChange(stories[newIndex].id);
         }
         
@@ -463,6 +474,17 @@ const Player: React.FC<PlayerProps> = ({
             fetchNextPage();
         }
     }, [stories, onStoryChange, fetchNextPage, hasNextPage]);
+
+    const handleHorizontalSlideChangeWithTracking = useCallback((storyIndex: number) => (swiper: SwiperType) => {
+        setActiveSegmentIndices(prev => ({
+            ...prev,
+            [storyIndex]: swiper.activeIndex
+        }));
+        const story = stories[storyIndex];
+        if (story) {
+            trackStorySlideChange(story.id, swiper.activeIndex, story.segments.length);
+        }
+    }, [stories]);
 
     const handleHorizontalSwiperInit = useCallback((storyIndex: number) => (swiper: SwiperType) => {
         horizontalSwipersRef.current[storyIndex] = swiper;
@@ -514,21 +536,25 @@ const Player: React.FC<PlayerProps> = ({
             )}
 
             {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 h-[54px]">
-                {/* Logo Section */}
+            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 backdrop-blur-md border-b border-white/10 h-[54px] shadow-sm">
                 {/* Logo & Back Button Section */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <button
-                        onClick={onClose}
-                        className="w-10 h-10 md:w-[30px] md:h-[30px] flex items-center justify-center rounded-full group focus:outline-none z-50 hover:bg-white/10 md:bg-black/20 md:backdrop-blur-sm md:hover:bg-black/40 transition-all duration-300 aspect-square"
-                        aria-label="Fechar"
+                        onClick={() => {
+                            const seg = activeSegmentIndices[activeStoryIndex] || 0;
+                            if (currentStory) trackPlayerClose(currentStory.id, seg, currentStory.segments.length);
+                            onClose();
+                        }}
+                        className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-white/10 hover:bg-[#fd572b] border border-white/10 hover:border-transparent transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden shadow-sm z-50 focus:outline-none"
+                        aria-label="Voltar"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 md:w-4 md:h-4 text-white/80 group-hover:text-white transition-colors">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 md:w-3.5 md:h-3.5 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                         </svg>
+                        <span className="text-[11px] font-poppins font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
                     </button>
                     <h1
-                        className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer shadow-sm hover:opacity-80 transition-opacity"
+                        className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer drop-shadow-sm hover:opacity-80 transition-opacity"
                         onClick={onClose}
                     >
                         Com<span className="text-[#fd572b]">Marília</span>
@@ -559,7 +585,7 @@ const Player: React.FC<PlayerProps> = ({
                         {allCategories.map(cat => (
                             <SwiperSlide key={cat} className="!w-auto flex items-center">
                                 <button
-                                    onClick={() => onCategoryChange(cat)}
+                                    onClick={() => { onCategoryChange(cat); trackCategoryFilter(cat); }}
                                     className={`category-link inline-block text-white/80 text-xs py-1 px-3 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer ${activeCategory === cat ? 'active' : ''}`}
                                     aria-label={`Filtrar por categoria: ${cat}`}
                                     aria-pressed={activeCategory === cat}
@@ -608,7 +634,7 @@ const Player: React.FC<PlayerProps> = ({
                                 }}
                                 nested={true}
                                 onSwiper={handleHorizontalSwiperInit(storyIndex)}
-                                onSlideChange={handleHorizontalSlideChange(storyIndex)}
+                                onSlideChange={handleHorizontalSlideChangeWithTracking(storyIndex)}
                             >
                                 {story.segments.map((segment, segIndex) => {
                                     const isStoryActive = storyIndex === activeStoryIndex;
