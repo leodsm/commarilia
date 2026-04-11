@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
   if (!isOpen || !story) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
+    <div className="fixed inset-0 z-[60] flex items-end pb-4 px-3 pt-16 md:items-center justify-center p-0 md:p-4 perspective-1000">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
@@ -35,7 +35,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
       ></div>
 
       {/* Content Panel - Slide Up Animation */}
-      <div className="relative bg-[#fffaf5] w-full h-[90vh] md:h-auto md:max-h-[90vh] md:max-w-2xl rounded-t-2xl md:rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-slide-up">
+      <div className="relative bg-[#fffaf5] w-full max-h-[calc(100vh-6rem)] md:h-auto md:max-h-[90vh] md:max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-slide-up">
 
         <div
           ref={contentRef}
@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           tabIndex={-1} // Makes div programmatically focusable
         >
           {/* Header Ticket Laranja */}
-          <div className="bg-[#fd572b] shrink-0 pt-4 pb-8 md:pt-6 md:pb-10 px-6 md:px-8 rounded-b-2xl shadow-lg z-20 relative">
+          <div className="bg-[#fd572b] shrink-0 pt-4 pb-8 md:pt-6 md:pb-10 px-6 md:px-8 rounded-t-2xl rounded-b-2xl shadow-lg z-20 relative">
             <div className="w-12 h-1 bg-white/40 rounded-full mx-auto mb-5 md:mb-6 md:hidden"></div>
             <div className="flex items-start gap-4 mb-3">
               <button
