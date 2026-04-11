@@ -269,9 +269,6 @@ const StorySegment = React.memo(({
                         </div>
                     )}
 
-                    {segment?.showOverlay && (
-                        <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
-                    )}
                 </div>
             ) : isVimeo && vimeoId ? (
                 <div className="absolute inset-0 w-full h-full bg-black">
@@ -297,9 +294,6 @@ const StorySegment = React.memo(({
                         </div>
                     )}
 
-                    {segment?.showOverlay && (
-                        <div className="absolute inset-0 bg-black/20 pointer-events-none z-10"></div>
-                    )}
                 </div>
             ) : segment?.mediaUrl ? (
                 <>

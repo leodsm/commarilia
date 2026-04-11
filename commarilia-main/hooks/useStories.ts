@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { fetchStories } from '../services/api';
 import { TransformedStory } from '../types';
 
-export const useStories = (tenantSlug?: string) => {
+export const useStories = () => {
     const [stories, setStories] = useState<TransformedStory[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
@@ -10,7 +10,7 @@ export const useStories = (tenantSlug?: string) => {
     useEffect(() => {
         const loadData = async () => {
             try {
-                const data = await fetchStories(tenantSlug);
+                const data = await fetchStories();
                 setStories(data);
             } catch (err) {
                 setError('Falha ao carregar stories. Tente novamente mais tarde.');
@@ -20,7 +20,7 @@ export const useStories = (tenantSlug?: string) => {
             }
         };
         loadData();
-    }, [tenantSlug]);
+    }, []);
 
     return { stories, loading, error };
 };

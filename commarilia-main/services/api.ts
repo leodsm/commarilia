@@ -54,9 +54,7 @@ function slugify(text: string): string {
     .replace(/--+/g, '-');
 }
 
-export const fetchStories = async (tenantSlug?: string): Promise<TransformedStory[]> => {
-  // TODO: Em um SaaS real (Fase 5), usaremos o tenantSlug para buscar na tabela correta do Supabase.
-  // Por enquanto mantemos o endpoint existente para não quebrar os stories atuais.
+export const fetchStories = async (): Promise<TransformedStory[]> => {
   try {
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',

@@ -5,7 +5,6 @@ import Modal from './Modal';
 import Onboarding from './Onboarding';
 import { HelmetProvider } from 'react-helmet-async';
 import ReactGA from 'react-ga4';
-import { useParams } from 'react-router-dom';
 
 // Hooks
 import { useStories } from '../hooks/useStories';
@@ -17,8 +16,7 @@ const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2';
 ReactGA.initialize(GA_MEASUREMENT_ID);
 
 export const PublicApp: React.FC = () => {
-  const { tenantSlug } = useParams();
-  const { stories, loading, error } = useStories(tenantSlug);
+  const { stories, loading, error } = useStories();
   const { showOnboarding, markVisited, setShowOnboarding } = useOnboarding();
 
   const [view, setView] = useState<'home' | 'player'>('home');

@@ -14,20 +14,6 @@
   font-style: normal;
 }
 
-@font-face {
-  font-family: 'Gotham';
-  src: local('Gotham Bold'), local('Gotham-Bold');
-  font-weight: 700;
-  font-style: normal;
-}
-
-@font-face {
-  font-family: 'Gotham';
-  src: local('Gotham Book'), local('Gotham-Book'), local('Gotham');
-  font-weight: 400;
-  font-style: normal;
-}
-
 body {
   margin: 0;
   font-family: 'Inter', sans-serif;
@@ -39,9 +25,6 @@ body {
   font-family: 'Poppins', sans-serif;
 }
 
-.font-gotham {
-  font-family: 'Gotham', 'Poppins', sans-serif;
-}
 
 /* Hide Scrollbar */
 .no-scrollbar::-webkit-scrollbar {
@@ -53,9 +36,6 @@ body {
   scrollbar-width: none;
 }
 
-.text-shadow {
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
-}
 
 .aspect-card {
   aspect-ratio: 4 / 5;
@@ -164,27 +144,6 @@ body {
 
 /* --- Custom UI Components --- */
 
-/* Button Glassmorphism */
-.btn-glass {
-  background: rgba(0, 0, 0, 0.25);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(2px);
-  -webkit-backdrop-filter: blur(2px);
-  border-radius: 10px;
-  padding: 0.50rem 2rem;
-  color: white;
-  text-decoration: none;
-  font-weight: 600;
-  transition: background 0.3s ease, border-color 0.3s ease;
-  margin-top: 0.75rem;
-  display: inline-block;
-  cursor: pointer;
-}
-
-.btn-glass:hover {
-  background: rgba(0, 0, 0, 0.4);
-  border-color: rgba(255, 255, 255, 0.3);
-}
 
 /* Categories Header */
 .mask-gradient {
