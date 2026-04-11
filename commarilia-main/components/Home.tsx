@@ -27,13 +27,13 @@ const Home: React.FC<HomeProps> = ({
     <div className="min-h-screen flex flex-col bg-white">
       <SEO title="Home" />
       {/* Header */}
-      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-[100] shadow-sm transition-all">
+      <header className="border-b border-[#252d45] bg-[#1a2035] sticky top-0 z-[100] shadow-md transition-all">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
           <div
             className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => window.location.reload()}
           >
-            <span className="text-2xl font-poppins font-bold text-gray-900 tracking-tight">
+            <span className="text-2xl font-poppins font-bold text-white tracking-tight">
               Com<span className="text-[#fd572b]">Marília</span>
             </span>
           </div>
@@ -41,9 +41,9 @@ const Home: React.FC<HomeProps> = ({
       </header>
 
       {/* Categories Bar */}
-      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-[90] shadow-sm">
+      <div className="bg-[#1a2035] border-b border-[#252d45] py-3 sticky top-16 z-[90] shadow-md">
         <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-start sm:justify-center gap-3 overflow-x-auto no-scrollbar pb-1">
+          <div className="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
             {isLoading ? (
               <>
                 <CategorySkeleton />
@@ -55,10 +55,11 @@ const Home: React.FC<HomeProps> = ({
                 <button
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
-                  className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 active:scale-95 ${activeCategory === cat
-                    ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
-                    }`}
+                  className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-200 active:scale-95 ${
+                    activeCategory === cat
+                      ? "bg-[#fd572b] text-white border-[#fd572b] shadow-lg shadow-orange-900/30"
+                      : "bg-transparent text-white/70 border-white/20 hover:border-white/50 hover:text-white hover:bg-white/10"
+                  }`}
                 >
                   {cat}
                 </button>

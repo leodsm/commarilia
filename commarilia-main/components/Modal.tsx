@@ -42,13 +42,18 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           className="flex-1 overflow-y-auto overscroll-contain bg-[#fffaf5] outline-none"
           tabIndex={-1} // Makes div programmatically focusable
         >
-          {/* Header Ticket Laranja */}
-          <div className="bg-[#fd572b] shrink-0 pt-5 pb-8 md:pt-6 md:pb-10 px-6 md:px-8 rounded-t-2xl rounded-b-2xl shadow-lg z-20 relative">
-            <div className="w-12 h-1 bg-white/40 rounded-full mx-auto mb-5 md:mb-6 md:hidden"></div>
+          {/* Header Ticket Escuro (Azul Marinho) */}
+          <div className="bg-[#1a2035] shrink-0 pt-3 pb-8 md:pt-4 md:pb-10 px-6 md:px-8 rounded-t-2xl rounded-b-2xl shadow-lg z-20 relative">
+            {/* Drag Handle — clicável para fechar */}
+            <button
+              onClick={onClose}
+              className="block mx-auto mb-5 w-12 h-1 bg-[#fd572b] rounded-full hover:bg-white/80 transition-colors duration-200 cursor-pointer focus:outline-none"
+              aria-label="Fechar"
+            />
             <div className="flex items-start gap-4 mb-3">
               <button
                 onClick={onClose}
-                className="flex shrink-0 items-center justify-center text-white/80 hover:text-white transition-all group focus:outline-none mt-1.5"
+                className="flex shrink-0 items-center justify-center text-white/70 hover:text-white transition-all group focus:outline-none mt-1.5"
                 aria-label="Voltar"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={4} stroke="currentColor" className="w-[18px] h-[18px] md:w-5 md:h-5 group-hover:-translate-x-1 transition-transform drop-shadow-sm">
@@ -60,8 +65,8 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
               </h2>
             </div>
             
-            {/* Categoria Bridge Badge */}
-            <span className="absolute -bottom-3 right-6 md:right-8 px-4 py-1.5 text-xs font-bold text-gray-900 bg-[#fffaf5] border border-gray-200 rounded-full shadow-md uppercase tracking-wide z-30">
+            {/* Categoria Bridge Badge — laranja vibrante */}
+            <span className="absolute -bottom-3 right-6 md:right-8 px-4 py-1.5 text-xs font-bold text-white bg-[#fd572b] rounded-full shadow-md uppercase tracking-wide z-30">
               {story.category}
             </span>
           </div>
