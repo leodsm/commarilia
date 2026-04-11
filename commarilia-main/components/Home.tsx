@@ -27,8 +27,8 @@ const Home: React.FC<HomeProps> = ({
     <div className="min-h-screen flex flex-col bg-white">
       <SEO title="Home" />
       {/* Header */}
-      <header className="border-b border-[#252d45] bg-[#1a2035] sticky top-0 z-[100] shadow-md transition-all">
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
+      <header className="bg-[#090e1f]/95 backdrop-blur-xl sticky top-0 z-[100] shadow-lg border-b border-white/5 transition-all">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-center">
           <div
             className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => window.location.reload()}
@@ -41,9 +41,9 @@ const Home: React.FC<HomeProps> = ({
       </header>
 
       {/* Categories Bar */}
-      <div className="bg-[#1a2035] border-b border-[#252d45] py-3 sticky top-16 z-[90] shadow-md">
-        <div className="max-w-7xl mx-auto px-4">
-          <div className="flex items-center justify-start sm:justify-center gap-2.5 overflow-x-auto no-scrollbar pb-1">
+      <div className="bg-[#090e1f]/90 backdrop-blur-xl border-b border-white/[0.06] py-3 sticky top-16 z-[90] shadow-lg">
+        <div className="max-w-5xl mx-auto px-6">
+          <div className="flex items-center justify-start sm:justify-center gap-2 overflow-x-auto no-scrollbar pb-1">
             {isLoading ? (
               <>
                 <CategorySkeleton />
@@ -55,10 +55,10 @@ const Home: React.FC<HomeProps> = ({
                 <button
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
-                  className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-semibold border transition-all duration-200 active:scale-95 ${
+                  className={`whitespace-nowrap px-5 py-1.5 rounded-full text-sm font-semibold border transition-all duration-300 active:scale-95 backdrop-blur-md ${
                     activeCategory === cat
-                      ? "bg-[#fd572b] text-white border-[#fd572b] shadow-lg shadow-orange-900/30"
-                      : "bg-transparent text-white/70 border-white/20 hover:border-white/50 hover:text-white hover:bg-white/10"
+                      ? "bg-[#fd572b] text-white border-[#fd572b] shadow-lg shadow-orange-900/40"
+                      : "bg-white/[0.07] text-white/75 border-white/[0.12] hover:bg-white/[0.14] hover:text-white hover:border-white/25"
                   }`}
                 >
                   {cat}
@@ -70,7 +70,7 @@ const Home: React.FC<HomeProps> = ({
       </div>
 
       {/* Grid */}
-      <main className="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
+      <main className="flex-grow max-w-5xl mx-auto px-6 py-8 w-full">
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
           {isLoading ? (
             Array(8).fill(0).map((_, i) => <CardSkeleton key={i} />)
