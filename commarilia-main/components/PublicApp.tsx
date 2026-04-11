@@ -1,8 +1,8 @@
-import React, { useState, useMemo, useCallback, useEffect } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, Suspense, lazy } from 'react';
 import Home from './Home';
 import Player from './Player';
-import Modal from './Modal';
-import Onboarding from './Onboarding';
+const Modal = lazy(() => import('./Modal'));
+const Onboarding = lazy(() => import('./Onboarding'));
 import { HelmetProvider } from 'react-helmet-async';
 import ReactGA from 'react-ga4';
 
@@ -16,7 +16,7 @@ const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2';
 ReactGA.initialize(GA_MEASUREMENT_ID);
 
 export const PublicApp: React.FC = () => {
-  const { stories, loading, error } = useStories();
+  const { stories, loading, error, fetchNextPage, hasNextPage } = useStories();
   const { showOnboarding, markVisited, setShowOnboarding } = useOnboarding();
 
   const [view, setView] = useState<'home' | 'player'>('home');
@@ -199,21 +199,27 @@ export const PublicApp: React.FC = () => {
                 onCategoryChange={setActiveCategory}
                 isModalOpen={!!modalStoryId}
                 onStoryChange={setActiveStoryId}
+                fetchNextPage={fetchNextPage}
+                hasNextPage={hasNextPage}
               />
 
               {showOnboarding && (
-                <Onboarding onDismiss={handleDismissOnboarding} />
+                <Suspense fallback={null}>
+                  <Onboarding onDismiss={handleDismissOnboarding} />
+                </Suspense>
               )}
             </div>
           </div>
         )}
 
         {/* Read More Modal */}
-        <Modal
-          isOpen={!!modalStoryId}
-          onClose={handleCloseModal}
-          story={activeModalStory}
-        />
+        <Suspense fallback={null}>
+          <Modal
+            isOpen={!!modalStoryId}
+            onClose={handleCloseModal}
+            story={activeModalStory}
+          />
+        </Suspense>
       </div>
     </HelmetProvider>
   );

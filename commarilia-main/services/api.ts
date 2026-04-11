@@ -3,8 +3,12 @@ import { GraphQLResponse, TransformedStory, StoryNode, TransformedSegment } from
 const GRAPHQL_ENDPOINT = 'https://portal.commarilia.com/graphql';
 
 const GQL_QUERY = `
-  query GetStories {
-      posts(first: 50) {
+  query GetStories($first: Int!, $after: String) {
+      posts(first: $first, after: $after) {
+          pageInfo {
+              hasNextPage
+              endCursor
+          }
           nodes {
               id
               slug
@@ -12,7 +16,7 @@ const GQL_QUERY = `
               content
               featuredImage {
                   node {
-                      sourceUrl(size: LARGE)
+                      sourceUrl(size: MEDIUM)
                   }
               }
               categories {
@@ -54,12 +58,15 @@ function slugify(text: string): string {
     .replace(/--+/g, '-');
 }
 
-export const fetchStories = async (): Promise<TransformedStory[]> => {
+export const fetchStories = async (first = 10, after: string | null = null): Promise<{stories: TransformedStory[], pageInfo: {hasNextPage: boolean, endCursor: string}}> => {
   try {
     const response = await fetch(GRAPHQL_ENDPOINT, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ query: GQL_QUERY }),
+      body: JSON.stringify({ 
+        query: GQL_QUERY,
+        variables: { first, after }
+      }),
       // Add cache control for Vercel/Browsers
       cache: 'force-cache',
       next: { revalidate: 300 } // Strategy if using Next.js, ignored in pure React but good practice
@@ -73,7 +80,7 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
 
     const nodes = json.data.posts.nodes;
 
-    return nodes
+    const storiesArray = nodes
       .map((post: StoryNode, index: number) => {
         const slides = post.conteudoDosStories?.conteudo?.slides || [];
         const storyId = post.slug || slugify(post.title) || `story-${index}`;
@@ -115,8 +122,10 @@ export const fetchStories = async (): Promise<TransformedStory[]> => {
         };
       })
       .filter((story): story is TransformedStory => story !== null);
+
+    return { stories: storiesArray, pageInfo: json.data.posts.pageInfo };
   } catch (error) {
     console.error('API Fetch Error:', error);
-    return [];
+    return { stories: [], pageInfo: { hasNextPage: false, endCursor: '' } };
   }
 };

@@ -52,9 +52,20 @@ export interface TransformedStory {
   segments: TransformedSegment[];
 }
 
+export interface PageInfo {
+  hasNextPage: boolean;
+  endCursor: string;
+}
+
+export interface PaginatedStories {
+  stories: TransformedStory[];
+  pageInfo: PageInfo;
+}
+
 export interface GraphQLResponse {
   data: {
     posts: {
+      pageInfo: PageInfo;
       nodes: StoryNode[];
     };
   };

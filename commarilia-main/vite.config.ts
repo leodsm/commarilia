@@ -13,6 +13,16 @@ export default defineConfig(() => {
         alias: {
           '@': path.resolve(__dirname, '.'),
         }
+      },
+      build: {
+        rollupOptions: {
+          output: {
+            manualChunks: {
+              vendor: ['react', 'react-dom', 'react-router-dom'],
+              swiper: ['swiper', 'swiper/react', 'swiper/modules']
+            }
+          }
+        }
       }
     };
 });

@@ -17,6 +17,8 @@ interface PlayerProps {
     onCategoryChange: (cat: string) => void;
     isModalOpen: boolean;
     onStoryChange?: (storyId: string) => void;
+    fetchNextPage?: () => void;
+    hasNextPage?: boolean;
 }
 
 // Helper to extract YouTube ID
@@ -405,7 +407,9 @@ const Player: React.FC<PlayerProps> = ({
     activeCategory,
     onCategoryChange,
     isModalOpen,
-    onStoryChange
+    onStoryChange,
+    fetchNextPage,
+    hasNextPage
 }) => {
     const [swiperReady, setSwiperReady] = useState(false);
     const [verticalSwiper, setVerticalSwiper] = useState<SwiperType | null>(null);
@@ -453,7 +457,12 @@ const Player: React.FC<PlayerProps> = ({
             // Adding the prop is cleaner. Let's assume I will add `onStoryChange` to PlayerProps.
             if (onStoryChange) onStoryChange(stories[newIndex].id);
         }
-    }, [stories, onStoryChange]);
+        
+        // Fetch more if getting close to end
+        if (fetchNextPage && hasNextPage && newIndex >= stories.length - 3) {
+            fetchNextPage();
+        }
+    }, [stories, onStoryChange, fetchNextPage, hasNextPage]);
 
     const handleHorizontalSwiperInit = useCallback((storyIndex: number) => (swiper: SwiperType) => {
         horizontalSwipersRef.current[storyIndex] = swiper;
