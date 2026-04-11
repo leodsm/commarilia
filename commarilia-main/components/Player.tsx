@@ -69,6 +69,7 @@ const StorySegment = React.memo(({
     // Loading state for buffering feedback
     const [isLoading, setIsLoading] = useState(true);
     const [showButtonText, setShowButtonText] = useState(false);
+    const [showRipple, setShowRipple] = useState<'play' | 'pause' | null>(null);
 
     useEffect(() => {
         if (isActive && isFirstCard) {
@@ -161,14 +162,20 @@ const StorySegment = React.memo(({
 
         if (!videoRef.current) return;
 
+        let nextPlayingState = false;
         if (videoRef.current.paused) {
             videoRef.current.play()
                 .then(() => setIsPlaying(true))
                 .catch(err => console.error("Play failed:", err));
+            nextPlayingState = true;
         } else {
             videoRef.current.pause();
             setIsPlaying(false);
         }
+
+        // Ripple Effect
+        setShowRipple(nextPlayingState ? 'play' : 'pause');
+        setTimeout(() => setShowRipple(null), 500);
     }, [isYouTube, isVimeo, isPlaying]);
 
     const toggleMute = useCallback((e: React.MouseEvent) => {
@@ -315,6 +322,23 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
+            {/* Ripple Effect Layer */}
+            {showRipple && (
+                <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
+                    <div className="w-24 h-24 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center animate-ping-once text-white">
+                        {showRipple === 'play' ? (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 ml-1">
+                                <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                            </svg>
+                        ) : (
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
+                                <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clipRule="evenodd" />
+                            </svg>
+                        )}
+                    </div>
+                </div>
+            )}
+
             {/* Shared Controls Layer */}
             {showControls && (
                 <div className="absolute top-[70px] right-4 z-50 flex flex-col gap-4 pointer-events-auto">
@@ -353,8 +377,13 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
-            {/* CTA Button Layer */}
-            <div className={`absolute bottom-4 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)] transition-all duration-500`}>
+            {/* Text Protection Gradient */}
+            {segment?.showButton && (
+                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-20 pointer-events-none"></div>
+            )}
+
+            {/* CTA Button Layer - Bottom Bar */}
+            <div className="absolute bottom-0 left-0 right-0 z-30 flex justify-center pointer-events-none transition-all duration-500">
                 <div className="flex flex-col w-full items-center">
                     {segment?.showButton && (
                         <div
@@ -376,19 +405,17 @@ const StorySegment = React.memo(({
                                     onOpenModal(storyId);
                                 }
                             }}
-                            onMouseEnter={() => setShowButtonText(true)}
-                            onMouseLeave={() => setShowButtonText(false)}
-                            className={`group/btn pointer-events-auto flex items-center justify-center cursor-pointer transition-all duration-500 bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden ${showButtonText ? 'px-6 py-2.5 gap-2 hover:scale-105 active:scale-95' : 'w-10 h-10 gap-0 opacity-80 hover:opacity-100 hover:scale-110 active:scale-95'}`}
+                            className="group/btn pointer-events-auto flex flex-col items-center justify-center cursor-pointer transition-colors duration-300 w-full pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] hover:bg-white/5 active:bg-white/10"
                             role="button"
                             aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
                         >
-                            <span className={`text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-[14px] drop-shadow-md transition-all duration-500 whitespace-nowrap overflow-hidden origin-left ${showButtonText ? 'max-w-[120px] opacity-100' : 'max-w-0 opacity-0'}`}>
-                                {segment.slideLink ? 'Acessar' : 'Leia Mais'}
-                            </span>
-                            <div className={`flex items-center justify-center animate-bounce transition-all duration-500 ${showButtonText ? '-mt-0.5' : 'mt-1'}`}>
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
+                            <div className="flex flex-col items-center justify-center animate-bounce gap-1">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5 text-white/80 group-hover:text-white drop-shadow-md">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
+                                <span className="text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.2em] drop-shadow-md">
+                                    {segment.slideLink ? 'Acessar Link' : 'Leia Mais'}
+                                </span>
                             </div>
                         </div>
                     )}
@@ -597,16 +624,42 @@ const Player: React.FC<PlayerProps> = ({
                     <SwiperSlide key={story.id} className="w-full h-full bg-black">
                         {/* Optimization: Only render if close to viewport */}
                         {Math.abs(activeStoryIndex - storyIndex) <= 1 ? (
-                            /* Horizontal Swiper for Segments */
-                            <Swiper
-                                modules={[Pagination]}
-                                direction="horizontal"
-                                className="w-full h-full"
-                                pagination={{
-                                    clickable: true,
-                                    // dynamicBullets removed to fix visibility issues
-                                }}
-                                nested={true}
+                            <div className="w-full h-full relative">
+                                {/* Custom Dynamic Pagination Overlay */}
+                                {(() => {
+                                    const currentSegIndex = activeSegmentIndices[storyIndex] || 0;
+                                    const currentSegment = story.segments[currentSegIndex];
+                                    const isVideo = currentSegment?.mediaType?.startsWith('video/');
+
+                                    if (isVideo) {
+                                        // Progress Bar (Top)
+                                        return (
+                                            <div className="absolute top-2 inset-x-2 z-50 flex gap-1 pointer-events-none drop-shadow-md">
+                                                {story.segments.map((_, idx) => (
+                                                    <div key={idx} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
+                                                        <div className={`h-full bg-white transition-all duration-300 ${idx < currentSegIndex ? 'w-full' : idx === currentSegIndex ? 'w-full' : 'w-0'}`}></div>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        );
+                                    } else {
+                                        // Bullets (Bottom, above CTA)
+                                        return (
+                                            <div className="absolute bottom-[90px] inset-x-0 z-50 flex justify-center gap-1.5 pointer-events-none drop-shadow-md">
+                                                {story.segments.map((_, idx) => (
+                                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentSegIndex ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
+                                                ))}
+                                            </div>
+                                        );
+                                    }
+                                })()}
+                                
+                                <Swiper
+                                    modules={[Pagination]}
+                                    direction="horizontal"
+                                    className="w-full h-full"
+                                    pagination={false}
+                                    nested={true}
                                 onSwiper={handleHorizontalSwiperInit(storyIndex)}
                                 onSlideChange={handleHorizontalSlideChange(storyIndex)}
                             >
@@ -630,7 +683,8 @@ const Player: React.FC<PlayerProps> = ({
                                         </SwiperSlide>
                                     );
                                 })}
-                            </Swiper>
+                                </Swiper>
+                            </div>
                         ) : null}
                     </SwiperSlide>
                 ))}

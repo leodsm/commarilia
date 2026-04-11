@@ -24,16 +24,16 @@ const Home: React.FC<HomeProps> = ({
     : stories.filter(s => s.category === activeCategory);
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-[#0a0a0a]">
       <SEO title="Home" />
       {/* Header */}
-      <header className="border-b border-gray-100 bg-white/95 backdrop-blur-sm sticky top-0 z-[100] shadow-sm transition-all">
+      <header className="border-b border-white/10 bg-[#0a0a0a]/80 backdrop-blur-md sticky top-0 z-[100] shadow-sm transition-all">
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-center">
           <div
             className="flex items-center gap-2 cursor-pointer select-none"
             onClick={() => window.location.reload()}
           >
-            <span className="text-2xl font-poppins font-bold text-gray-900 tracking-tight">
+            <span className="text-2xl font-poppins font-bold text-white tracking-tight">
               Com<span className="text-[#fd572b]">Marília</span>
             </span>
           </div>
@@ -41,7 +41,7 @@ const Home: React.FC<HomeProps> = ({
       </header>
 
       {/* Categories Bar */}
-      <div className="bg-white border-b border-gray-100 py-4 sticky top-16 z-[90] shadow-sm">
+      <div className="bg-[#0a0a0a]/90 backdrop-blur-sm border-b border-white/10 py-4 sticky top-16 z-[90] shadow-sm">
         <div className="max-w-7xl mx-auto px-4">
           <div className="flex items-center justify-start sm:justify-center gap-3 overflow-x-auto no-scrollbar pb-1">
             {isLoading ? (
@@ -55,9 +55,9 @@ const Home: React.FC<HomeProps> = ({
                 <button
                   key={cat}
                   onClick={() => onSelectCategory(cat)}
-                  className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium border transition-all duration-200 active:scale-95 ${activeCategory === cat
-                    ? "bg-[#fd572b] text-white border-[#fd572b] shadow-md shadow-orange-200"
-                    : "bg-white text-gray-600 border-gray-200 hover:border-gray-400 hover:bg-gray-50"
+                  className={`whitespace-nowrap px-5 py-2 rounded-full text-sm font-medium border transition-all duration-300 active:scale-95 ${activeCategory === cat
+                    ? "bg-[#fd572b] text-white border-[#fd572b] shadow-lg shadow-[#fd572b]/20"
+                    : "bg-white/5 text-gray-300 border-white/10 hover:border-white/30 hover:bg-white/10"
                     }`}
                 >
                   {cat}
@@ -78,7 +78,7 @@ const Home: React.FC<HomeProps> = ({
               <div
                 key={story.id}
                 onClick={() => onSelectStory(story.id)}
-                className="group relative block aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ring-1 ring-black/5 hover:ring-orange-500/20 transform-gpu bg-white"
+                className="group relative block aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(253,87,43,0.3)] ring-1 ring-white/10 hover:ring-[#fd572b]/50 transform-gpu bg-black"
               >
                 {/* Image with Zoom Effect */}
                 <img
@@ -95,7 +95,17 @@ const Home: React.FC<HomeProps> = ({
                   </span>
                 </div>
 
-                {/* Title and Subtitle removed as per request */}
+                {/* Play Indicator Overlay to show it's a media story */}
+                <div className="absolute inset-0 bg-black/10 group-hover:bg-black/30 transition-colors duration-500 flex items-center justify-center opacity-0 group-hover:opacity-100">
+                  <div className="w-12 h-12 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center translate-y-4 group-hover:translate-y-0 transition-all duration-500 shadow-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6 text-white ml-1">
+                      <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
+                    </svg>
+                  </div>
+                </div>
+
+                {/* Gradient for dark vibe on hover */}
+                <div className="absolute inset-x-0 bottom-0 h-1/2 bg-gradient-to-t from-black/80 to-transparent pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
               </div>
             ))
           ) : (
@@ -107,9 +117,9 @@ const Home: React.FC<HomeProps> = ({
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-50 border-t border-gray-200 mt-12 py-10">
+      <footer className="bg-[#050505] border-t border-white/5 mt-12 py-10">
         <div className="max-w-7xl mx-auto px-4 text-center">
-          <p className="text-gray-400 text-sm font-medium">© {new Date().getFullYear()} ComMarília. Todos os direitos reservados.</p>
+          <p className="text-gray-500 text-sm font-medium">© {new Date().getFullYear()} ComMarília. Todos os direitos reservados.</p>
         </div>
       </footer>
     </div>
