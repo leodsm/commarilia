@@ -27,7 +27,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
   if (!isOpen || !story) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end pb-4 px-3 pt-16 md:items-center justify-center p-0 md:p-4 perspective-1000">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 pt-10 sm:p-6 md:p-8 perspective-1000">
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
@@ -35,7 +35,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
       ></div>
 
       {/* Content Panel - Slide Up Animation */}
-      <div className="relative bg-[#fffaf5] w-full max-h-[calc(100vh-6rem)] md:h-auto md:max-h-[90vh] md:max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-slide-up">
+      <div className="relative bg-[#fffaf5] w-full max-h-[85vh] md:max-h-[90vh] md:max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-slide-up">
 
         <div
           ref={contentRef}
@@ -43,7 +43,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           tabIndex={-1} // Makes div programmatically focusable
         >
           {/* Header Ticket Laranja */}
-          <div className="bg-[#fd572b] shrink-0 pt-4 pb-8 md:pt-6 md:pb-10 px-6 md:px-8 rounded-t-2xl rounded-b-2xl shadow-lg z-20 relative">
+          <div className="bg-[#fd572b] shrink-0 pt-5 pb-8 md:pt-6 md:pb-10 px-6 md:px-8 rounded-t-2xl rounded-b-2xl shadow-lg z-20 relative">
             <div className="w-12 h-1 bg-white/40 rounded-full mx-auto mb-5 md:mb-6 md:hidden"></div>
             <div className="flex items-start gap-4 mb-3">
               <button
@@ -82,13 +82,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
             <div className="flex justify-center my-8">
               <button
                 onClick={onClose}
-                className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 border border-transparent transition-all duration-[400ms] active:scale-95 text-gray-700 hover:text-black group overflow-hidden shadow-sm focus:outline-none"
+                className="flex flex-shrink-0 justify-center items-center gap-1.5 border border-transparent transition-all duration-[400ms] active:scale-95 text-gray-400 hover:text-gray-700 group focus:outline-none"
                 aria-label="Voltar"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5 flex-shrink-0 group-hover:-translate-x-1 transition-transform duration-[400ms]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
-                <span className="text-[11px] font-poppins font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
+                <span className="text-[12px] font-poppins font-bold uppercase tracking-wider mt-[1px] transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
               </button>
             </div>
 
