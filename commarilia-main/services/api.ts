@@ -16,7 +16,7 @@ const GQL_QUERY = `
               content
               featuredImage {
                   node {
-                      sourceUrl(size: MEDIUM)
+                      sourceUrl(size: LARGE)
                   }
               }
               categories {
