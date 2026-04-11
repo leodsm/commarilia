@@ -1,5 +1,6 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { TransformedStory } from '../types';
+import { trackModalOpen, trackModalClose, trackModalComplete } from '../services/analytics';
 
 interface ModalProps {
   isOpen: boolean;
@@ -9,20 +10,42 @@ interface ModalProps {
 
 const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
   const contentRef = useRef<HTMLDivElement>(null);
+  const scrollDepthRef = useRef(0);
+  const completedRef = useRef(false);
+
+  // Track scroll depth for analytics
+  const handleScroll = useCallback(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const pct = Math.round((el.scrollTop / (el.scrollHeight - el.clientHeight)) * 100);
+    if (pct > scrollDepthRef.current) {
+      scrollDepthRef.current = pct;
+    }
+    if (pct >= 90 && !completedRef.current && story) {
+      completedRef.current = true;
+      trackModalComplete(story.id, story.title);
+    }
+  }, [story]);
+
+  const handleClose = useCallback(() => {
+    if (story) trackModalClose(story.id, scrollDepthRef.current);
+    scrollDepthRef.current = 0;
+    completedRef.current = false;
+    onClose();
+  }, [story, onClose]);
 
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen && story) {
+      trackModalOpen(story.id, story.title, story.category);
+      scrollDepthRef.current = 0;
+      completedRef.current = false;
       document.body.style.overflow = 'hidden';
-      // Automatically focus the content area to allow keyboard scrolling immediately
-      // Small timeout ensures the element is rendered and transition started
-      setTimeout(() => {
-        contentRef.current?.focus();
-      }, 50);
+      setTimeout(() => { contentRef.current?.focus(); }, 50);
     } else {
       document.body.style.overflow = '';
     }
     return () => { document.body.style.overflow = ''; };
-  }, [isOpen]);
+  }, [isOpen, story]);
 
   if (!isOpen || !story) return null;
 
@@ -31,7 +54,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
-        onClick={onClose}
+        onClick={handleClose}
       ></div>
 
       {/* Content Panel - Slide Up Animation */}
@@ -45,7 +68,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           {/* Back icon + Title inline */}
           <div className="flex items-start gap-3">
             <button
-              onClick={onClose}
+              onClick={handleClose}
               className="flex-shrink-0 mt-1 w-7 h-7 flex items-center justify-center rounded-full bg-black/20 hover:bg-black/40 text-white transition-all duration-200 active:scale-95 focus:outline-none"
               aria-label="Voltar"
             >
@@ -69,6 +92,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
           ref={contentRef}
           className="flex-1 overflow-y-auto overscroll-contain outline-none bg-[#fffaf5]"
           tabIndex={-1}
+          onScroll={handleScroll}
         >
           <div className="p-6 md:p-8 pt-8">
             <div
@@ -84,7 +108,7 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
             {/* Bottom Close Button */}
             <div className="flex justify-center my-8">
               <button
-                onClick={onClose}
+                onClick={handleClose}
                 className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-gray-200 hover:bg-gray-300 border border-transparent transition-all duration-[400ms] active:scale-95 text-gray-700 hover:text-black group overflow-hidden shadow-sm focus:outline-none"
                 aria-label="Voltar"
               >
