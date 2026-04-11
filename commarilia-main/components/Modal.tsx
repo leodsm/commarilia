@@ -37,29 +37,29 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
       {/* Content Panel - Slide Up Animation */}
       <div className="relative bg-white w-full h-[90vh] md:h-auto md:max-h-[90vh] md:max-w-2xl rounded-t-2xl md:rounded-2xl overflow-hidden shadow-2xl flex flex-col animate-slide-up">
 
-        {/* Top Close Button (Desktop/Accessibility) */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 bg-black/40 hover:bg-black/60 text-white rounded-full transition-colors backdrop-blur-md"
-          aria-label="Fechar"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="18" y1="6" x2="6" y2="18"></line>
-            <line x1="6" y1="6" x2="18" y2="18"></line>
-          </svg>
-        </button>
-
         <div
           ref={contentRef}
-          className="flex-1 overflow-y-auto overscroll-contain bg-white outline-none"
+          className="flex-1 overflow-y-auto overscroll-contain bg-white outline-none pt-6 md:pt-8"
           tabIndex={-1} // Makes div programmatically focusable
         >
           {/* Header Text */}
-          <div className="px-6 pt-8 md:px-8 md:pt-8 bg-white">
-            <span className="inline-block px-3 py-1 mb-3 text-xs font-bold text-white bg-[#fd572b] rounded-full uppercase tracking-wide">
+          <div className="px-6 md:px-8 bg-white">
+            <div className="flex items-center gap-3 mb-4">
+              <button
+                onClick={onClose}
+                className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 border border-transparent transition-all duration-[400ms] active:scale-95 text-gray-700 hover:text-black group overflow-hidden shadow-sm focus:outline-none"
+                aria-label="Voltar"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                </svg>
+                <span className="text-[11px] font-poppins font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
+              </button>
+              <span className="inline-block px-3 py-1 text-xs font-bold text-white bg-[#fd572b] rounded-full uppercase tracking-wide">
               {story.category}
             </span>
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 font-poppins leading-tight">
+            </div>
+            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 font-poppins leading-tight mt-1">
               {story.title}
             </h2>
           </div>
@@ -77,17 +77,16 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
             <hr className="my-8 border-gray-200" />
 
             {/* Bottom Close Button (Action) */}
-            {/* Bottom Close Button (Action) - Redesigned to X icon only */}
             <div className="flex justify-center my-8">
               <button
                 onClick={onClose}
-                className="w-14 h-14 bg-gray-100 hover:bg-gray-200 text-gray-800 rounded-full transition-all duration-300 flex items-center justify-center shadow-sm hover:shadow-md active:scale-95"
-                aria-label="Fechar Notícia"
+                className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-gray-100 hover:bg-gray-200 border border-transparent transition-all duration-[400ms] active:scale-95 text-gray-700 hover:text-black group overflow-hidden shadow-sm focus:outline-none"
+                aria-label="Voltar"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                  <line x1="18" y1="6" x2="6" y2="18"></line>
-                  <line x1="6" y1="6" x2="18" y2="18"></line>
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
+                <span className="text-[11px] font-poppins font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
               </button>
             </div>
 
