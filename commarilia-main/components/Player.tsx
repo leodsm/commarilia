@@ -69,7 +69,6 @@ const StorySegment = React.memo(({
     // Loading state for buffering feedback
     const [isLoading, setIsLoading] = useState(true);
     const [showButtonText, setShowButtonText] = useState(false);
-    const [showRipple, setShowRipple] = useState<'play' | 'pause' | null>(null);
 
     useEffect(() => {
         if (isActive && isFirstCard) {
@@ -162,20 +161,14 @@ const StorySegment = React.memo(({
 
         if (!videoRef.current) return;
 
-        let nextPlayingState = false;
         if (videoRef.current.paused) {
             videoRef.current.play()
                 .then(() => setIsPlaying(true))
                 .catch(err => console.error("Play failed:", err));
-            nextPlayingState = true;
         } else {
             videoRef.current.pause();
             setIsPlaying(false);
         }
-
-        // Ripple Effect
-        setShowRipple(nextPlayingState ? 'play' : 'pause');
-        setTimeout(() => setShowRipple(null), 500);
     }, [isYouTube, isVimeo, isPlaying]);
 
     const toggleMute = useCallback((e: React.MouseEvent) => {
@@ -322,23 +315,6 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
-            {/* Ripple Effect Layer */}
-            {showRipple && (
-                <div className="absolute inset-0 flex items-center justify-center z-40 pointer-events-none">
-                    <div className="w-24 h-24 bg-black/40 backdrop-blur-sm rounded-full flex items-center justify-center animate-ping-once text-white">
-                        {showRipple === 'play' ? (
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12 ml-1">
-                                <path fillRule="evenodd" d="M4.5 5.653c0-1.426 1.529-2.33 2.779-1.643l11.54 6.348c1.295.712 1.295 2.573 0 3.285L7.28 19.991c-1.25.687-2.779-.217-2.779-1.643V5.653z" clipRule="evenodd" />
-                            </svg>
-                        ) : (
-                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-12 h-12">
-                                <path fillRule="evenodd" d="M6.75 5.25a.75.75 0 01.75-.75H9a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H7.5a.75.75 0 01-.75-.75V5.25zm7.5 0A.75.75 0 0115 4.5h1.5a.75.75 0 01.75.75v13.5a.75.75 0 01-.75.75H15a.75.75 0 01-.75-.75V5.25z" clipRule="evenodd" />
-                            </svg>
-                        )}
-                    </div>
-                </div>
-            )}
-
             {/* Shared Controls Layer */}
             {showControls && (
                 <div className="absolute top-[70px] right-4 z-50 flex flex-col gap-4 pointer-events-auto">
@@ -377,13 +353,8 @@ const StorySegment = React.memo(({
                 </div>
             )}
 
-            {/* Text Protection Gradient */}
-            {segment?.showButton && (
-                <div className="absolute inset-x-0 bottom-0 h-48 bg-gradient-to-t from-black/90 via-black/40 to-transparent z-20 pointer-events-none"></div>
-            )}
-
-            {/* CTA Button Layer - Bottom Bar */}
-            <div className="absolute bottom-0 left-0 right-0 z-30 flex justify-center pointer-events-none transition-all duration-500">
+            {/* CTA Button Layer */}
+            <div className={`absolute bottom-4 left-0 right-0 z-30 flex justify-center pointer-events-none pb-[env(safe-area-inset-bottom,0px)] transition-all duration-500`}>
                 <div className="flex flex-col w-full items-center">
                     {segment?.showButton && (
                         <div
@@ -405,17 +376,17 @@ const StorySegment = React.memo(({
                                     onOpenModal(storyId);
                                 }
                             }}
-                            className="group/btn pointer-events-auto flex flex-col items-center justify-center cursor-pointer transition-colors duration-300 w-full pt-4 pb-[calc(1rem+env(safe-area-inset-bottom,0px))] hover:bg-white/5 active:bg-white/10"
+                            className={`group/btn pointer-events-auto flex items-center justify-center cursor-pointer transition-[max-width,padding,gap,opacity] duration-500 ease-in-out bg-black/50 hover:bg-black/70 backdrop-blur-md rounded-full border border-white/20 shadow-[0_8px_20px_rgba(0,0,0,0.6)] animate-slide-up overflow-hidden h-10 active:scale-95 ${showButtonText ? 'px-6 gap-2 max-w-[250px] opacity-100' : 'px-0 gap-0 max-w-[40px] opacity-80 hover:opacity-100 hover:max-w-[250px] hover:px-6 hover:gap-2'}`}
                             role="button"
                             aria-label={segment.slideLink ? "Abrir Link" : "Leia Mais"}
                         >
-                            <div className="flex flex-col items-center justify-center animate-bounce gap-1">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-5 h-5 text-white/80 group-hover:text-white drop-shadow-md">
+                            <span className={`text-white/90 group-hover/btn:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.15em] leading-[14px] drop-shadow-md transition-all duration-500 ease-in-out whitespace-nowrap overflow-hidden origin-left ${showButtonText ? 'max-w-[150px] opacity-100' : 'max-w-0 opacity-0 group-hover/btn:max-w-[150px] group-hover/btn:opacity-100'}`}>
+                                {segment.slideLink ? 'Acessar' : 'Leia Mais'}
+                            </span>
+                            <div className={`flex items-center justify-center min-w-[40px] animate-bounce transition-all duration-500 ease-in-out ${showButtonText ? '-mt-0.5' : 'mt-1 group-hover/btn:-mt-0.5'}`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3.5} stroke="currentColor" className="w-3.5 h-3.5 text-[#fd572b] drop-shadow-sm">
                                     <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 15.75l7.5-7.5 7.5 7.5" />
                                 </svg>
-                                <span className="text-white/90 group-hover:text-white text-[11px] font-poppins font-bold uppercase tracking-[0.2em] drop-shadow-md">
-                                    {segment.slideLink ? 'Acessar Link' : 'Leia Mais'}
-                                </span>
                             </div>
                         </div>
                     )}
@@ -541,21 +512,21 @@ const Player: React.FC<PlayerProps> = ({
             )}
 
             {/* Header */}
-            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 h-[54px]">
-                {/* Logo Section */}
+            <div className="absolute top-0 left-0 right-0 z-20 p-4 flex items-center gap-4 bg-black/30 backdrop-blur-md border-b border-white/10 h-[54px] shadow-sm">
                 {/* Logo & Back Button Section */}
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3">
                     <button
                         onClick={onClose}
-                        className="w-10 h-10 md:w-[30px] md:h-[30px] flex items-center justify-center rounded-full group focus:outline-none z-50 hover:bg-white/10 md:bg-black/20 md:backdrop-blur-sm md:hover:bg-black/40 transition-all duration-300 aspect-square"
-                        aria-label="Fechar"
+                        className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-white/10 hover:bg-[#fd572b] border border-white/10 hover:border-transparent transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden shadow-sm z-50 focus:outline-none"
+                        aria-label="Voltar"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6 md:w-4 md:h-4 text-white/80 group-hover:text-white transition-colors">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={3} stroke="currentColor" className="w-4 h-4 md:w-3.5 md:h-3.5 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                         </svg>
+                        <span className="text-[11px] font-poppins font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
                     </button>
                     <h1
-                        className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer shadow-sm hover:opacity-80 transition-opacity"
+                        className="text-white text-xl font-poppins font-bold flex-shrink-0 cursor-pointer drop-shadow-sm hover:opacity-80 transition-opacity"
                         onClick={onClose}
                     >
                         Com<span className="text-[#fd572b]">Marília</span>
@@ -624,42 +595,16 @@ const Player: React.FC<PlayerProps> = ({
                     <SwiperSlide key={story.id} className="w-full h-full bg-black">
                         {/* Optimization: Only render if close to viewport */}
                         {Math.abs(activeStoryIndex - storyIndex) <= 1 ? (
-                            <div className="w-full h-full relative">
-                                {/* Custom Dynamic Pagination Overlay */}
-                                {(() => {
-                                    const currentSegIndex = activeSegmentIndices[storyIndex] || 0;
-                                    const currentSegment = story.segments[currentSegIndex];
-                                    const isVideo = currentSegment?.mediaType?.startsWith('video/');
-
-                                    if (isVideo) {
-                                        // Progress Bar (Top)
-                                        return (
-                                            <div className="absolute top-2 inset-x-2 z-50 flex gap-1 pointer-events-none drop-shadow-md">
-                                                {story.segments.map((_, idx) => (
-                                                    <div key={idx} className="h-1 flex-1 bg-white/30 rounded-full overflow-hidden">
-                                                        <div className={`h-full bg-white transition-all duration-300 ${idx < currentSegIndex ? 'w-full' : idx === currentSegIndex ? 'w-full' : 'w-0'}`}></div>
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        );
-                                    } else {
-                                        // Bullets (Bottom, above CTA)
-                                        return (
-                                            <div className="absolute bottom-[90px] inset-x-0 z-50 flex justify-center gap-1.5 pointer-events-none drop-shadow-md">
-                                                {story.segments.map((_, idx) => (
-                                                    <div key={idx} className={`w-1.5 h-1.5 rounded-full transition-all duration-300 ${idx === currentSegIndex ? 'bg-white scale-125' : 'bg-white/40'}`}></div>
-                                                ))}
-                                            </div>
-                                        );
-                                    }
-                                })()}
-                                
-                                <Swiper
-                                    modules={[Pagination]}
-                                    direction="horizontal"
-                                    className="w-full h-full"
-                                    pagination={false}
-                                    nested={true}
+                            /* Horizontal Swiper for Segments */
+                            <Swiper
+                                modules={[Pagination]}
+                                direction="horizontal"
+                                className="w-full h-full"
+                                pagination={{
+                                    clickable: true,
+                                    // dynamicBullets removed to fix visibility issues
+                                }}
+                                nested={true}
                                 onSwiper={handleHorizontalSwiperInit(storyIndex)}
                                 onSlideChange={handleHorizontalSlideChange(storyIndex)}
                             >
@@ -683,8 +628,7 @@ const Player: React.FC<PlayerProps> = ({
                                         </SwiperSlide>
                                     );
                                 })}
-                                </Swiper>
-                            </div>
+                            </Swiper>
                         ) : null}
                     </SwiperSlide>
                 ))}
