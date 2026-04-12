@@ -3,19 +3,16 @@
 
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
   <title>ComMarília.com</title>
 
-  <!-- Google Analytics 4 -->
+  <!-- Google Analytics GA4 -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-LHENCH2RVQ"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
-    gtag('config', 'G-LHENCH2RVQ', {
-      send_page_view: true,
-      cookie_flags: 'SameSite=None;Secure'
-    });
+    gtag('config', 'G-LHENCH2RVQ');
   </script>
 
   <!-- Tailwind CSS -->
@@ -200,6 +197,18 @@
       box-shadow: 0 0 15px rgba(253, 87, 43, 0.5);
     }
   </style>
+
+  <!-- Google Analytics GA4 -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-LHENCH2RVQ"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-LHENCH2RVQ', {
+      page_title: document.title,
+      page_location: window.location.href
+    });
+  </script>
 
   <link rel="stylesheet" href="/index.css">
 </head>

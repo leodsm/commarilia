@@ -70,8 +70,8 @@ const Home: React.FC<HomeProps> = ({
       </div>
 
       {/* Grid */}
-      <main className="flex-grow max-w-5xl mx-auto px-6 py-8 w-full">
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <main className="flex-grow max-w-5xl mx-auto px-6 py-12 w-full">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
           {isLoading ? (
             Array(8).fill(0).map((_, i) => <CardSkeleton key={i} />)
           ) : filteredStories.length > 0 ? (
@@ -79,7 +79,7 @@ const Home: React.FC<HomeProps> = ({
               <div
                 key={story.id}
                 onClick={() => onSelectStory(story.id)}
-                className="group relative block aspect-[3/4] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ring-1 ring-black/5 hover:ring-orange-500/20 transform-gpu bg-white"
+                className="group relative block aspect-[4/5] rounded-2xl overflow-hidden cursor-pointer transition-all duration-500 ease-out hover:-translate-y-2 hover:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.3)] ring-1 ring-black/5 hover:ring-orange-500/20 transform-gpu bg-white"
               >
                 {/* Image with Zoom Effect */}
                 <img
