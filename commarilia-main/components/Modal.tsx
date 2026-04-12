@@ -27,7 +27,13 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
   if (!isOpen || !story) return null;
 
   return (
-    <div className="fixed inset-0 z-[60] flex items-end md:items-center justify-center">
+    <div
+      className="fixed inset-0 z-[60] flex items-end md:items-center justify-center px-2 md:px-6"
+      style={{
+        paddingTop: 'calc(env(safe-area-inset-top, 0px) + 12px)',
+        paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)'
+      }}
+    >
       {/* Backdrop */}
       <div
         className="absolute inset-0 bg-black/80 backdrop-blur-sm transition-opacity duration-300"
@@ -35,7 +41,12 @@ const Modal: React.FC<ModalProps> = ({ isOpen, onClose, story }) => {
       ></div>
 
       {/* Content Panel - Slide Up Animation */}
-      <div className="relative bg-[#fffaf5] w-full h-[88vh] md:h-auto md:max-h-[85vh] md:max-w-2xl rounded-t-[2.5rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col animate-slide-up">
+      <div
+        className="relative bg-[#fffaf5] w-full md:max-w-2xl rounded-[2rem] md:rounded-[2.5rem] overflow-hidden shadow-2xl flex flex-col animate-slide-up"
+        style={{
+          maxHeight: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 20px)'
+        }}
+      >
 
         {/* Scrollable Content Container */}
         <div

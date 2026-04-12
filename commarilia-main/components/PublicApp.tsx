@@ -1,19 +1,14 @@
-import React, { useState, useMemo, useCallback, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useMemo, useCallback, useEffect, useRef, Suspense, lazy } from 'react';
 import Home from './Home';
 import Player from './Player';
 const Modal = lazy(() => import('./Modal'));
 const Onboarding = lazy(() => import('./Onboarding'));
 import { HelmetProvider } from 'react-helmet-async';
-import ReactGA from 'react-ga4';
 
 // Hooks
 import { useStories } from '../hooks/useStories';
 import { useOnboarding } from '../hooks/useOnboarding';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
-
-// Initialize GA4
-const GA_MEASUREMENT_ID = 'G-JV88LKB14S';
-ReactGA.initialize(GA_MEASUREMENT_ID);
 
 export const PublicApp: React.FC = () => {
   const { stories, loading, error, fetchNextPage, hasNextPage } = useStories();
@@ -23,6 +18,7 @@ export const PublicApp: React.FC = () => {
   const [activeStoryId, setActiveStoryId] = useState<string | null>(null);
   const [activeCategory, setActiveCategory] = useState('Todas');
   const [modalStoryId, setModalStoryId] = useState<string | null>(null);
+  const hasSkippedInitialAutoPageview = useRef(false);
 
   // -- Handlers --
 
@@ -158,9 +154,26 @@ export const PublicApp: React.FC = () => {
     return <div className="p-10 text-center text-red-500">{error}</div>;
   }
 
-  // -- Analytics Tracking --
+  // -- Analytics Tracking (GA4 via gtag) --
   useEffect(() => {
-    ReactGA.send({ hitType: "pageview", page: view === 'home' ? '/' : `/story/${activeStoryId || ''}` });
+    const gtag = (window as any).gtag as ((...args: any[]) => void) | undefined;
+    if (!gtag) return;
+
+    const pagePath = view === 'home'
+      ? '/'
+      : (activeStoryId ? `/story/${activeStoryId}` : '/story');
+
+    // The initial home pageview is already sent by gtag('config').
+    if (!hasSkippedInitialAutoPageview.current && pagePath === '/') {
+      hasSkippedInitialAutoPageview.current = true;
+      return;
+    }
+
+    gtag('event', 'page_view', {
+      page_path: pagePath,
+      page_location: window.location.href,
+      page_title: document.title
+    });
   }, [view, activeStoryId]);
 
   return (
@@ -179,7 +192,13 @@ export const PublicApp: React.FC = () => {
 
         {/* Player View Overlay */}
         {view === 'player' && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in">
+          <div
+            className="fixed inset-0 z-50 flex items-center justify-center animate-fade-in p-2 md:p-5"
+            style={{
+              paddingTop: 'calc(env(safe-area-inset-top, 0px) + 8px)',
+              paddingBottom: 'calc(env(safe-area-inset-bottom, 0px) + 8px)'
+            }}
+          >
             {/* Backdrop with blur */}
             <div
               className="absolute inset-0 bg-black/90 backdrop-blur-md cursor-pointer"
@@ -188,7 +207,13 @@ export const PublicApp: React.FC = () => {
             />
 
             {/* Player Container */}
-            <div className="w-full h-full md:w-auto md:h-full md:aspect-[9/16] bg-black relative shadow-2xl overflow-hidden md:rounded-none border-gray-800 md:border z-10 transition-all duration-300">
+            <div
+              className="w-full max-w-[440px] bg-black relative shadow-2xl overflow-hidden rounded-[1.3rem] border border-gray-800 z-10 transition-all duration-300"
+              style={{
+                height: 'calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 16px)',
+                maxHeight: '900px'
+              }}
+            >
               <Player
                 stories={playerStories}
                 allCategories={allCategories}

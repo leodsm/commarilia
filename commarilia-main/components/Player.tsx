@@ -500,24 +500,8 @@ const Player: React.FC<PlayerProps> = ({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [verticalSwiper, activeStoryIndex, isModalOpen]);
 
-    useEffect(() => {
-        if (!isModalOpen) {
-            // Attempt to hide address bar on mobile
-            window.scrollTo(0, 1);
-            
-            // Fullscreen API attempt - usually requires user interaction, 
-            // but some browsers allow it if triggered by the same event that opened the player
-            const docEl = document.documentElement;
-            if (docEl.requestFullscreen) {
-              docEl.requestFullscreen().catch(() => {
-                // Silently fail if blocked by browser policy
-              });
-            }
-        }
-    }, [isModalOpen]);
-
     return (
-        <div className="w-full h-[100dvh] bg-black relative group/player overflow-hidden">
+        <div className="w-full h-full bg-black relative group/player overflow-hidden">
             {currentStory && (
                 <SEO
                     title={currentStory.title}
