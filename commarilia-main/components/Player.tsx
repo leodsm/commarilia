@@ -498,6 +498,8 @@ const Player: React.FC<PlayerProps> = ({
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
+    }, [verticalSwiper, activeStoryIndex, isModalOpen]);
+
     useEffect(() => {
         if (!isModalOpen) {
             // Attempt to hide address bar on mobile
