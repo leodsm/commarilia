@@ -12,7 +12,7 @@ import { useOnboarding } from '../hooks/useOnboarding';
 import { useKeyboardNavigation } from '../hooks/useKeyboardNavigation';
 
 // Initialize GA4
-const GA_MEASUREMENT_ID = 'G-YWN4G3R9M2';
+const GA_MEASUREMENT_ID = 'G-JV88LKB14S';
 ReactGA.initialize(GA_MEASUREMENT_ID);
 
 export const PublicApp: React.FC = () => {
