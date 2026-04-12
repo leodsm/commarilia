@@ -6,13 +6,6 @@ import { Spinner } from './Loader';
 // Import Swiper type for instance typing
 import type { Swiper as SwiperType } from 'swiper';
 import SEO from './SEO';
-import {
-    trackPlayerOpen,
-    trackPlayerClose,
-    trackCategoryFilter,
-    trackReadMore,
-    trackStorySlideChange,
-} from '../services/analytics';
 
 interface PlayerProps {
     stories: TransformedStory[];
@@ -377,7 +370,6 @@ const StorySegment = React.memo(({
                                 }
                                 setIsPlaying(false);
 
-                                trackReadMore(storyId, segment.title || '', !!segment.slideLink);
                                 if (segment.slideLink) {
                                     window.open(segment.slideLink, '_blank');
                                 } else {
@@ -440,15 +432,6 @@ const Player: React.FC<PlayerProps> = ({
         }
     }, [currentStory, onStoryChange]);
 
-    // Track player open on initial mount
-    useEffect(() => {
-        const story = stories[safeInitialIndex];
-        if (story) {
-            trackPlayerOpen(story.id, story.title, story.category);
-        }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     // -- SEO --
     // Use currentStory.content (HTML) to extract a snippet? Or just use "Assista agora no ComMarília".
     const seoDescription = currentStory?.title
@@ -465,7 +448,11 @@ const Player: React.FC<PlayerProps> = ({
         const newIndex = swiper.activeIndex;
         setActiveStoryIndex(newIndex);
 
+        // Notify parent to update URL for deep linking
         if (stories[newIndex]) {
+            // We need a way to call `setActiveStoryId` in App. 
+            // Since we didn't add a prop for it, let's just update the URL directly here or add the prop?
+            // Adding the prop is cleaner. Let's assume I will add `onStoryChange` to PlayerProps.
             if (onStoryChange) onStoryChange(stories[newIndex].id);
         }
         
@@ -474,17 +461,6 @@ const Player: React.FC<PlayerProps> = ({
             fetchNextPage();
         }
     }, [stories, onStoryChange, fetchNextPage, hasNextPage]);
-
-    const handleHorizontalSlideChangeWithTracking = useCallback((storyIndex: number) => (swiper: SwiperType) => {
-        setActiveSegmentIndices(prev => ({
-            ...prev,
-            [storyIndex]: swiper.activeIndex
-        }));
-        const story = stories[storyIndex];
-        if (story) {
-            trackStorySlideChange(story.id, swiper.activeIndex, story.segments.length);
-        }
-    }, [stories]);
 
     const handleHorizontalSwiperInit = useCallback((storyIndex: number) => (swiper: SwiperType) => {
         horizontalSwipersRef.current[storyIndex] = swiper;
@@ -522,10 +498,24 @@ const Player: React.FC<PlayerProps> = ({
 
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [verticalSwiper, activeStoryIndex, isModalOpen]);
+    useEffect(() => {
+        if (!isModalOpen) {
+            // Attempt to hide address bar on mobile
+            window.scrollTo(0, 1);
+            
+            // Fullscreen API attempt - usually requires user interaction, 
+            // but some browsers allow it if triggered by the same event that opened the player
+            const docEl = document.documentElement;
+            if (docEl.requestFullscreen) {
+              docEl.requestFullscreen().catch(() => {
+                // Silently fail if blocked by browser policy
+              });
+            }
+        }
+    }, [isModalOpen]);
 
     return (
-        <div className="w-full h-full bg-black relative group/player">
+        <div className="w-full h-[100dvh] bg-black relative group/player overflow-hidden">
             {currentStory && (
                 <SEO
                     title={currentStory.title}
@@ -540,11 +530,7 @@ const Player: React.FC<PlayerProps> = ({
                 {/* Logo & Back Button Section */}
                 <div className="flex items-center gap-3">
                     <button
-                        onClick={() => {
-                            const seg = activeSegmentIndices[activeStoryIndex] || 0;
-                            if (currentStory) trackPlayerClose(currentStory.id, seg, currentStory.segments.length);
-                            onClose();
-                        }}
+                        onClick={onClose}
                         className="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-white/10 hover:bg-[#fd572b] border border-white/10 hover:border-transparent transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden shadow-sm z-50 focus:outline-none"
                         aria-label="Voltar"
                     >
@@ -585,7 +571,7 @@ const Player: React.FC<PlayerProps> = ({
                         {allCategories.map(cat => (
                             <SwiperSlide key={cat} className="!w-auto flex items-center">
                                 <button
-                                    onClick={() => { onCategoryChange(cat); trackCategoryFilter(cat); }}
+                                    onClick={() => onCategoryChange(cat)}
                                     className={`category-link inline-block text-white/80 text-xs py-1 px-3 rounded-full bg-white/10 backdrop-blur-sm transition-all duration-300 cursor-pointer ${activeCategory === cat ? 'active' : ''}`}
                                     aria-label={`Filtrar por categoria: ${cat}`}
                                     aria-pressed={activeCategory === cat}
@@ -634,7 +620,7 @@ const Player: React.FC<PlayerProps> = ({
                                 }}
                                 nested={true}
                                 onSwiper={handleHorizontalSwiperInit(storyIndex)}
-                                onSlideChange={handleHorizontalSlideChangeWithTracking(storyIndex)}
+                                onSlideChange={handleHorizontalSlideChange(storyIndex)}
                             >
                                 {story.segments.map((segment, segIndex) => {
                                     const isStoryActive = storyIndex === activeStoryIndex;

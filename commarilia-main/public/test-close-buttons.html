@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelos Botão Fechar - Estilo Expansível (V3.4)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-black min-h-screen text-white p-6 md:p-10">
+
+    <div class="max-w-7xl mx-auto">
+        <h1 class="text-3xl font-bold mb-2">Testes UI/UX - Expansão Dinâmica</h1>
+        <p class="text-gray-400 mb-10">Opções focadas no V3.4 (onde o botão cresce para revelar o texto no hover), incluindo as categorias no centro e o logo à direita.</p>
+
+        <div class="grid grid-cols-1 xl:grid-cols-2 gap-8">
+            
+            <!-- V4.1: Classic Glass Expandable -->
+            <div class="bg-white/5 rounded-2xl p-6 flex flex-col justify-center border border-white/10 relative overflow-hidden min-h-[250px]">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                
+                <div class="absolute top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-md border-b border-white/10 flex items-center justify-between p-2 sm:p-4">
+                    
+                    <!-- Botão Fechar -->
+                    <button class="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-white/10 hover:bg-black/60 backdrop-blur-md border border-white/20 transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden" aria-label="Voltar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
+                    </button>
+
+                    <!-- Categorias -->
+                    <div class="flex-grow flex items-center justify-start gap-2 overflow-hidden mx-4 relative pointer-events-none" style="mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);">
+                        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto no-scrollbar scroll-smooth">
+                            <button class="flex-shrink-0 text-white text-[11px] sm:text-xs py-1 px-3 rounded-full bg-[#fd572b] transition-all cursor-pointer font-semibold shadow-sm">Todas</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer">Economia</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Política</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Lazer</button>
+                        </div>
+                    </div>
+
+                    <!-- Logo Direita -->
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 hidden sm:block">Com<span class="text-[#fd572b]">Marília</span></span>
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 sm:hidden">C<span class="text-[#fd572b]">M</span></span>
+                </div>
+                
+                <div class="absolute bottom-4 left-4 z-10">
+                    <span class="px-3 py-1 bg-black/60 rounded text-xs font-semibold uppercase tracking-wider text-white">V4.1: Classic Glass</span>
+                </div>
+            </div>
+
+            <!-- V4.2: Brand Attention Expandable -->
+            <div class="bg-white/5 rounded-2xl p-6 flex flex-col justify-center border border-white/10 relative overflow-hidden min-h-[250px]">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                
+                <div class="absolute top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-md border-b border-white/10 flex items-center justify-between p-2 sm:p-4">
+                    
+                    <!-- Botão Fechar -->
+                    <button class="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-white/10 hover:bg-[#fd572b] border border-white/10 hover:border-transparent transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden shadow-sm" aria-label="Voltar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Voltar</span>
+                    </button>
+
+                    <!-- Categorias -->
+                    <div class="flex-grow flex items-center justify-start gap-2 overflow-hidden mx-4 relative pointer-events-none" style="mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);">
+                        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto no-scrollbar scroll-smooth">
+                            <button class="flex-shrink-0 text-white text-[11px] sm:text-xs py-1 px-3 rounded-full bg-[#fd572b] transition-all cursor-pointer font-semibold shadow-sm">Todas</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer">Economia</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Política</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Lazer</button>
+                        </div>
+                    </div>
+
+                    <!-- Logo Direita -->
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 hidden sm:block">Com<span class="text-[#fd572b]">Marília</span></span>
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 sm:hidden">C<span class="text-[#fd572b]">M</span></span>
+                </div>
+                
+                <div class="absolute bottom-4 left-4 z-10">
+                    <span class="px-3 py-1 bg-black/60 rounded text-xs font-semibold uppercase tracking-wider text-white">V4.2: Brand Attention (Laranja Hover)</span>
+                </div>
+            </div>
+
+            <!-- V4.3: Ghost Outline Expandable -->
+            <div class="bg-white/5 rounded-2xl p-6 flex flex-col justify-center border border-white/10 relative overflow-hidden min-h-[250px]">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                
+                <div class="absolute top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-md border-b border-white/10 flex items-center justify-between p-2 sm:p-4">
+                    
+                    <!-- Botão Fechar -->
+                    <button class="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-5 items-center gap-0 hover:gap-1.5 rounded-full bg-transparent hover:bg-black/40 backdrop-blur-md border border-transparent hover:border-white/50 transition-all duration-[400ms] active:scale-95 text-white/80 hover:text-white group overflow-hidden" aria-label="Voltar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Retornar</span>
+                    </button>
+
+                    <!-- Categorias -->
+                    <div class="flex-grow flex items-center justify-start gap-2 overflow-hidden mx-4 relative pointer-events-none" style="mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);">
+                        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto no-scrollbar scroll-smooth">
+                            <button class="flex-shrink-0 text-white text-[11px] sm:text-xs py-1 px-3 rounded-full bg-[#fd572b] transition-all cursor-pointer font-semibold shadow-sm">Todas</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer">Economia</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Política</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Lazer</button>
+                        </div>
+                    </div>
+
+                    <!-- Logo Direita -->
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 hidden sm:block">Com<span class="text-[#fd572b]">Marília</span></span>
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 sm:hidden">C<span class="text-[#fd572b]">M</span></span>
+                </div>
+                
+                <div class="absolute bottom-4 left-4 z-10">
+                    <span class="px-3 py-1 bg-black/60 rounded text-xs font-semibold uppercase tracking-wider text-white">V4.3: Ghost Outline Expandable</span>
+                </div>
+            </div>
+
+            <!-- V4.4: High Contrast Expandable -->
+            <div class="bg-white/5 rounded-2xl p-6 flex flex-col justify-center border border-white/10 relative overflow-hidden min-h-[250px]">
+                <div class="absolute inset-0 bg-cover bg-center opacity-40" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                
+                <div class="absolute top-0 left-0 right-0 h-16 bg-black/30 backdrop-blur-md border-b border-white/10 flex items-center justify-between p-2 sm:p-4">
+                    
+                    <!-- Botão Fechar -->
+                    <button class="h-8 flex flex-shrink-0 px-2 justify-center hover:px-3 hover:pr-4 items-center gap-0 hover:gap-1.5 rounded-full bg-black/50 hover:bg-white border border-white/20 hover:border-transparent transition-all duration-[400ms] active:scale-95 text-white/90 hover:text-black group overflow-hidden shadow-sm" aria-label="Voltar">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4 flex-shrink-0 group-hover:-translate-x-0.5 transition-transform duration-[400ms]"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5"></path></svg>
+                        <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px] max-w-0 opacity-0 group-hover:max-w-[100px] group-hover:opacity-100 transition-all duration-[400ms] ease-in-out whitespace-nowrap">Sair</span>
+                    </button>
+
+                    <!-- Categorias -->
+                    <div class="flex-grow flex items-center justify-start gap-2 overflow-hidden mx-4 relative pointer-events-none" style="mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent); -webkit-mask-image: linear-gradient(to right, transparent, black 15px, black calc(100% - 15px), transparent);">
+                        <div class="flex items-center gap-2 pointer-events-auto overflow-x-auto no-scrollbar scroll-smooth">
+                            <button class="flex-shrink-0 text-white text-[11px] sm:text-xs py-1 px-3 rounded-full bg-[#fd572b] transition-all cursor-pointer font-semibold shadow-sm">Todas</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer">Economia</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Política</button>
+                            <button class="flex-shrink-0 text-white/80 text-[11px] sm:text-xs py-1 px-3 rounded-full bg-white/10 hover:bg-white/20 transition-all cursor-pointer hidden sm:block">Lazer</button>
+                        </div>
+                    </div>
+
+                    <!-- Logo Direita -->
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 hidden sm:block">Com<span class="text-[#fd572b]">Marília</span></span>
+                    <span class="font-bold text-lg drop-shadow-md flex-shrink-0 sm:hidden">C<span class="text-[#fd572b]">M</span></span>
+                </div>
+                
+                <div class="absolute bottom-4 left-4 z-10">
+                    <span class="px-3 py-1 bg-black/60 rounded text-xs font-semibold uppercase tracking-wider text-white">V4.4: Alto Contraste (Invertido no hover)</span>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Modelos Modal - Melhorias do Bridge Badge (5.5)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;500;600&display=swap');
+        body { font-family: 'Poppins', sans-serif; }
+        .font-inter { font-family: 'Inter', sans-serif; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-900 to-zinc-900 min-h-screen text-white p-6 md:p-10">
+
+    <div class="max-w-[1600px] mx-auto">
+        <div class="mb-10 text-center">
+            <h1 class="text-3xl md:text-4xl font-bold mb-3 text-white">Testes - <span class="text-[#fd572b]">Integrações do Botão Voltar (V5.5)</span></h1>
+            <p class="text-gray-400 max-w-2xl mx-auto">Opções focadas em resolver a sensação de isolamento do botão de fechar no design "Bridge" (Onde a tag da categoria fica fazendo a ponte embaixo).</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10">
+            
+            <!-- V5.5 Original Ref (For Comparison) -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl opacity-70 scale-95 origin-bottom">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <!-- Header Ticket -->
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-5 px-6 rounded-t-[2rem] rounded-b-2xl z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-4"></div>
+                                <div class="flex items-center gap-3 mb-2">
+                                    <button class="h-8 flex px-2 items-center rounded-full bg-black/20 text-white backdrop-blur-md">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                    </button>
+                                </div>
+                                <h2 class="text-xl font-bold text-white leading-tight mb-4">Marília: A Capital do Alimento...</h2>
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-white bg-black border-[3px] border-[#fffaf5] rounded-full uppercase z-30">Agronegócio</span>
+                            </div>
+                            <div class="flex-1 px-6 py-8"></div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-gray-500">O problema Base (V5.5)</h3>
+            </div>
+
+            <!-- OPÇÃO A: Dual Bridge (Ponte Dupla) -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-8 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-5"></div>
+                                <h2 class="text-[22px] font-bold text-white leading-[1.1] drop-shadow-sm mb-2">Marília: A Capital do Alimento Nacional</h2>
+                                
+                                <!-- Botão Voltar como ponte inferior (ESQUERDA) -->
+                                <button class="absolute -bottom-4 left-6 h-8 flex px-3 pr-4 items-center gap-1.5 rounded-full bg-white text-gray-800 border-[3px] border-[#fffaf5] shadow-md transition-all z-30 overflow-hidden group">
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                    <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px]">Voltar</span>
+                                </button>
+
+                                <!-- Categoria como ponte inferior (DIREITA) -->
+                                <span class="absolute -bottom-4 right-6 h-8 flex items-center px-4 text-[11px] font-bold text-white bg-black border-[3px] border-[#fffaf5] rounded-full shadow-md uppercase tracking-wide z-30">Indústria</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8 pt-10">
+                                <p class="mb-4">O topo de laranja fica exclusivamente dedicado à honra do Título da Notícia e marca as duas saídas como pontes funcionais idênticas guiando o olhar do usuário com clareza.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-green-400">Opção A: Ponte Dupla (Abaixo)</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">O Ticket segura apenas o título, e ambos (Botão/Categoria) apoiam a linha guia servindo como âncoras lado a lado.</p>
+            </div>
+
+            <!-- OPÇÃO B: Cabeçalho Completo do Navbar -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-6 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-3"></div>
+                                
+                                <!-- Botão Voltar "Pílula Larga" amarrado com o "Menu" / Logo simulado estruturalmente -->
+                                <div class="flex items-center justify-between mb-2">
+                                    <button class="h-8 flex px-2 hover:px-3 pr-4 items-center gap-1.5 rounded-full bg-black/20 text-white backdrop-blur-md transition-all active:scale-95 border border-white/10 group">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider text-white mt-[1px]">Voltar</span>
+                                    </button>
+                                    
+                                    <span class="text-sm font-bold text-white/50 tracking-wider">C<span class="text-white">M</span></span>
+                                </div>
+                                <h2 class="text-xl font-bold text-white leading-tight drop-shadow-sm mb-3">Marília: A Capital do Alimento Nacional</h2>
+                                
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-white bg-black border-[3px] border-[#fffaf5] rounded-full shadow-md uppercase tracking-wide z-30">Saúde</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8">
+                                <p class="mb-4">O topo de laranja integra perfeitamente a leitura "Header".</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-blue-400">Opção B: Navbar Expansiva</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">O botão tem a mesma pílula e fica balanceado com o mini-logo da marca equilibrando visualmente o espaço de "cabeçalho".</p>
+            </div>
+
+            <!-- OPÇÃO C: Botão Flutuando Externo (iOS Modern) -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    
+                    <!-- X Fechar externo no espaço translúcido -->
+                    <button class="absolute top-4 right-4 h-9 w-9 flex items-center justify-center rounded-full bg-white/20 hover:bg-white text-white hover:text-black backdrop-blur-md transition-all active:scale-95 shadow-md z-50">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-8 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-6"></div>
+                                <h2 class="text-2xl font-bold text-white leading-tight drop-shadow-sm mb-3">Marília: A Capital do Alimento Nacional</h2>
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-white bg-black border-[3px] border-[#fffaf5] rounded-full shadow-md uppercase tracking-wide z-30">Tecnologia</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8">
+                                <p class="mb-4">Toda a UI interna do bloco perde a obrigação de segurar controles.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-purple-400">Opção C: Flotante Externo</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">Saindo do modal: Fica extremamente focado de fora como o antigo estilo, despoluindo o topo do Ticket laranja.</p>
+            </div>
+
+            <!-- OPÇÃO D: Alinhamento Literal do Título -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-6 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-4"></div>
+                                <div class="flex items-start gap-4 mb-2">
+                                    <button class="h-8 flex shrink-0 px-2.5 items-center rounded-full bg-black/20 text-white backdrop-blur-md transition-all active:scale-95 group mt-1">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                    </button>
+                                    <h2 class="text-[19px] font-bold text-white leading-tight drop-shadow-sm mb-3">Marília: A Capital do Alimento Nacional</h2>
+                                </div>
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-white bg-black border-[3px] border-[#fffaf5] rounded-full shadow-md uppercase tracking-wide z-30">Educação</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8">
+                                <p class="mb-4">Formatação limpa horizontal que aproveita bem o respiro da tela.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-yellow-400">Opção D: Lado do Título</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">Integrado ao lado do texto de título do Ticket para dar propósito a ele de forma agressiva.</p>
+            </div>
+
+            <!-- OPÇÃO E: Pill Flutuante Compartilhando o Puxador -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-8 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <!-- Envelopando puxador e botão juntos -->
+                                <div class="relative w-full flex justify-center mb-6">
+                                    <button class="absolute left-0 top-[-6px] h-[28px] pr-3 pl-1 flex items-center gap-1 rounded-full bg-white/10 hover:bg-white/30 border border-white/20 text-white backdrop-blur-md transition-all active:scale-95 group">
+                                        <div class="w-6 h-6 flex items-center justify-center rounded-full bg-black/20 group-hover:bg-black/30">
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                        </div>
+                                        <span class="text-[10px] font-bold uppercase tracking-wider text-white mt-[1px]">Sair</span>
+                                    </button>
+                                    <div class="w-12 h-1.5 bg-white/40 rounded-full"></div>
+                                </div>
+                                <h2 class="text-2xl font-bold text-white leading-[1.15] drop-shadow-sm mb-2">Marília e Seus Trilhos Iniciais</h2>
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-[#fd572b] bg-white border-[3px] border-[#fffaf5] rounded-full shadow-md uppercase tracking-wide z-30">Economia</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8 pt-10">
+                                <p class="mb-4">Formatação horizontal fina onde a aba controla o nível de percepção.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-orange-400">Opção E: Mini Pílula Topo</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">Uma pequena cápsula na extremidade esquerda colada ao nível exato do Puxador nativo cinza.</p>
+            </div>
+
+            <!-- OPÇÃO F: Estilo Ghost Breadcrumb -->
+            <div class="flex flex-col items-center">
+                <div class="w-[320px] h-[650px] bg-black rounded-[2.5rem] border-[12px] border-zinc-800 relative overflow-hidden flex flex-col justify-end shadow-2xl">
+                    <div class="absolute inset-0 bg-cover bg-center opacity-40 blur-sm" style="background-image: url('https://images.unsplash.com/photo-1550684848-fac1c5b4e853?q=80&w=600&auto=format&fit=crop');"></div>
+                    <div class="absolute inset-0 bg-black/60"></div>
+                    <div class="relative w-full h-[88%] flex flex-col z-10">
+                        <div class="flex-1 bg-[#fffaf5] rounded-t-[2rem] flex flex-col relative overflow-visible">
+                            <div class="bg-[#fd572b] shrink-0 pt-3 pb-8 px-6 rounded-t-[2rem] rounded-b-2xl shadow-lg z-20 relative">
+                                <div class="w-12 h-1 bg-white/40 rounded-full mx-auto mb-2"></div>
+                                <div class="flex items-center gap-2 mb-3 -ml-2">
+                                    <button class="flex px-2 py-1 items-center gap-1 text-white/70 hover:text-white transition-all group focus:outline-none">
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="3" stroke="currentColor" class="w-3 h-3 group-hover:-translate-x-1 transition-transform"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+                                        <span class="text-[11px] font-bold uppercase tracking-wider mt-[1px]">Histórias ComMarília</span>
+                                    </button>
+                                </div>
+                                <h2 class="text-[22px] font-bold text-white leading-tight drop-shadow-sm mb-2">As Personalidades Nacionais da Nossa Cidade</h2>
+                                <span class="absolute -bottom-3 right-6 px-4 py-1.5 text-[11px] font-bold text-gray-900 bg-[#fffaf5] border border-gray-200 rounded-full shadow-md uppercase tracking-wide z-30">Pioneiros</span>
+                            </div>
+                            <div class="flex-1 overflow-y-auto no-scrollbar font-inter text-gray-700 text-[13px] px-6 py-8 pt-10">
+                                <p class="mb-4">O ícone perde seu formato de "botão isolado" circular e se transforma num link texturizado no ar.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="mt-4 font-semibold text-lg text-teal-400">Opção F: Breadcrumb Escrito</h3>
+                <p class="text-sm text-gray-400 text-center max-w-[280px]">Substituir a "Bolinha" da UX por uma Setinha com a Escrita "Retornar/Historias..." como os textos.</p>
+            </div>
+
+        </div>
+    </div>
+</body>
+</html>
